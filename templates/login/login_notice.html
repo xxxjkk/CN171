@@ -1,0 +1,31 @@
+{% load staticfiles %}
+
+<html >
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>{% block title %}{% endblock %}</title>
+    <link href="{% static 'bootstrap-3.3.7-dist/css/bootstrap.css' %}" rel="stylesheet">
+  </head>
+  <body>
+        <!--<meta http-equiv="Refresh" content="5;../login">-->
+        <h1>
+            你尚未登录，
+            <input type="text" size="1" style="width:30px; color:red" readonly="true" value="5" id="time"/>
+            秒后自动返回登录页面！
+        </h1>
+        <script language="javascript">
+            var t = 5;
+            var time = document.getElementById("time");
+            function fun(){
+                t--;
+                time.value = t;
+                if(t<=0){
+                    location.href = "../login";
+                    clearInterval(inter);
+                }
+            }
+            var inter = setInterval("fun()",1000);
+        </script>
+  </body>
+</html>
