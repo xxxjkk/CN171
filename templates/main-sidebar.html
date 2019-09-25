@@ -38,34 +38,7 @@
           </a>
           <ul class="treeview-menu">
               <li id="asset" style="display: none"><a href="{% url 'cmdb' %}"><span>&nbsp;&nbsp;&nbsp;&nbsp;主机管理</span></a></li>
-              <li id="idc" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;机房管理</span></a></li>
-              <li id="cabinet" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;机柜管理</span></a></li>
-              <li id="group" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;属组管理</span></a></li>
-          </ul>
-        </li>
-        <li class="treeview" id="appconf" style="display: none">
-          <a href="#"><i class="fa fa-outdent"></i> <span>应用管理</span>
-            <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-          </a>
-          <ul class="treeview-menu">
-            <li id="product" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;产品线管理</span></a></li>
-            <li id="project" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;工程管理</span></a></li>
-            <li id="appowner" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;人员管理</span></a></li>
-            <li id="authinfo" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;认证中心</span></a></li>
-          </ul>
-        </li>
-        <li class="treeview" id="branches" style="display: none">
-          <a href="#"><i class="fa fa-building"></i> <span>分支管理</span>
-            <span class="pull-right-container">
-              <i class="fa fa-angle-left pull-right"></i>
-            </span>
-          </a>
-          <ul class="treeview-menu">
-            <li id="region" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;区域管理</span></a></li>
-            <li id="branch" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;分支机构</span></a></li>
-            <li id="resource" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;资源管理</span></a></li>
+              <li id="app" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;应用管理</span></a></li>
           </ul>
         </li>
         <li class="treeview" id="setup" style="display: none">
@@ -78,21 +51,22 @@
             <li id="joblist" style="display: none"><a href="{% url 'taskManagement' %}"><span>&nbsp;&nbsp;&nbsp;&nbsp;后台管理</span></a></li>
           </ul>
         </li>
-        <li id="delivery" style="display: none"><a href="#"><i class="fa fa-retweet"></i> <span>持续交付</span></a></li>
         <li class="treeview" id="monitor" style="display: none">
-          <a href="#"><i class="fa fa-television"></i> <span>监控平台</span>
+          <a href="#"><i class="fa fa-television"></i> <span>监控管理</span>
             <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
             </span>
           </a>
           <ul class="treeview-menu">
-            <li id="system" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;系统监控</span></a></li>
-            <li id="manage" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;监控管理</span></a></li>
-{#            <li id="alert" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;报警管理</span></a></li>#}
+            <li id="nettopo" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;网络拓扑</span></a></li>
+{#            <li id="manage" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;监控管理</span></a></li>#}
+{#           <li id="alert" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;报警管理</span></a></li>#}
           </ul>
         </li>
         {% comment %}
-        <li id="mfile" style="display: none"><a href="{% url 'mfile' %}"><i class="fa fa-folder-open"></i> <span>文件管理</span></a></li>
+{#        <li id="mfile" style="display: none"><a href="{% url 'mfile' %}"><i class="fa fa-folder-open"></i> <span>文件管理</span></a></li>
+#}
+        {% endcomment %}
         <li class="treeview" id="accounts" style="display: none">
           <a href="#"><i class="fa fa-users"></i> <span>用户管理</span>
             <span class="pull-right-container">
@@ -100,12 +74,11 @@
             </span>
           </a>
           <ul class="treeview-menu">
-            <li id="userlist" style="display: none"><a href="{% url 'user_list' %}"><span>&nbsp;&nbsp;&nbsp;&nbsp;用户管理</span></a></li>
-            <li id="rolelist" style="display: none"><a href="{% url 'role_list' %}"><span>&nbsp;&nbsp;&nbsp;&nbsp;角色管理</span></a></li>
-            <li id="permlist" style="display: none"><a href="{% url 'permission_list' %}"><span>&nbsp;&nbsp;&nbsp;&nbsp;权限管理</span></a></li>
+            <li id="userlist" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;用户管理</span></a></li>
+            <li id="rolelist" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;角色管理</span></a></li>
+            <li id="permlist" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;权限管理</span></a></li>
           </ul>
         </li>
-        {% endcomment %}
         <li id="config" style="display: none"><a href="#"><i class="fa fa fa-cog"></i> <span>系统配置</span></a></li>
 {#          {% endif %}#}
       </ul>
