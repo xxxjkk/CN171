@@ -9,40 +9,6 @@
 
 {% endblock %}
 {% block content %}
-<script>
-    window.onload=init;
-    function init() {
-        showhide(2);
-    }
-    function showhide(n) {
-        var box = document.getElementById("cmdb");
-        box.className="active";
-        var box2 = document.getElementById("asset");
-        box2.className="active";
-    }
-    //node status
-    $(document).ready(function(){
-    $("span").each(function(){
-        if($(this).attr('id')){
-            var hostid = $(this).attr('id');
-            var host = hostid.substr(5);
-            $.get("/cmdb/nodestatus/"+host+"/",function(data,status){
-              if ( data == "1" ) {
-                  document.getElementById(hostid).style.color="green";
-                  document.getElementById(hostid).title="Online";
-                  {#                      $(this).css('display','block');#}
-
-              }
-              else if (data == "2") {
-                  document.getElementById(hostid).style.color="red";
-                  document.getElementById(hostid).title="Offline";
-              }
-  });
-        }
-  });
-});
-</script>
-
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -55,7 +21,7 @@
             <div class="box">
                 <div class="box-header">
                     <div class="btn-group">
-						 <a id="taskstart" style="display: none" href="#" onclick="checkSubmit('确定删除？')" class="btn btn-success">启动</a>
+						 <a id="taskstart" style="display: none" href="#" onclick="checkSubmit('确定启动？')" class="btn btn-success">启动</a>
                     </div>
                     <div class="btn-group">
                          <a id="taskstop" style="display: none" href="#" class="btn btn-success">停止</a>
@@ -97,22 +63,25 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                    <tr class="even gradeX">
+                                {% for task in task_list %}
+                                <tr class="even gradeX">
                                         <td width="7%" style="text-align:center;"><input type="checkbox" id="id" class="i-checks" name="id"/></td>
-                                        <td width="7%" style="text-align:center;">BES</td>
-                                        <td width="7%" style="text-align:center;">中心1</td>
-                                        <td width="7%" style="text-align:center;">正常</td>
+                                        <td width="7%" style="text-align:center;">{{task.bg_module}}</td>
+                                        <td width="7%" style="text-align:center;">{{task.bg_domain}}</td>
+                                        <td width="7%" style="text-align:center;">{{task.bg_status}}</td>
                                         <td width="24%" style="text-align:center;">
-                                            <a href="#" style="list-style-type:none">详情</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                             <a href="#" style="list-style-type:none">启动</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                             <a href="#" style="list-style-type:none">停止</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                                            <a href="#" style="list-style-type:none">重启</a>
+                                            <a href="#" style="list-style-type:none">重启</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                                            <a href="#" style="list-style-type:none">详情</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                                            <a href="#" style="list-style-type:none">编辑</a>
                                         </td>
-                                        <td width="12%" style="text-align:center;">Admin</td>
-                                        <td width="12%" style="text-align:center;">启动</td>
-                                        <td width="17%" style="text-align:center;">2019-09-08 10:19:30</td>
-                                        <td width="7%" style="text-align:center;">成功</td>
-                                        </tr>
+                                        <td width="12%" style="text-align:center;">{{task.bg_lastopr_user}}</td>
+                                        <td width="12%" style="text-align:center;">{{task.bg_lastopr_type}}</td>
+                                        <td width="17%" style="text-align:center;">{{task.bg_lastopr_time}}</td>
+                                        <td width="7%" style="text-align:center;">{{task.bg_lastopr_result}}</td>
+                                </tr>
+                                {% endfor %}
                             </tbody>
                   </table>
                 <div class="row" style="width: auto">
@@ -129,7 +98,7 @@
             </div>
         </form>
     </section>
-        <!-- /.content -->
+<!-- /.content -->
 {#用于接收asset_edit.html中layui子层的传值#}
 <input id="handle_status" value="" hidden="hidden">
 </div>
@@ -238,7 +207,7 @@ function asset_import(){
 <script>
     function change_info(){
         var args = $("#asset_form").serialize();
-        window.location = "{% url 'cmdb' %}?" + args
+        window.location = "{% url 'taskManagement' %}?" + args
     }
 
     function export_excel(){
@@ -246,13 +215,13 @@ function asset_import(){
         if (asset_id_all == ''){
             if(confirm('您没有勾选，是否导出全部信息？')){
                 var args = $("#asset_form").serialize();
-                window.location = "{% url 'cmdb' %}?export=all&" + args
+                window.location = "{% url 'taskManagement' %}?export=all&" + args
                 }else{
                     return false;
                 }
             }else{
                 var args = $("#asset_form").serialize();
-                window.location = "{% url 'cmdb' %}?export=true&" + args
+                window.location = "{% url 'taskManagement' %}?export=true&" + args
             }
     }
     $("#search_input").keydown(function(e) {
@@ -260,22 +229,6 @@ function asset_import(){
             change_info()
         }
         });
-</script>
-
-<script>
-function node_status(args) {
-      $.get("/cmdb/nodestatus/"+args+"/",function(data,status){
-          var res = JSON.parse(data);
-          if ( res.data == "1" ) {
-              document.getElementById("node_"+res.hostname).style.color="green";
-          }
-          else if (res.data == "2") {
-              document.getElementById("node_"+res.hostname).style.color="red";
-
-          }
-      });
-}
-
 </script>
 
 {% endblock %}
