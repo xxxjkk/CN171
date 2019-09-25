@@ -22,11 +22,11 @@ def login(request):
             username = login_form.cleaned_data['username']
             password = login_form.cleaned_data['password']
             try:
-                user = models.User.objects.get(name=username)
-                if user.password == password:
+                user = models.User.objects.get(acc_user_name=username)
+                if user.acc_user_password == password:
                     request.session['is_login'] = True
-                    request.session['user_id'] = user.id
-                    request.session['user_name'] = user.name
+                    request.session['user_id'] = user.acc_user_id
+                    request.session['user_name'] = user.acc_user_name
                     return redirect('/index/')
                 else:
                     message = "密码不正确！"
