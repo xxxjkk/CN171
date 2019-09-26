@@ -11,12 +11,17 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import pymysql
-import pymysql
 import os
+try:
+    import ConfigParser as cp
+except ImportError as e:
+    import configparser as cp
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+config = cp.ConfigParser()
+config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -129,16 +134,18 @@ STATIC_URL = '/static/'
 
 pymysql.install_as_MySQLdb()
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'cn171',  # 数据库名字
-        'USER': 'root',  # 账号
-        'PASSWORD': 'root',  # 密码
-        'HOST': '127.0.0.1',  # IP
-        'PORT': '3306',  # 端口
+        'NAME': config.get('DataBase', 'database'),
+        'USER': config.get('DataBase', 'user'),
+        'PASSWORD': config.get('DataBase', 'password'),
+        'HOST': config.get('DataBase', 'host'),
+        'PORT': config.getint('DataBase', 'port'),
     }
 }
+
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [

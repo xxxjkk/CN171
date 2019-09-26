@@ -21,7 +21,7 @@
             <div class="box">
                 <div class="box-header">
                     <div class="btn-group">
-						 <a id="taskstart" style="display: none" href="#" onclick="checkSubmit('确定启动？')" class="btn btn-success">启动</a>
+						 <a id="taskstart" style="display: none" href="#" onclick="checkSubmit('确定启动所有√选的中心吗？')" class="btn btn-success">启动</a>
                     </div>
                     <div class="btn-group">
                          <a id="taskstop" style="display: none" href="#" class="btn btn-success">停止</a>
@@ -55,10 +55,10 @@
                                     <th width="7%" style="text-align:center;">模块</th>
                                     <th width="7%" style="text-align:center;">中心</th>
                                     <th width="7%" style="text-align:center;">状态</th>
-                                    <th class="text-center" width="24%" style="text-align:center;">功能</th>
+                                    <th class="text-center" width="26%" style="text-align:center;">功能</th>
                                     <th width="12%" style="text-align:center;">最后一次操作人员</th>
                                     <th width="12%" style="text-align:center;">最后一次操作类型</th>
-                                    <th width="17%" style="text-align:center;">最后一次操作时间</th>
+                                    <th width="14%" style="text-align:center;">最后一次操作时间</th>
                                     <th width="7%" style="text-align:center;">操作结果</th>
                                 </tr>
                             </thead>
@@ -69,16 +69,19 @@
                                         <td width="7%" style="text-align:center;">{{task.bg_module}}</td>
                                         <td width="7%" style="text-align:center;">{{task.bg_domain}}</td>
                                         <td width="7%" style="text-align:center;">{{task.bg_status}}</td>
-                                        <td width="24%" style="text-align:center;">
-                                            <a href="#" style="list-style-type:none" onclick="checkSubmit('确定启动？')">启动</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                                            <a href="#" style="list-style-type:none" onclick="checkSubmit('确定停止？')">停止</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                                            <a href="#" style="list-style-type:none" onclick="checkSubmit('确定重启？')">重启</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                                        <td width="26%" style="text-align:center;">
+                                            <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','start')"
+                                               style="list-style-type:none">启动</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                                            <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','stop')"
+                                               style="list-style-type:none">停止</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                                            <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','restart')"
+                                               style="list-style-type:none">重启</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                             <a href="#" style="list-style-type:none">详情</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                             <a href="#" style="list-style-type:none">编辑</a>
                                         </td>
                                         <td width="12%" style="text-align:center;">{{task.bg_lastopr_user}}</td>
                                         <td width="12%" style="text-align:center;">{{task.bg_lastopr_type}}</td>
-                                        <td width="17%" style="text-align:center;">{{task.bg_lastopr_time}}</td>
+                                        <td width="14%" style="text-align:center;">{{task.bg_lastopr_time}}</td>
                                         <td width="7%" style="text-align:center;">{{task.bg_lastopr_result}}</td>
                                 </tr>
                                 {% endfor %}
@@ -102,6 +105,7 @@
 {#用于接收asset_edit.html中layui子层的传值#}
 <input id="handle_status" value="" hidden="hidden">
 </div>
+
 <script>
   $(function () {
     $("#example1").DataTable();
@@ -116,17 +120,54 @@
     });
   });
 </script>
+
 <script>
-function checkSubmit(a) {
-    if (!confirm(a)) {
-        window.event.returnValue = false;
-    }else{
-        window.location = "{% url 'cmdb' %}"
+function checkSubmit(status, bg_id, action) {
+    switch(action)
+    {
+        case "start":
+            if (status == "停止"){
+                msg = "确定启动？";
+                if (!confirm(msg)) {
+                    window.event.returnValue = false;
+                }else{
+                    window.location = "{% url 'taskExecuteOne' %}?bg_id="+bg_id+"&bg_action=start";
+                }
+             }else{
+                msg = "中心非“停止”状态！"
+                alert(msg);
+             }
+        break;
+        case "stop":
+            if (status != "停止"){
+                msg = "确定停止？";
+                if (!confirm(msg)) {
+                    window.event.returnValue = false;
+                }else{
+                    window.location = "{% url 'taskExecuteOne' %}?bg_id="+bg_id+"&bg_action=stop";
+                }
+             }else{
+                msg = "中心已处于“停止”状态！"
+                alert(msg);
+             }
+        break;
+        case "restart":
+            if (status != "停止"){
+                msg = "确定重启？";
+                if (!confirm(msg)) {
+                    window.event.returnValue = false;
+                }else{
+                    window.location = "{% url 'taskExecuteOne' %}?bg_id="+bg_id+"&bg_action=restart";
+                }
+             }else{
+                msg = "中心处于“停止”状态，请先启动！"
+                alert(msg);
+             }
+        break;
     }
-
 }
-
 </script>
+
 <script>
 function tanchu(n){
     layer.open({

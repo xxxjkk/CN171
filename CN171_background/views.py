@@ -1,12 +1,6 @@
-import sys
-
-from django.http import HttpResponse
-from django.shortcuts import render
-from CN171_background import models
+from django.shortcuts import render,redirect
 from CN171_background.models import BgTaskManagement
-from CN171_background.tool import app_stop, ssh_exec_cmd, ssh_close
-from CN171_background.tool import ssh_connect
-from django.shortcuts import redirect
+from CN171_tools import connecttool
 
 
 # Create your views here.
@@ -14,26 +8,25 @@ from django.shortcuts import redirect
 #后台管理函数
 def taskManagement(request):
     #获取所有后台对象
-    task_list = models.BgTaskManagement.objects.all()
+    task_list = BgTaskManagement.objects.all()
     return render(request, "background/task_management.html", {"task_list" : task_list})
 
 
-#单个启动按钮函数
-def taskStart(request):
+#单个按钮执行函数
+def taskExecuteOne(request):
     bg_id = request.GET.get('bg_id')
+    bg_action = request.GET.get('bg_action')
     bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
 
-    sshd = ssh_connect()
-    cmd = bgTaskManagement.bg_task_start
-    stdin, stdout, stderr = ssh_exec_cmd(sshd, cmd)
-    err_list = stderr.readlines()
-    if len(err_list) > 0:
-        print('Start failed:' + err_list[0])
-        sys.exit(0)
+    if bg_action == 'start':
+        cmd = bgTaskManagement.bg_task_start
+    elif bg_action == 'stop':
+        cmd = bgTaskManagement.bg_task_stop
+    elif bg_action == 'restart':
+        cmd = bgTaskManagement.bg_task_restart
     else:
-        print('Start success.')
-    for item in stdout.readlines():
-        print(item)
-    ssh_close(sshd)
+        return redirect("taskManagement")
 
+    connecttool.domainExecuteOne(cmd)
     return redirect("taskManagement")
+
