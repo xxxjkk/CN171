@@ -5,4 +5,5 @@ urlpatterns = [
 
     # 任务管理
     url(r'^task_management/', backgroundviews.taskManagement, name='taskManagement'),
+    url(r'^taskStart/', backgroundviews.taskStart, name='taskStart'),
 ]

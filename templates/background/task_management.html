@@ -73,7 +73,7 @@
                                         <td width="7%" style="text-align:center;">{{task.bg_domain}}</td>
                                         <td width="7%" style="text-align:center;">{{task.bg_status}}</td>
                                         <td width="24%" style="text-align:center;">
-                                            <a href="#" style="list-style-type:none">启动</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                                            <a href="{% url 'taskStart' %}?bg_id={{task.bg_id}}" style="list-style-type:none">启动</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                             <a href="#" style="list-style-type:none">停止</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                             <a href="#" style="list-style-type:none">重启</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                             <a href="#" style="list-style-type:none">详情</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;

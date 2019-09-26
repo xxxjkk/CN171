@@ -31,7 +31,7 @@ class BgTaskManagement(models.Model):
 class BgTaskLog(models.Model):
     # '''后台管理日志表'''
     bg_log_id = models.AutoField(primary_key=True)
-    bg_id = models.IntegerField(max_length=56)
+    bg_id = models.IntegerField()
     bg_operation_user = models.CharField(max_length=56,null=True, blank=True)
     bg_operation = models.CharField(max_length=32,null=True, blank=True)
     bg_opr_result = models.CharField(max_length=32,null=True, blank=True)
