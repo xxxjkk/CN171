@@ -30,3 +30,7 @@ def taskExecuteOne(request):
     connecttool.domainExecuteOne(cmd)
     return redirect("taskManagement")
 
+
+
+#新增中心函数
+

@@ -45,3 +45,16 @@ class BgTaskLog(models.Model):
         verbose_name = u'后台管理日志表'
         verbose_name_plural = verbose_name
         db_table = "bg_task_log"
+
+class BgDomainStatusDict(models.Model):
+    # '''中心状态字典表'''
+    bg_domainstatus_id = models.AutoField(primary_key=True)
+    bg_domainstatus = models.CharField(max_length=32, null=True, blank=True)
+
+    def __unicode__(self):
+        return self.dis_name
+
+    class Meta:
+        verbose_name = u'中心状态字典表'
+        verbose_name_plural = verbose_name
+        db_table = "bg_domainstatus_dict"
