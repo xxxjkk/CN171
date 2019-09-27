@@ -2715,6 +2715,10 @@ select.input-sm {
   height: 30px;
   line-height: 30px;
 }
+select.input-sm-33 {
+  height: 33px;
+  line-height: 30px;
+}
 textarea.input-sm,
 select[multiple].input-sm {
   height: auto;

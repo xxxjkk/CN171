@@ -25,6 +25,7 @@ class BgTaskManagement(models.Model):
     class Meta:
         verbose_name = u'后台管理表'
         verbose_name_plural = verbose_name
+        ordering = ['bg_id']
         db_table = "bg_task_management"
 
 
