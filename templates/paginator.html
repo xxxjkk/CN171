@@ -1,41 +1,73 @@
-<div class="col-sm-6">
+<div class="col-sm-8">
     <div class="dataTables_paginate paging_simple_numbers">
         <ul class="pagination" style="margin-top: 0; float: right">
-            {% if contacts.has_previous %}
+             <li class="paginate_button previous" aria-controls="editable" tabindex="0">
+                     <a class="pe" href="?page=1&page_len={{ page_len }}">首页</a>
+             </li>
+            {% if page_objects.has_previous %}
                 <li class="paginate_button previous" aria-controls="editable" tabindex="0" >
-                    <a class="pe" href="?page={{ contacts.previous_page_number }}&page_len={{ page_len }}">Previous</a>
-                </li>
-            {% else %}
-                <li class="paginate_button previous" aria-controls="editable" tabindex="0">
-                     <a class="page" href="?page=1&page_len={{ page_len }}">Start</a>
+                    <a class="pe" href="?page={{ page_objects.previous_page_number }}&page_len={{ page_len }}">上一页</a>
                 </li>
             {% endif %}
             {% ifequal show_first 1 %}
-                <li class="paginate_button" aria-controls="editable" tabindex="0"><a class="page" href="?page=1&page_len={{ page_len }}"  title="第1页">1...</a></li>
+                <li class="paginate_button" aria-controls="editable" tabindex="0"><a class="pe" href="?page=1&page_len={{ page_len }}"  title="第1页">1...</a></li>
             {% endifequal %}
             {% for page in page_range %}
                 {% ifequal current_page page %}
-                    <li class="paginate_button active"  aria-controls="editable" tabindex="0"><a class="page" href="?page={{ page }}&page_len={{ page_len }}"  title="第{{ page }}页">{{ page }}</a></li>
+                    <li class="paginate_button active"  aria-controls="editable" tabindex="0"><a class="pe" href="?page={{ page }}&page_len={{ page_len }}"  title="第{{ page }}页">{{ page }}</a></li>
                 {% else %}
-                    <li class="paginate_button" aria-controls="editable" tabindex="0"><a class="page" href="?page={{ page }}&page_len={{ page_len }}"  title="第{{ page }}页">{{ page }}</a></li>
+                    <li class="paginate_button" aria-controls="editable" tabindex="0"><a class="pe" href="?page={{ page }}&page_len={{ page_len }}"  title="第{{ page }}页">{{ page }}</a></li>
                 {% endifequal %}
             {% endfor %}
             {% ifequal show_end 1 %}
-                <li class="paginate_button" aria-controls="editable" tabindex="0"><a class="page" href="?page={{ p.num_pages }}&page_len={{ page_len }}"  title="第{{ page }}页">...{{ p.num_pages }}</a></li>
+                <li class="paginate_button" aria-controls="editable" tabindex="0"><a class="pe" href="?page={{ p.num_pages }}&page_len={{ page_len }}"  title="第{{ page }}页">...{{ p.num_pages }}</a></li>
             {% endifequal %}
-            {% if contacts.has_next %}
-                <li class="paginate_button next" aria-controls="editable" tabindex="0">
-                    <a class="page" href="?page={{ contacts.next_page_number }}&page_len={{ page_len }}">Next</a>
-                </li>
-            {% else %}
-                <li class="paginate_button next" aria-controls="editable" tabindex="0">
-                    <a class="page" href="?page={{ end_page }}&page_len={{ page_len }}">End</a>
+            {% if page_objects.has_next %}
+                <li class="paginate_button next " aria-controls="editable" tabindex="0">
+                    <a class="pe" href="?page={{ page_objects.next_page_number }}&page_len={{ page_len }}">下一页</a>
                 </li>
             {% endif %}
+                <li class="paginate_button next" aria-controls="editable" tabindex="0">
+                    <a class="pe" href="?page={{ end_page }}&page_len={{ page_len }}">尾页</a>
+                </li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+             <label for="page_len">
+                      <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
+                        {% ifequal page_len '2' %}
+                            <option value="2" selected>2</option>
+                        {% else %}
+                            <option value="2">2</option>
+                        {% endifequal %}
+                        {% ifequal page_len '10' %}
+                            <option value="10" selected>10</option>
+                        {% else %}
+                            <option value="10">10</option>
+                        {% endifequal %}
+                        {% ifequal page_len '20' %}
+                            <option value="20" selected>20</option>
+                        {% else %}
+                            <option value="20">20</option>
+                        {% endifequal %}
+                        {% ifequal page_len '50' %}
+                            <option value="50" selected>50</option>
+                        {% else %}
+                            <option value="50">50</option>
+                        {% endifequal %}
+                    </select>
+                 </label>
+        </ul>
+        <ul>
+
         </ul>
     </div>
 </div>
 <script>
+
+ function change_info(){
+        var args = $("#{{form_id}}").serialize();
+        window.location = "{% url 'taskManagement' %}?" + args
+    }
+
+
     function sleep(n) { //n表示的毫秒数
             var start = new Date().getTime();
             while (true) if (new Date().getTime() - start > n) break;
@@ -62,5 +94,6 @@
 {#            sleep(1000)#}
         })
     });
+
 
 </script>

@@ -1,3 +1,7 @@
+from django.http import HttpResponse
+from django.shortcuts import render
+from CN171_background import models
+from CN171_background.api import pages
 from django.shortcuts import render,redirect
 from CN171_background.models import BgTaskManagement
 from CN171_tools import connecttool
@@ -7,9 +11,12 @@ from CN171_tools import connecttool
 
 #后台管理函数
 def taskManagement(request):
-    #获取所有后台对象
-    task_list = BgTaskManagement.objects.all()
-    return render(request, "background/task_management.html", {"task_list" : task_list})
+    # 获取所有后台对象
+    # page_len = request.GET.get('page_len', '')
+    task_list = models.BgTaskManagement.objects.all()
+    form_id = "task_management_form"
+    p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(task_list, request)
+    return render(request, "background/task_management.html", locals())
 
 
 #单个按钮执行函数

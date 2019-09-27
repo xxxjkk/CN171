@@ -16,7 +16,7 @@
 
     <!-- Main content -->
     <section class="content">
-        <form action="" method="post" id="asset_form">
+        <form action="" method="post" id="task_management_form">
         {% csrf_token %}
             <div class="box">
                 <div class="box-header">
@@ -28,6 +28,9 @@
                     </div>
                     <div class="btn-group">
                          <a id="taskrestartmulti" style="display: none" href="#" class="btn btn-success">重启</a>
+                    </div>
+                    <div class="btn-group">
+                         <a id="status_flush" style="display: none" href="#" class="btn btn-success">刷新状态</a>
                     </div>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <div class="btn-group">
@@ -63,7 +66,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for task in task_list %}
+                                {% for task in page_objects %}
                                 <tr class="even gradeX">
                                         <td width="7%" style="text-align:center;"><input type="checkbox" id="id" class="i-checks" name="id"/></td>
                                         <td width="7%" style="text-align:center;">{{task.bg_module}}</td>
@@ -89,13 +92,6 @@
                   </table>
                 <div class="row" style="width: auto">
                     {% include 'paginator.html' %}
-                 <label for="page_len">
-                    <select name="page_len" id="page_len" class="form-control m-b input-sm" onchange="change_info()">
-                        <option value="10" selected>10</option>
-                        <option value="20">20</option>
-                        <option value="50">50</option>
-                    </select>
-                 </label>
                 </div>
                </div>
             </div>
@@ -246,11 +242,6 @@ function asset_import(){
 }
 </script>
 <script>
-    function change_info(){
-        var args = $("#asset_form").serialize();
-        window.location = "{% url 'taskManagement' %}?" + args
-    }
-
     function export_excel(){
         var asset_id_all = getIDall();
         if (asset_id_all == ''){
