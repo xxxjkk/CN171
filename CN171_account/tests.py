@@ -5,10 +5,12 @@ import os
 from django.core.paginator import Paginator
 
 objects=['john', 'paul', 'george', 'ringo', 'lucy', 'meiry', 'checy', 'wind', 'flow', 'rain']
+#objects=[]
 p = Paginator(objects, 3)   #实例化一个分页器，获得分页器 3条数据为一页，实例化分页对象
 print(p.count )   #10 对象总共10个元素
 print(p.num_pages)  #对象可分4页
 print(p.page_range)  #xrang(1,5) 对象页的可迭代范围
+print(len(p.page_range))
 
 page1=p.page(1) #取第一页
 print(page1.object_list)  #第一页对象的列表【'jhon', 'paul', 'george'】
