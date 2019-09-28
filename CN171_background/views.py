@@ -14,7 +14,6 @@ def taskManagement(request):
     # 获取所有后台对象
     # page_len = request.GET.get('page_len', '')
     task_list = models.BgTaskManagement.objects.all()
-    form_id = "task_management_form"
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(task_list, request)
     return render(request, "background/task_management.html", locals())
 

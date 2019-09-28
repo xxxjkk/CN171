@@ -1,4 +1,4 @@
-<div class="col-sm-8">
+<div class="col-sm-7">
     <div class="dataTables_paginate paging_simple_numbers">
         <ul class="pagination" style="margin-top: 0; float: right">
              <li class="paginate_button previous" aria-controls="editable" tabindex="0">
@@ -30,42 +30,13 @@
                 <li class="paginate_button next" aria-controls="editable" tabindex="0">
                     <a class="pe" href="?page={{ end_page }}&page_len={{ page_len }}">尾页</a>
                 </li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-             <label for="page_len">
-                      <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
-                        {% ifequal page_len '2' %}
-                            <option value="2" selected>2</option>
-                        {% else %}
-                            <option value="2">2</option>
-                        {% endifequal %}
-                        {% ifequal page_len '10' %}
-                            <option value="10" selected>10</option>
-                        {% else %}
-                            <option value="10">10</option>
-                        {% endifequal %}
-                        {% ifequal page_len '20' %}
-                            <option value="20" selected>20</option>
-                        {% else %}
-                            <option value="20">20</option>
-                        {% endifequal %}
-                        {% ifequal page_len '50' %}
-                            <option value="50" selected>50</option>
-                        {% else %}
-                            <option value="50">50</option>
-                        {% endifequal %}
-                    </select>
-                 </label>
-        </ul>
-        <ul>
 
         </ul>
+
     </div>
 </div>
 <script>
 
- function change_info(){
-        var args = $("#{{form_id}}").serialize();
-        window.location = "{% url 'taskManagement' %}?" + args
-    }
 
 
     function sleep(n) { //n表示的毫秒数
