@@ -74,12 +74,12 @@
             </span>
           </a>
           <ul class="treeview-menu">
-            <li id="userlist" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;用户管理</span></a></li>
+            <li id="userlist" style="display: none"><a href="{% url 'userManagement' %}"><span>&nbsp;&nbsp;&nbsp;&nbsp;用户管理</span></a></li>
             <li id="rolelist" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;角色管理</span></a></li>
             <li id="permlist" style="display: none"><a href="#"><span>&nbsp;&nbsp;&nbsp;&nbsp;权限管理</span></a></li>
           </ul>
         </li>
-        <li id="config" style="display: none"><a href="#"><i class="fa fa fa-cog"></i> <span>系统配置</span></a></li>
+        <li id="config" style="display: none"><a href="{% url 'configManagement' %}"><i class="fa fa fa-cog"></i> <span>系统配置</span></a></li>
 {#          {% endif %}#}
       </ul>
       <!-- /.sidebar-menu -->
