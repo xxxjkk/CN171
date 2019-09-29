@@ -21,13 +21,13 @@
             <div class="box">
                 <div class="box-header">
                     <div class="btn-group">
-						 <a id="taskstartmulti" style="display: none" href="#" onclick="checkSubmit('确定启动所有√选的中心吗？')" class="btn btn-success">启动</a>
+						 <a id="taskstart" style="display: none" href="#" onclick="checkSubmitBatch('确定启动所有√选的中心吗？')" class="btn btn-success">启动</a>
                     </div>
                     <div class="btn-group">
-                         <a id="taskstopmulti" style="display: none" href="#" class="btn btn-success">停止</a>
+                         <a id="taskstop" style="display: none" href="#" class="btn btn-success">停止</a>
                     </div>
                     <div class="btn-group">
-                         <a id="taskrestartmulti" style="display: none" href="#" class="btn btn-success">重启</a>
+                         <a id="taskrestart" style="display: none" href="#" class="btn btn-success">重启</a>
                     </div>
                     <div class="btn-group">
                          <a id="status_flush" style="display: none" href="#" class="btn btn-success">刷新状态</a>
@@ -42,7 +42,7 @@
                     <div class="input-group inline-group col-md-3" style="float: right">
                                 <input type="text" class="form-control" id="search_input" name="keyword" placeholder="Search">
                                 <div class="input-group-btn">
-                                    <button type="button" class="btn btn-primary "  onclick="change_info()">搜索</button>
+                                    <button href="#" type="button" class="btn btn-primary "  onclick="change_info()">搜索</button>
                                 </div>
                      </div>
                 </div>
@@ -68,19 +68,19 @@
                             <tbody>
                                 {% for task in page_objects %}
                                 <tr class="even gradeX">
-                                        <td width="7%" style="text-align:center;"><input type="checkbox" id="id" class="i-checks" name="id"/></td>
+                                        <td width="7%" style="text-align:center;"><input type="checkbox" id="id" class="i-checks" name="id" value="{{task.bg_id}}"/></td>
                                         <td width="7%" style="text-align:center;">{{task.bg_module}}</td>
                                         <td width="7%" style="text-align:center;">{{task.bg_domain}}</td>
                                         <td width="7%" style="text-align:center;">{{task.bg_status}}</td>
                                         <td width="26%" style="text-align:center;">
-                                            <a id="taskstart" href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','start')"
-                                               style="list-style-type:none;">启动</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                                            <a id="taskstop" href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','stop')"
-                                               style="list-style-type:none;">停止</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                                            <a id="taskrestart" href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','restart')"
-                                               style="list-style-type:none;">重启</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                                            <a id="taskinfo" href="#" style="list-style-type:none;">详情</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                                            <a id="taskedit" href="#" style="list-style-type:none;" onclick="return editpop({{ task.bg_id }})">编辑</a>
+                                            <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','start')"
+                                               style="list-style-type:none">启动</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                                            <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','stop')"
+                                               style="list-style-type:none">停止</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                                            <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','restart')"
+                                               style="list-style-type:none">重启</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                                            <a href="#" style="list-style-type:none">详情</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                                            <a href="#" style="list-style-type:none">编辑</a>
                                         </td>
                                         <td width="12%" style="text-align:center;">{{task.bg_lastopr_user}}</td>
                                         <td width="12%" style="text-align:center;">{{task.bg_lastopr_type}}</td>
@@ -149,7 +149,42 @@ function change_info(){
 
 
 </script>
+<script>
+function checkSubmitBatch(a) {
+    if (!confirm(a)) {
+        window.event.returnValue = false;
+    }else{
+    //将所有复选框的默认值放入id数组中
+                var id = document.getElementsByName('id');
+                var ids = [];
+                //将所有选中复选框的默认值写入到id数组中
+                for (var i = 0; i < id.length; i++) {
+                    if (id[i].checked){
+                        ids.push(id[i].value);
+                      }
+                }
+                console.log(ids);
+                //ajax开始运行
+                $.ajax({
+                    url: '{% url 'batchTaskStart' %}',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        ids: ids,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    'traditional': true,
+                    success: function (msg) {
+                        location.reload()
+                    }
+                });
 
+    }
+
+}
+
+
+</script>
 <script>
 function checkSubmit(status, bg_id, action) {
     switch(action)
@@ -198,14 +233,14 @@ function checkSubmit(status, bg_id, action) {
 </script>
 
 <script>
-function editpop(bg_id){
+function tanchu(n){
     layer.open({
     type: 2,
-    title: '修改后台中心信息',
+    title: '修改主机信息',
     closeBtn: 1,
     area: ['700px', '550px'],
     shadeClose: true, //点击遮罩关闭
-    content: ['/cmdb/assetedit/' + bg_id],
+    content: ['/cmdb/assetedit/' + n],
 {#    end:function(){#}
 {#            var handle_status = $("#handle_status").val();#}
 {#            if ( handle_status == '1' ) {#}

@@ -6,4 +6,5 @@ urlpatterns = [
     # 任务管理
     url(r'^task_management/', backgroundviews.taskManagement, name='taskManagement'),
     url(r'^taskExecuteOne/', backgroundviews.taskExecuteOne, name='taskExecuteOne'),
+    url(r'^batchTaskStart/', backgroundviews.batchTaskStart, name='batchTaskStart'),
 ]
