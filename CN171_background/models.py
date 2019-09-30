@@ -5,19 +5,19 @@ from django.db import models
 
 class BgTaskManagement(models.Model):
     # '''后台管理表'''
-    bg_id = models.AutoField(primary_key=True)
-    bg_module = models.CharField(max_length=56)
-    bg_domain = models.CharField(max_length=56)
-    bg_status = models.CharField(max_length=32,null=True, blank=True)
-    bg_lastopr_user = models.CharField(max_length=56,null=True, blank=True)
-    bg_lastopr_type = models.CharField(max_length=32,null=True, blank=True)
-    bg_lastopr_time = models.DateTimeField(auto_now_add=True,null=True, blank=True)
-    bg_lastopr_result = models.CharField(max_length=32,null=True, blank=True)
-    bg_task_start = models.TextField()
-    bg_task_stop = models.TextField()
-    bg_task_restart = models.TextField()
-    bg_task_query = models.TextField()
-    bg_insert_time = models.DateTimeField(auto_now_add=True)
+    bg_id = models.AutoField(u"后台id", primary_key=True)
+    bg_module = models.CharField(u"模块", max_length=56)
+    bg_domain = models.CharField(u"中心", max_length=56)
+    bg_status = models.CharField(u"状态", max_length=32, null=True, blank=True)
+    bg_lastopr_user = models.CharField(u"最后一次操作人员", max_length=56,null=True, blank=True)
+    bg_lastopr_type = models.CharField(u"最后一次操作类型", max_length=32,null=True, blank=True)
+    bg_lastopr_time = models.DateTimeField(u"最后一次操作时间", null=True, blank=True)
+    bg_lastopr_result = models.CharField(u"最后一次操作结果", max_length=32,null=True, blank=True)
+    bg_task_start = models.TextField(u"启动脚本" )
+    bg_task_stop = models.TextField(u"停止脚本" )
+    bg_task_restart = models.TextField(u"重启脚本" )
+    bg_task_query = models.TextField(u"查询脚本" )
+    bg_insert_time = models.DateTimeField(u"录入时间", auto_now_add=True)
 
     def __unicode__(self):
         return self.dis_name
@@ -31,13 +31,13 @@ class BgTaskManagement(models.Model):
 
 class BgTaskLog(models.Model):
     # '''后台管理日志表'''
-    bg_log_id = models.AutoField(primary_key=True)
-    bg_id = models.IntegerField()
-    bg_operation_user = models.CharField(max_length=56,null=True, blank=True)
-    bg_operation = models.CharField(max_length=32,null=True, blank=True)
-    bg_opr_result = models.CharField(max_length=32,null=True, blank=True)
-    bg_operation_time = models.DateTimeField(auto_now_add=True)
-    bg_log_dir = models.CharField(max_length=32,null=True, blank=True)
+    bg_log_id = models.AutoField(u"日志id", primary_key=True)
+    bg_id = models.IntegerField(u"后台id" )
+    bg_operation_user = models.CharField(u"操作人员", max_length=56,null=True, blank=True)
+    bg_operation = models.CharField(u"操作类型", max_length=32,null=True, blank=True)
+    bg_opr_result = models.CharField(u"操作结果", max_length=32,null=True, blank=True)
+    bg_operation_time = models.DateTimeField(u"操作时间")
+    bg_log_dir = models.CharField(u"详细日志", max_length=256,null=True, blank=True)
 
     def __unicode__(self):
         return self.dis_name
