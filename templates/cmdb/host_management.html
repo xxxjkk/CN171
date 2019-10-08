@@ -37,9 +37,9 @@
                         <a id="taskdel" class="btn btn-danger" style="display: none"  name="btn btn-info">批量导出</a>
                     </div>
                     <div class="input-group inline-group col-md-3" style="float: right">
-                                <input type="text" class="form-control" id="search_input" name="keyword" placeholder="Search">
+                                <input type="text" class="form-control" id="search_input" name="keyword" value="{{keyword}}" placeholder="Search">
                                 <div class="input-group-btn">
-                                    <button href="#" type="button" class="btn btn-primary "  onclick="change_info()">搜索</button>
+                                    <button type="button" class="btn btn-primary "  onclick="change_info()">搜索</button>
                                 </div>
                      </div>
                 </div>
@@ -52,11 +52,11 @@
                             <th width="10%" style="text-align:center;">
                                 <input id="checkall" type="checkbox" class="i-checks" name="checkall" value="checkall" data-editable='false' onclick="">
                             </th>
-                                    <th width="24%" style="text-align:center;">主机名</th>
+                                    <th width="20%" style="text-align:center;">主机名</th>
                                     <th width="10%" style="text-align:center;">类型</th>
                                     <th width="10%" style="text-align:center;">资源池</th>
-                                    <th width="13%" style="text-align:center;">业务IP</th>
-                                    <th width="13%" style="text-align:center;">管理IP</th>
+                                    <th width="10%" style="text-align:center;">业务IP</th>
+                                    <th width="10%" style="text-align:center;">管理IP</th>
                                     <th width="10%" style="text-align:center;">模块</th>
                                     <th width="10%" style="text-align:center;">中心</th>
                                     <th width="10%" style="text-align:center;">状态</th>
@@ -70,15 +70,15 @@
                                         </td>
                                         <td width="24%" style="text-align:center;">
                                             <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','start')"
-                                               style="list-style-type:none">{{host.bg_module}}</a>
+                                               style="list-style-type:none">{{host.cmdb_host_name}}</a>
                                         </td>
-                                        <td width="10%" style="text-align:center;">{{host.bg_domain}}</td>
-                                        <td width="10%" style="text-align:center;">{{host.bg_status}}</td>
-                                        <td width="13%" style="text-align:center;">{{host.bg_status}}</td>
-                                        <td width="13%" style="text-align:center;">{{host.bg_lastopr_user}}</td>
-                                        <td width="10%" style="text-align:center;">{{host.bg_lastopr_type}}</td>
-                                        <td width="10%" style="text-align:center;">{{host.bg_lastopr_time}}</td>
-                                        <td width="10%" style="text-align:center;">{{host.bg_lastopr_result}}</td>
+                                        <td width="10%" style="text-align:center;">{{host.cmdb_host_type}}</td>
+                                        <td width="10%" style="text-align:center;">{{host.cmdb_host_pod}}</td>
+                                        <td width="13%" style="text-align:center;">{{host.cmdb_host_busip}}</td>
+                                        <td width="13%" style="text-align:center;">{{host.cmdb_host_manip}}</td>
+                                        <td width="10%" style="text-align:center;">{{host.cmdb_host_manip}}</td>
+                                        <td width="10%" style="text-align:center;">{{host.cmdb_host_manip}}</td>
+                                        <td width="10%" style="text-align:center;">{{host.cmdb_host_status}}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -123,10 +123,6 @@
 
 <script>
 
-function change_info(){
-        var args = $("#task_management_form").serialize();
-        window.location = "{% url 'taskManagement' %}?" + args
-    }
   $(function () {
     $("#example1").DataTable();
     $('#dataform').DataTable({
@@ -141,8 +137,8 @@ function change_info(){
   });
 
   function change_info(){
-        var args = $("#task_management_form").serialize();
-        window.location = "{% url 'taskManagement' %}?" + args
+        var args = $("#host_management_form").serialize();
+        window.location = "{% url 'hostManagement' %}?" + args
     }
 </script>
 

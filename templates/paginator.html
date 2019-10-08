@@ -2,33 +2,33 @@
     <div class="dataTables_paginate paging_simple_numbers">
         <ul class="pagination" style="margin-top: 0; float: right">
              <li class="paginate_button previous" aria-controls="editable" tabindex="0">
-                     <a class="pe" href="?page=1&page_len={{ page_len }}">首页</a>
+                     <a class="pe" href="?page=1&page_len={{ page_len }}&keyword={{ keyword }}">首页</a>
              </li>
             {% if page_objects.has_previous %}
                 <li class="paginate_button previous" aria-controls="editable" tabindex="0" >
-                    <a class="pe" href="?page={{ page_objects.previous_page_number }}&page_len={{ page_len }}">上一页</a>
+                    <a class="pe" href="?page={{ page_objects.previous_page_number }}&page_len={{ page_len }}&keyword={{ keyword }}">上一页</a>
                 </li>
             {% endif %}
             {% ifequal show_first 1 %}
-                <li class="paginate_button" aria-controls="editable" tabindex="0"><a class="pe" href="?page=1&page_len={{ page_len }}"  title="第1页">1...</a></li>
+                <li class="paginate_button" aria-controls="editable" tabindex="0"><a class="pe" href="?page=1&page_len={{ page_len }}&keyword={{ keyword }}"  title="第1页">1...</a></li>
             {% endifequal %}
             {% for page in page_range %}
                 {% ifequal current_page page %}
-                    <li class="paginate_button active"  aria-controls="editable" tabindex="0"><a class="pe" href="?page={{ page }}&page_len={{ page_len }}"  title="第{{ page }}页">{{ page }}</a></li>
+                    <li class="paginate_button active"  aria-controls="editable" tabindex="0"><a class="pe" href="?page={{ page }}&page_len={{ page_len }}&keyword={{ keyword }}"  title="第{{ page }}页">{{ page }}</a></li>
                 {% else %}
-                    <li class="paginate_button" aria-controls="editable" tabindex="0"><a class="pe" href="?page={{ page }}&page_len={{ page_len }}"  title="第{{ page }}页">{{ page }}</a></li>
+                    <li class="paginate_button" aria-controls="editable" tabindex="0"><a class="pe" href="?page={{ page }}&page_len={{ page_len }}&keyword={{ keyword }}"  title="第{{ page }}页">{{ page }}</a></li>
                 {% endifequal %}
             {% endfor %}
             {% ifequal show_end 1 %}
-                <li class="paginate_button" aria-controls="editable" tabindex="0"><a class="pe" href="?page={{ p.num_pages }}&page_len={{ page_len }}"  title="第{{ page }}页">...{{ p.num_pages }}</a></li>
+                <li class="paginate_button" aria-controls="editable" tabindex="0"><a class="pe" href="?page={{ p.num_pages }}&page_len={{ page_len }}&keyword={{ keyword }}"  title="第{{ page }}页">...{{ p.num_pages }}</a></li>
             {% endifequal %}
             {% if page_objects.has_next %}
                 <li class="paginate_button next " aria-controls="editable" tabindex="0">
-                    <a class="pe" href="?page={{ page_objects.next_page_number }}&page_len={{ page_len }}">下一页</a>
+                    <a class="pe" href="?page={{ page_objects.next_page_number }}&page_len={{ page_len }}&keyword={{ keyword }}">下一页</a>
                 </li>
             {% endif %}
                 <li class="paginate_button next" aria-controls="editable" tabindex="0">
-                    <a class="pe" href="?page={{ end_page }}&page_len={{ page_len }}">尾页</a>
+                    <a class="pe" href="?page={{ end_page }}&page_len={{ page_len }}&keyword={{ keyword }}">尾页</a>
                 </li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
         </ul>
