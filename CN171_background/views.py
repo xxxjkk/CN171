@@ -5,10 +5,11 @@ import threading
 from django.http import HttpResponse
 from django.shortcuts import render
 from CN171_background import models
-from CN171_background.api import pages
+from CN171_background.api import pages,get_object
 from django.shortcuts import render, redirect
 from CN171_background.models import BgTaskManagement, BgTaskLog
 from CN171_tools import connecttool
+from CN171_background.forms import BgForm
 from datetime import datetime
 
 # Create your views here.
@@ -138,3 +139,54 @@ class MyThread(threading.Thread):
             return self.result
         except Exception as e:
             return None
+
+
+def taskEdit(request, bg_id):
+    status = 0
+    obj = get_object(BgTaskManagement, bg_id=bg_id)
+
+    if request.method == 'POST':
+        bgform = BgForm(request.POST, instance=obj)
+        if bgform.is_valid():
+            bgform.save()
+            status = 1
+        else:
+            status = 2
+    else:
+        bgform = BgForm(instance=obj)
+    return render(request, 'background/task_edit.html', locals())
+
+def taskAdd(request):
+    status = 0
+    if request.method == "POST":
+        bgform = BgForm(request.POST)
+        if bgform.is_valid():
+            bgform.save()
+            status = 1
+            tips = u"新增成功！"
+            display_control = ""
+        else:
+            status = 2
+            tips = u"新增失败！"
+            display_control = ""
+        return render(request, "background/task_add.html", locals())
+    else:
+        display_control = "none"
+        bgform = BgForm()
+        return render(request, "background/task_add.html", locals())
+
+
+def taskDel(request):
+    bg_id = request.GET.get('bg_id', '')
+    if bg_id:
+        BgTaskManagement.objects.filter(bg_id=bg_id).delete()
+
+    if request.method == 'POST':
+        bg_batch = request.GET.get('arg', '')
+        bg_id_all = str(request.POST.get('bg_id_all', ''))
+
+        if bg_batch:
+            for bg_id in bg_id_all.split(','):
+                bg_item = get_object(BgTaskManagement, bg_id=bg_id)
+                bg_item.delete()
+    return HttpResponse(u'删除成功')

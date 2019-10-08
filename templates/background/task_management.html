@@ -12,7 +12,9 @@
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header"></section>
+    <section class="content-header">
+            <h4>后台管理</h4>
+    </section>
 
     <!-- Main content -->
     <section class="content">
@@ -34,7 +36,7 @@
                     </div>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <div class="btn-group">
-                        <a id="taskadd" class="btn btn-danger" style="display: none"  name="del_button">新增</a>
+                        <a id="taskadd" class="btn btn-danger" style="display: none"  name="add_button" onclick="return taskadd()">新增</a>
                     </div>
                      <div class="btn-group">
                         <a id="taskdel" class="btn btn-danger" style="display: none"  name="del_button">删除</a>
@@ -53,7 +55,7 @@
                       <thead>
                         <tr>
                             <th width="7%" style="text-align:center;">
-                                <input id="checkall" type="checkbox" class="i-checks" name="checkall" value="checkall" data-editable='false' onclick="check_all('asset_form')">
+                                <input id="checkall" type="checkbox" class="i-checks" name="checkall" value="checkall" data-editable='false' onclick="check_all('task_management_form')">
                             </th>
                                     <th width="7%" style="text-align:center;">模块</th>
                                     <th width="7%" style="text-align:center;">中心</th>
@@ -71,7 +73,18 @@
                                         <td width="7%" style="text-align:center;"><input type="checkbox" id="id" class="i-checks" name="id" value="{{task.bg_id}}"/></td>
                                         <td width="7%" style="text-align:center;">{{task.bg_module}}</td>
                                         <td width="7%" style="text-align:center;">{{task.bg_domain}}</td>
-                                        <td width="7%" style="text-align:center;">{{task.bg_status}}</td>
+                                        <td width="8%" style="text-align:center;">
+                                            {% if task.bg_status == '正常' %}
+                                            <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:green;"></label>
+                                            {% elif task.bg_status == '部分正常' %}
+                                                <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:yellow;"></label>
+                                            {% elif task.bg_status == '异常' %}
+                                                <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:red;"></label>
+                                            {% elif task.bg_status == '停止' %}
+                                                <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:gray;"></label>
+                                            {% endif %}
+                                            &nbsp;{{task.bg_status}}
+                                        </td>
                                         <td width="26%" style="text-align:center;">
                                             <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','start')"
                                                style="list-style-type:none">启动</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
@@ -80,7 +93,7 @@
                                             <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','restart')"
                                                style="list-style-type:none">重启</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                             <a href="#" style="list-style-type:none">详情</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                                            <a href="#" style="list-style-type:none">编辑</a>
+                                            <a href="#" style="list-style-type:none" onclick="return taskedit({{ task.bg_id }})">编辑</a>
                                         </td>
                                         <td width="12%" style="text-align:center;">{{task.bg_lastopr_user}}</td>
                                         <td width="12%" style="text-align:center;">{{task.bg_lastopr_type}}</td>
@@ -124,7 +137,7 @@
         </form>
     </section>
 <!-- /.content -->
-{#用于接收asset_edit.html中layui子层的传值#}
+{#用于接收task_edit.html中layui子层的传值#}
 <input id="handle_status" value="" hidden="hidden">
 </div>
 
@@ -178,9 +191,7 @@ function checkSubmitBatch(a) {
                         location.reload()
                     }
                 });
-
     }
-
 }
 
 
@@ -233,14 +244,14 @@ function checkSubmit(status, bg_id, action) {
 </script>
 
 <script>
-function tanchu(n){
+function taskedit(bg_id){
     layer.open({
     type: 2,
-    title: '修改主机信息',
+    title: '修改后台中心信息',
     closeBtn: 1,
     area: ['700px', '550px'],
     shadeClose: true, //点击遮罩关闭
-    content: ['/cmdb/assetedit/' + n],
+    content: ['/background/taskEdit/' + bg_id],
 {#    end:function(){#}
 {#            var handle_status = $("#handle_status").val();#}
 {#            if ( handle_status == '1' ) {#}
@@ -258,6 +269,53 @@ function tanchu(n){
   });
 }
 </script>
+<script>
+function taskadd(){
+    layer.open({
+    type: 2,
+    title: '新增后台中心信息',
+    closeBtn: 1,
+    area: ['700px', '550px'],
+    shadeClose: true, //点击遮罩关闭
+    content: ['/background/taskAdd/'],
+{#    end:function(){#}
+{#            var handle_status = $("#handle_status").val();#}
+{#            if ( handle_status == '1' ) {#}
+{#                layer.msg('保存成功！',{#}
+{#                    icon: 1,#}
+{#                    time: 2000 //2秒关闭（如果不配置，默认是3秒）#}
+{#                });#}
+{#            } else if ( handle_status == '2' ) {#}
+{#                layer.msg('修改失败！',{#}
+{#                    icon: 2,#}
+{#                    time: 2000 //2秒关闭（如果不配置，默认是3秒）#}
+{#                });#}
+{#            }#}
+{#        }#}
+  });
+}
+</script>
+
+<script>
+    $('#taskdel').click(function () {
+        var bg_id_all = getIDall();
+        if (bg_id_all == ''){
+            alert("请至少选择一行!");
+            return false;
+        }
+        if (confirm("确定删除?")) {
+            $.ajax({
+                type: "post",
+                data: {bg_id_all: bg_id_all,csrfmiddlewaretoken: '{{ csrf_token }}'},
+                url: "{% url 'taskDel' %}?arg=batch",
+                success: function () {
+                    parent.location.reload();
+                }
+            });
+        }
+    });
+</script>
+
 <script>
 function detail(n){
     layer.open({
