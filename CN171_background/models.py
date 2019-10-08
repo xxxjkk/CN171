@@ -4,7 +4,6 @@ from django.db import models
 
 
 class BgTaskManagement(models.Model):
-    # '''后台管理表'''
     bg_id = models.AutoField(u"后台id", primary_key=True)
     bg_module = models.CharField(u"模块", max_length=56)
     bg_domain = models.CharField(u"中心", max_length=56)
