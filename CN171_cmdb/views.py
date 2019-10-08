@@ -41,3 +41,15 @@ def appManagement(request):
         app_list = models.CmdbApp.objects.all()
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(app_list, request)
     return render(request, "cmdb/app_management.html", locals())
+
+def hostPwdOprLog(request):
+    host_pwd_opr_log_list = []
+    keyword = request.GET.get("keyword", "")
+    if keyword:
+        host_pwd_opr_log_list = models.HostPwdOprLog.objects.filter(
+            Q(opr_user_name__icontains=keyword)
+        )
+    else:
+        host_pwd_opr_log_list = models.HostPwdOprLog.objects.all()
+    p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(host_pwd_opr_log_list, request)
+    return render(request, "cmdb/host_pwd_opr_log.html", locals())

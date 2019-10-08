@@ -30,9 +30,9 @@
                 <div class="box-header">
                     <div class="form-group form-inline input-daterange">
                         <label>开始时间:  &nbsp;</label>
-                        <input type="text" class="form-control" name="startdate" placeholder="YYYY-MM-DD hh:mm:ss" id="start-picker" readonly value="{{ starttime }}">
+                        <input type="text" class="form-control" name="starttime" placeholder="YYYY-MM-DD hh:mm:ss" id="start-picker" readonly value="{{ starttime }}">
                         <label>  &nbsp;  &nbsp;  &nbsp;  &nbsp;结束时间:  &nbsp;</label>
-                        <input type="text" class="form-control" name="enddate" placeholder="YYYY-MM-DD hh:mm:ss" id="end-picker" readonly value="{{ endtime }}">  &nbsp;  &nbsp;  &nbsp
+                        <input type="text" class="form-control" name="endtime" placeholder="YYYY-MM-DD hh:mm:ss" id="end-picker" readonly value="{{ endtime }}">  &nbsp;  &nbsp;  &nbsp
                         <div class="btn-group">
                             <a id="search" style="display: none" href="#" class="btn btn-info" onclick="searchbytime()"><i class="fa fa-search"></i>搜索</a>
                         </div>  &nbsp;  &nbsp;
@@ -91,26 +91,26 @@
                     <ul style="margin-top: 0;">
                         <label for="page_len">
                             <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
-                                {% ifequal page_len '2' %}
-                                    <option value="2" selected>2</option>
-                                {% else %}
-                                    <option value="2">2</option>
-                                {% endifequal %}
-                                {% ifequal page_len '10' %}
-                                    <option value="10" selected>10</option>
-                                {% else %}
-                                    <option value="10">10</option>
-                                {% endifequal %}
-                                {% ifequal page_len '20' %}
-                                    <option value="20" selected>20</option>
-                                {% else %}
-                                    <option value="20">20</option>
-                                {% endifequal %}
-                                {% ifequal page_len '50' %}
-                                    <option value="50" selected>50</option>
-                                {% else %}
-                                    <option value="50">50</option>
-                                {% endifequal %}
+                            {% ifequal page_len '2' %}
+                                <option value="2" selected>2</option>
+                            {% else %}
+                                <option value="2">2</option>
+                            {% endifequal %}
+                            {% ifequal page_len '10' %}
+                                <option value="10" selected>10</option>
+                            {% else %}
+                                <option value="10">10</option>
+                            {% endifequal %}
+                            {% ifequal page_len '20' %}
+                                <option value="20" selected>20</option>
+                            {% else %}
+                                <option value="20">20</option>
+                            {% endifequal %}
+                            {% ifequal page_len '50' %}
+                                <option value="50" selected>50</option>
+                            {% else %}
+                                <option value="50">50</option>
+                            {% endifequal %}
                             </select>
                         </label>
                     </ul>
@@ -140,14 +140,7 @@
 
   function change_info(){
         var args = $("#pbossOrderStatusForm").serialize();
-
-        starttimepicker = document.getElementById('start-picker').value;
-        endtimepicker = document.getElementById('end-picker').value;
-        if (starttimepicker && endtimepicker) {
-            window.location = "{% url 'pbossOrderStatusSearch' %}?starttime="+starttimepicker+"&endtime="+endtimepicker+"";
-        }else{
-            window.location = "{% url 'pbossOrderStatus' %}?" + args
-        }
+        window.location = "{% url 'pbossOrderStatusSearch' %}?" + args
     }
 </script>
 
