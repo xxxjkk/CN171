@@ -19,10 +19,18 @@ config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
 
 
 # 连接构建服务器
-def ssh_connect():
-    hostname = config.get('Ansible', 'ansible_host')
-    username = config.get('Ansible', 'ansible_user')
-    password = config.get('Ansible', 'ansible_password')
+def ssh_connect(conntarget):
+    if conntarget == "Ansible":
+        hostname = config.get('Ansible', 'ansible_host')
+        username = config.get('Ansible', 'ansible_user')
+        password = config.get('Ansible', 'ansible_password')
+    elif conntarget == "PBOSS":
+        hostname = config.get('PBOSS', 'pboss_order_host')
+        username = config.get('PBOSS', 'pboss_order_user')
+        password = config.get('PBOSS', 'pboss_order_password')
+    else:
+        print(conntarget + "not find!")
+        exit()
     try:
         ssh_fd = paramiko.SSHClient()
         ssh_fd.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -45,7 +53,8 @@ def ssh_close(ssh_fd):
 
 # 单个中心执行函数
 def domainExecuteOne(exec_cmd):
-    sshd = ssh_connect()
+    conntarget = "Ansible"
+    sshd = ssh_connect(conntarget)
     stdin, stdout, stderr = ssh_exec_cmd(sshd, exec_cmd)
     err_list = stderr.readlines()
     if len(err_list) > 0:
@@ -57,3 +66,32 @@ def domainExecuteOne(exec_cmd):
         print(item)
     ssh_close(sshd)
 
+
+#PBOSS订单生成函数
+def pbossOrderMake(type):
+    conntarget = "PBOSS"
+    sshd = ssh_connect(conntarget)
+    script = config.get('PBOSS', 'pboss_order_script')
+
+    #根据不同类型执行不同的生成命令
+    if type == 'status':
+        exec_cmd = script + ""
+    elif type == 'node':
+        exec_cmd = script + ""
+    elif type == 'rollback':
+        exec_cmd = script + ""
+    else:
+        print("未找到对应类型！")
+        return "失败"
+
+    stdin, stdout, stderr = ssh_exec_cmd(sshd, exec_cmd)
+    err_list = stderr.readlines()
+    if len(err_list) > 0:
+        print('Start failed:' + err_list[0])
+        return "失败"
+    else:
+        print('Start success.')
+    for item in stdout.readlines():
+        print(item)
+    ssh_close(sshd)
+    return "成功"

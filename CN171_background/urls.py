@@ -7,4 +7,7 @@ urlpatterns = [
     url(r'^task_management/', backgroundviews.taskManagement, name='taskManagement'),
     url(r'^taskExecuteOne/', backgroundviews.taskExecuteOne, name='taskExecuteOne'),
     url(r'^batchTaskStart/', backgroundviews.batchTaskStart, name='batchTaskStart'),
+    url(r'^taskEdit/(?P<bg_id>\d+)/$', backgroundviews.taskEdit, name='taskEdit'),
+    url(r'^taskAdd/$', backgroundviews.taskAdd, name='taskAdd'),
+    url(r'^taskDel/$', backgroundviews.taskDel, name='taskDel'),
 ]

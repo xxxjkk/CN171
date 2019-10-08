@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'CN171_config',
     'CN171_login',
     'CN171_monitor',
+    'CN171_order',
 ]
 
 MIDDLEWARE = [

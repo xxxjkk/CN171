@@ -46,3 +46,22 @@ def pages(post_objects, request):
 
     # 所有对象， 分页器， 本页对象， 所有页码， 本页页码，是否显示第一页，是否显示最后一页
     return paginator, page_objects, page_range, current_page, show_first, show_end, end_page, page_len
+
+
+
+
+def get_object(model, **kwargs):
+    """
+    use this function for query
+    使用改封装函数查询数据库
+    """
+    for value in kwargs.values():
+        if not value:
+            return None
+
+    the_object = model.objects.filter(**kwargs)
+    if len(the_object) == 1:
+        the_object = the_object[0]
+    else:
+        the_object = None
+    return the_object

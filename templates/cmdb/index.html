@@ -128,7 +128,7 @@
                             </thead>
                             <tbody>
                                     <tr class="even gradeX">
-                                        <td><input type="checkbox" id="id" class="i-checks"" name="id" /></td>
+                                        <td><input type="checkbox" id="id" class="i-checks" name="id" /></td>
                                         <td>
                                             <span id="node_" class="fa fa-circle" aria-hidden="true" style="color: lightgray" data-toggle="tooltip" data-placement="right" title="Unknow"></span>
                                         </td>
@@ -140,7 +140,7 @@
                                         <td class="text-center" data-editable='false'>
                                             <div align="center">&nbsp;&nbsp;&nbsp;&nbsp;
                                             <a id="assetedit" style="display: none; float:left; margin: auto;" href="#" class="btn btn-sm btn-info" onclick="">编辑</a>
-{#                                            <a id="assetdel" class="btn btn-sm btn-danger" style="display: none;float:left; margin: auto;">删除</a>#}
+<!--                                            <a id="assetdel" class="btn btn-sm btn-danger" style="display: none;float:left; margin: auto;">删除</a>-->
                                             </div>
                                         </td>
                                         </tr>
@@ -261,7 +261,7 @@ function asset_import(){
 <script>
     function change_info(){
         var args = $("#asset_form").serialize();
-        window.location = "{% url 'cmdb' %}?" + args
+        window.location = "{% url 'hostManagement' %}?" + args
     }
 
     function export_excel(){
@@ -269,13 +269,13 @@ function asset_import(){
         if (asset_id_all == ''){
             if(confirm('您没有勾选，是否导出全部信息？')){
                 var args = $("#asset_form").serialize();
-                window.location = "{% url 'cmdb' %}?export=all&" + args
+                window.location = "{% url 'hostManagement' %}?export=all&" + args
                 }else{
                     return false;
                 }
             }else{
                 var args = $("#asset_form").serialize();
-                window.location = "{% url 'cmdb' %}?export=true&" + args
+                window.location = "{% url 'hostManagement' %}?export=true&" + args
             }
     }
     $("#search_input").keydown(function(e) {

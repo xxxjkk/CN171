@@ -24,7 +24,7 @@ class User(models.Model):
     acc_user_mobile = models.CharField(max_length=30, null=True, blank=True)
 
     def __str__(self):
-        return self.name
+        return self.acc_user_name
 
     class Meta:
         verbose_name = '用户'

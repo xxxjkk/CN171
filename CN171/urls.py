@@ -20,5 +20,6 @@ urlpatterns = [
       url(r'^account/', include('CN171_account.urls')),
       url(r'^config/', include('CN171_config.urls')),
       url(r'^monitor/', include('CN171_monitor.urls')),
+      url(r'^order/', include('CN171_order.urls')),
 
 ]

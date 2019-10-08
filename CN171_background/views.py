@@ -5,10 +5,12 @@ import threading
 from django.http import HttpResponse
 from django.shortcuts import render
 from CN171_background import models
-from CN171_background.api import pages
+from CN171_background.api import pages,get_object
 from django.shortcuts import render, redirect
 from CN171_background.models import BgTaskManagement, BgTaskLog
 from CN171_tools import connecttool
+from CN171_background.forms import BgForm
+from django.db.models import Q
 from datetime import datetime
 
 # Create your views here.
@@ -20,9 +22,20 @@ from CN171_tools.connecttool import ssh_close, ssh_connect, ssh_exec_cmd
 def taskManagement(request):
     # 获取所有后台对象
     # page_len = request.GET.get('page_len', '')
-    task_list = models.BgTaskManagement.objects.all()
-    p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(
-        task_list, request)
+    task_list=[]
+    keyword = request.GET.get("keyword","")
+    if keyword:
+        task_list=models.BgTaskManagement.objects.filter(
+            Q(bg_module__icontains = keyword ) |
+            Q(bg_domain__icontains = keyword ) |
+            Q(bg_status__icontains = keyword)  |
+            Q(bg_lastopr_user__icontains = keyword) |
+            Q(bg_lastopr_type__icontains =keyword)  |
+            Q(bg_lastopr_result__icontains= keyword)
+        )
+    else:
+        task_list = models.BgTaskManagement.objects.all()
+    p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(task_list, request)
     return render(request, "background/task_management.html", locals())
 
 
@@ -138,3 +151,55 @@ class MyThread(threading.Thread):
             return self.result
         except Exception as e:
             return None
+
+#后台中心编辑函数
+def taskEdit(request, bg_id):
+    status = 0
+    obj = get_object(BgTaskManagement, bg_id=bg_id)
+
+    if request.method == 'POST':
+        bgform = BgForm(request.POST, instance=obj)
+        if bgform.is_valid():
+            bgform.save()
+            status = 1
+        else:
+            status = 2
+    else:
+        bgform = BgForm(instance=obj)
+    return render(request, 'background/task_edit.html', locals())
+
+#后台中心添加函数
+def taskAdd(request):
+    status = 0
+    if request.method == "POST":
+        bgform = BgForm(request.POST)
+        if bgform.is_valid():
+            bgform.save()
+            status = 1
+            tips = u"新增成功！"
+            display_control = ""
+        else:
+            status = 2
+            tips = u"新增失败！"
+            display_control = ""
+        return render(request, "background/task_add.html", locals())
+    else:
+        display_control = "none"
+        bgform = BgForm()
+        return render(request, "background/task_add.html", locals())
+
+#后台中心删除函数
+def taskDel(request):
+    bg_id = request.GET.get('bg_id', '')
+    if bg_id:
+        BgTaskManagement.objects.filter(bg_id=bg_id).delete()
+
+    if request.method == 'POST':
+        bg_batch = request.GET.get('arg', '')
+        bg_id_all = str(request.POST.get('bg_id_all', ''))
+
+        if bg_batch:
+            for bg_id in bg_id_all.split(','):
+                bg_item = get_object(BgTaskManagement, bg_id=bg_id)
+                bg_item.delete()
+    return HttpResponse(u'删除成功')
