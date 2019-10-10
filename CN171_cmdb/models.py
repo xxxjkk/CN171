@@ -76,3 +76,20 @@ class CmdbAppNetmode(models.Model):
         verbose_name = '组网'
         verbose_name_plural = '组网'
         db_table = "cmdb_app_netmode"
+
+
+class HostPwdOprLog(models.Model):
+    id = models.BigAutoField(u"主机密码操作日志ID", primary_key=True)
+    opr_user_name = models.CharField(u"操作的用户账号", max_length=128, null=True, blank=True)
+    modified_host_user = models.CharField(u"被修改的主机用户", max_length=128, null=True, blank=True)
+    opr_result = models.CharField(u"操作结果", max_length=36, null=True, blank=True)
+    opr_time = models.DateTimeField(u"操作时间", auto_now_add=True)
+    detail_log = models.TextField(u"详细日志")
+
+    def __str__(self):
+        return self.modified_host_user
+    class Meta:
+        verbose_name = "主机密码操作日志"
+        db_table ="cmdb_host_pwd_opr_log"
+
+

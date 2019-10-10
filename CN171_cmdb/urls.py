@@ -7,5 +7,5 @@ urlpatterns = [
     #url(r'^cmdb/', cmdbviews.cmdbIndex, name='cmdb'),
     url(r'^host_management/', cmdbviews.hostManagement, name='hostManagement'),
     url(r'^app_management/', cmdbviews.appManagement, name='appManagement'),
-
+    url(r'^host_pwd_opr_log/', cmdbviews.hostPwdOprLog, name='hostPwdOprLog'),
 ]
