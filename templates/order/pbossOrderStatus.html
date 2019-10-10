@@ -54,8 +54,8 @@
                         <tr>
                             <!--垂直居中：vertical-align: middle;-->
                             <th width="5%" style="text-align:center;vertical-align: middle;">区域/省份</th>
-                            <th width="8%" style="text-align:center;vertical-align: middle;">开始时间</th>
-                            <th width="8%" style="text-align:center;vertical-align: middle;">结束时间</th>
+                            <th width="8%" style="text-align:center;vertical-align: middle;">生成时间</th>
+                            <th width="5%" style="text-align:center;vertical-align: middle;">结束</th>
                             <th width="5%" style="text-align:center;vertical-align: middle;">计费反馈同步失败</th>
                             <th width="5%" style="text-align:center;vertical-align: middle;">流程启动异常</th>
                             <th width="5%" style="text-align:center;vertical-align: middle;">同步计费中</th>
@@ -65,14 +65,16 @@
                             <th width="5%" style="text-align:center;vertical-align: middle;">待施工处理</th>
                             <th width="5%" style="text-align:center;vertical-align: middle;">施工处理中</th>
                             <th width="5%" style="text-align:center;vertical-align: middle;">待同步计费</th>
+                            <th width="8%" style="text-align:center;vertical-align: middle;">开始时间</th>
+                            <th width="8%" style="text-align:center;vertical-align: middle;">结束时间</th>
                         </tr>
                       </thead>
                       <tbody>
                         {% for order in page_objects %}
                         <tr class="even gradeX">
                             <td width="5%" style="text-align:center;vertical-align: middle;">{{order.order_area}}</td>
-                            <td width="8%" style="text-align:center;vertical-align: middle;">{{order.order_starttime}}</td>
-                            <td width="8%" style="text-align:center;vertical-align: middle;">{{order.order_endtime}}</td>
+                            <td width="8%" style="text-align:center;vertical-align: middle;">{{order.order_createtime}}</td>
+                            <td width="5%" style="text-align:center;vertical-align: middle;">{{order.order_finish}}</td>
                             <td width="5%" style="text-align:center;vertical-align: middle;">{{order.order_cbbsfailed}}</td>
                             <td width="5%" style="text-align:center;vertical-align: middle;">{{order.order_startfailed}}</td>
                             <td width="5%" style="text-align:center;vertical-align: middle;">{{order.order_cbbssyncing}}</td>
@@ -82,6 +84,8 @@
                             <td width="5%" style="text-align:center;vertical-align: middle;">{{order.order_pending}}</td>
                             <td width="5%" style="text-align:center;vertical-align: middle;">{{order.order_processing}}</td>
                             <td width="5%" style="text-align:center;vertical-align: middle;">{{order.order_cbbssyncpending}}</td>
+                            <td width="8%" style="text-align:center;vertical-align: middle;">{{order.order_starttime}}</td>
+                            <td width="8%" style="text-align:center;vertical-align: middle;">{{order.order_endtime}}</td>
                         </tr>
                         {% endfor %}
                       </tbody>
