@@ -88,6 +88,13 @@ class HostPwdOprLog(models.Model):
 
     def __str__(self):
         return self.modified_host_user
+
+    def getDetailLog(self):
+        return self.detail_log
+
+    def getDetailLogId(self):
+        return self.id
+
     class Meta:
         verbose_name = "主机密码操作日志"
         db_table ="cmdb_host_pwd_opr_log"

@@ -26,7 +26,9 @@
                 <div class="box-header">
 
                     <div class="form-group form-inline input-daterange">
-
+                        <div class="btn-group">
+                            <a id="editHostUserPwd" style="display: none" href="#" class="btn btn-info" onclick="redEditHostPwdPage()"><i class="fa fa-search"></i>更改主机用户密码</a>
+                        </div> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <label>开始时间:  &nbsp;</label>
                         <input type="text" class="form-control" name="starttime" placeholder="YYYY-MM-DD hh:mm:ss" id="start-picker" readonly value="{{ starttime }}">
                         <label>  &nbsp;  &nbsp;  &nbsp;  &nbsp;结束时间:  &nbsp;</label>
@@ -60,7 +62,8 @@
                                         <td width="20%" style="text-align:center;">{{host_pwd_opr_log.modified_host_user}}</td>
                                         <td width="15%" style="text-align:center;">{{host_pwd_opr_log.opr_result}}</td>
                                         <td width="20%" style="text-align:center;">{{host_pwd_opr_log.opr_time}}</td>
-                                        <td width="15%" style="text-align:center;">详情</td>
+                                        <td width="15%" style="text-align:center;"><a href="#" onclick="detailLog('{{host_pwd_opr_log.id}}')"
+                                               style="list-style-type:none">日志详情</a></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -106,7 +109,6 @@
 <script>
 
   $(function () {
-    $("#example1").DataTable();
     $('#dataform').DataTable({
       "paging": false,
       "lengthChange": false,
@@ -122,6 +124,12 @@
         var args = $("#host_pwd_opr_log_form").serialize();
         window.location = "{% url 'hostPwdOprLog' %}?" + args
     }
+   function detailLog(logId){
+      window.location = "{% url 'hostPwdDetailLog' %}?logId=" + logId
+   }
+   function redEditHostPwdPage(){
+      window.location.href="{% url 'redEditHostPwdPage' %}";
+   }
 </script>
 
 {% endblock %}

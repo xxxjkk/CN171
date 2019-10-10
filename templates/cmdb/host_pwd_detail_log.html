@@ -1,13 +1,5 @@
 {% extends 'base.html' %}
-
-{% block self_head_css_js %}
-    <script src="/static/layer/layer.js"></script>
-    <script src="/static/js/base.js"></script>
-    <script src="/static/plugins/datatables/jquery.dataTables.min.js"></script>
-    <script src="/static/plugins/datatables/dataTables.bootstrap.min.js"></script>
-    <script src="/static/plugins/datatables/dataTables.bootstrap.css"></script>
-
-{% endblock %}
+{% block self_head_css_js %}{% endblock %}
 {% block content %}
 
 <div class="content-wrapper">
@@ -16,130 +8,31 @@
 
     <!-- Main content -->
     <section class="content">
-        <form action="" method="post" id="host_management_form">
+        <form method="post" id="host_log_form">
         {% csrf_token %}
-            <div class="box">
-                <div class="box-header">
-                    <div class="btn-group">
-						 <a id="taskstart" style="display: none" href="#" onclick="" class="btn btn-success">添加主机</a>
-                    </div>
-                    <div class="btn-group">
-                         <a id="taskstop" style="display: none" href="#" class="btn btn-success">删除主机</a>
-                    </div>
-                    <div class="btn-group">
-                         <a id="taskrestart" style="display: none" href="#" class="btn btn-success">刷新状态</a>
-                    </div>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <div class="btn-group">
-                        <a id="taskadd" class="btn btn-danger" style="display: none"  name="btn btn-info">批量导入</a>
-                    </div>
-                     <div class="btn-group">
-                        <a id="taskdel" class="btn btn-danger" style="display: none"  name="btn btn-info">批量导出</a>
-                    </div>
-                    <div class="input-group inline-group col-md-3" style="float: right">
-                                <input type="text" class="form-control" id="search_input" name="keyword" value="{{keyword}}" placeholder="Search">
-                                <div class="input-group-btn">
-                                    <button type="button" class="btn btn-primary "  onclick="change_info()">搜索</button>
-                                </div>
-                     </div>
-                </div>
+            <div class="box" align="center">
+                <div class="box-header"></div>
                 <!-- /.box-header -->
-
                 <div class="box-body">
-                  <table class="table table-striped table-bordered" id="dataform">
-                      <thead>
-                        <tr>
-                            <th width="10%" style="text-align:center;">
-                                <input id="checkall" type="checkbox" class="i-checks" name="checkall" value="checkall" data-editable='false' onclick="">
-                            </th>
-                                    <th width="20%" style="text-align:center;">主机名</th>
-                                    <th width="10%" style="text-align:center;">类型</th>
-                                    <th width="10%" style="text-align:center;">资源池</th>
-                                    <th width="10%" style="text-align:center;">业务IP</th>
-                                    <th width="10%" style="text-align:center;">管理IP</th>
-                                    <th width="10%" style="text-align:center;">模块</th>
-                                    <th width="10%" style="text-align:center;">中心</th>
-                                    <th width="10%" style="text-align:center;">状态</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for host in page_objects %}
-                                <tr class="even gradeX">
-                                        <td width="10%" style="text-align:center;">
-                                            <input type="checkbox" id="id" class="i-checks" name="id"/>
-                                        </td>
-                                        <td width="24%" style="text-align:center;">
-                                            <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','start')"
-                                               style="list-style-type:none">{{host.cmdb_host_name}}</a>
-                                        </td>
-                                        <td width="10%" style="text-align:center;">{{host.cmdb_host_type}}</td>
-                                        <td width="10%" style="text-align:center;">{{host.cmdb_host_pod}}</td>
-                                        <td width="13%" style="text-align:center;">{{host.cmdb_host_busip}}</td>
-                                        <td width="13%" style="text-align:center;">{{host.cmdb_host_manip}}</td>
-                                        <td width="10%" style="text-align:center;">{{host.cmdb_host_manip}}</td>
-                                        <td width="10%" style="text-align:center;">{{host.cmdb_host_manip}}</td>
-                                        <td width="10%" style="text-align:center;">{{host.cmdb_host_status}}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                  </table>
-                <div class="row" style="width: auto">
-                    {% include 'paginator.html' %}
-                    <ul style="margin-top: 0;">
-                    <label for="page_len">
-                      <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
-                        {% ifequal page_len '2' %}
-                            <option value="2" selected>2</option>
-                        {% else %}
-                            <option value="2">2</option>
-                        {% endifequal %}
-                        {% ifequal page_len '10' %}
-                            <option value="10" selected>10</option>
-                        {% else %}
-                            <option value="10">10</option>
-                        {% endifequal %}
-                        {% ifequal page_len '20' %}
-                            <option value="20" selected>20</option>
-                        {% else %}
-                            <option value="20">20</option>
-                        {% endifequal %}
-                        {% ifequal page_len '50' %}
-                            <option value="50" selected>50</option>
-                        {% else %}
-                            <option value="50">50</option>
-                        {% endifequal %}
-                    </select>
-                 </label>
-            </ul>
-                </div>
+                 {{detailLogForm.as_p}}
                </div>
+                <a href="#"><li style="width: 60pt" class="btn btn-primary" onclick="exportTxt()">导出</li></a>&nbsp;&nbsp;&nbsp;
+                <a href="#"><li style="width: 60pt" class="btn btn-primary" onclick="returnPrePage()">返回</li></a>
+                <br/><br/>
             </div>
         </form>
     </section>
 <!-- /.content -->
-{#用于接收asset_edit.html中layui子层的传值#}
-<input id="handle_status" value="" hidden="hidden">
 </div>
 
 <script>
-
-  $(function () {
-    $("#example1").DataTable();
-    $('#dataform').DataTable({
-      "paging": false,
-      "lengthChange": false,
-      "searching": false,
-      "ordering": true,
-      "info": false,
-      "bAutoWidth": false,
-      "bStateSave": true
-    });
-  });
-
-  function change_info(){
-        var args = $("#host_management_form").serialize();
-        window.location = "{% url 'hostManagement' %}?" + args
-    }
+  function returnPrePage(){
+     {# document.referrer  上一页的url，location.href  本页的url，location.search href  ？后面的参数  #}
+      window.location.href=document.referrer;
+  }
+  function exportTxt(){
+  window.location = "{% url 'hostPwdDetailLog' %}?flag="+1+"&logId="+'{{logId}}';
+  }
 </script>
 
 {% endblock %}
