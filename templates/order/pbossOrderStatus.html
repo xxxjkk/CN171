@@ -144,7 +144,13 @@
 
   function change_info(){
         var args = $("#pbossOrderStatusForm").serialize();
-        window.location = "{% url 'pbossOrderStatusSearch' %}?" + args
+        starttimepicker = document.getElementById('start-picker').value;
+        endtimepicker = document.getElementById('end-picker').value;
+        if (starttimepicker && endtimepicker) {
+            window.location = "{% url 'pbossOrderStatusSearch' %}?" + args;
+        }else{
+            window.location = "{% url 'pbossOrderStatus' %}?" + args;
+        }
     }
 </script>
 
@@ -154,9 +160,12 @@
         endtimepicker = document.getElementById('end-picker').value;
         if (starttimepicker && endtimepicker) {
             window.location = "{% url 'pbossOrderStatusSearch' %}?starttime="+starttimepicker+"&endtime="+endtimepicker+"";
+        }else if (starttimepicker){
+            alert("结束时间不能为空!");
+        }else if (endtimepicker){
+            alert("开始时间不能为空!");
         }else{
-            msg = "开始/结束时间不能为空!";
-            alert(msg);
+            window.location = "{% url 'pbossOrderStatus' %}?";
         }
     }
 </script>
