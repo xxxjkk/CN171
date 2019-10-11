@@ -6,7 +6,9 @@
     <script src="/static/plugins/datatables/jquery.dataTables.min.js"></script>
     <script src="/static/plugins/datatables/dataTables.bootstrap.min.js"></script>
     <script src="/static/plugins/datatables/dataTables.bootstrap.css"></script>
-
+	<link rel="stylesheet" href="/static/CSS/ladda-themeless.min.css">
+    <script src="/static/JS/spin.min.js"></script>
+	<script src="/static/JS/ladda.min.js"></script>
 {% endblock %}
 {% block content %}
 
@@ -23,16 +25,16 @@
             <div class="box">
                 <div class="box-header">
                     <div class="btn-group">
-						 <a id="taskstart" style="display: none" href="#" onclick="checkSubmitBatch('确定启动所有√选的中心吗？')" class="btn btn-success">启动</a>
+						 <a id="taskstart" style="display: none" href="#" onclick="checkSubmitBatch('确定停止所有√选的中心吗？')" class="btn btn-success">启动</a>
                     </div>
                     <div class="btn-group">
-                         <a id="taskstop" style="display: none" href="#" class="btn btn-success">停止</a>
+                         <a id="taskstop" style="display: none" href="#" onclick="checkSubmitStop('确定停止所有√选的中心吗？')"  class="btn btn-success">停止</a>
                     </div>
                     <div class="btn-group">
-                         <a id="taskrestart" style="display: none" href="#" class="btn btn-success">重启</a>
+                         <a id="taskrestart" style="display: none" href="#" onclick="checkRebootBatch('确定重启所有√选的中心吗？')"  class="btn btn-success">重启</a>
                     </div>
                     <div class="btn-group">
-                         <a id="status_flush" style="display: none" href="#" class="btn btn-success">刷新状态</a>
+                         <a id="status_flush" style="display: none" href="#" onclick="reload()"  class="btn btn-success">刷新状态</a>
                     </div>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <div class="btn-group">
@@ -82,6 +84,8 @@
                                                 <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:red;"></label>
                                             {% elif task.bg_status == '停止' %}
                                                 <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:gray;"></label>
+                                            {% elif task.bg_status == '进行中' %}
+                                                <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:orange;"></label>
                                             {% endif %}
                                             &nbsp;{{task.bg_status}}
                                         </td>
@@ -187,11 +191,113 @@ function checkSubmitBatch(a) {
                         csrfmiddlewaretoken: '{{ csrf_token }}'
                     },
                     'traditional': true,
-                    success: function (msg) {
-                        location.reload()
+                    success:function(msg){
+                           if(msg.ret=='true'){
+                               alert("启动成功！");
+                               location.reload(true);
+                           }
+                           else{
+                                alert("启动失败,请核查后重试！");
+                           }
                     }
                 });
     }
+}
+
+function checkSubmitStop(a) {
+    if (!confirm(a)) {
+        window.event.returnValue = false;
+    }else{
+    //将所有复选框的默认值放入id数组中
+                var id = document.getElementsByName('id');
+                var ids = [];
+                //将所有选中复选框的默认值写入到id数组中
+                for (var i = 0; i < id.length; i++) {
+                    if (id[i].checked){
+                        ids.push(id[i].value);
+                      }
+                }
+                console.log(ids);
+                //ajax开始运行
+                $.ajax({
+                    url: '{% url 'batchTaskStop' %}',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        ids: ids,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    'traditional': true,
+                    success:function(msg){
+                           if(msg.ret=='true'){
+                               alert("停止成功！");
+                               location.reload(true);
+                           }
+                           else{
+                                alert("操作失败,请核查后重试！");
+                           }
+                    }
+                });
+    }
+}
+
+function checkRebootBatch(a) {
+    if (!confirm(a)) {
+        window.event.returnValue = false;
+    }else{
+    //将所有复选框的默认值放入id数组中
+                var id = document.getElementsByName('id');
+                var ids = [];
+                //将所有选中复选框的默认值写入到id数组中
+                for (var i = 0; i < id.length; i++) {
+                    if (id[i].checked){
+                        ids.push(id[i].value);
+                      }
+                }
+                console.log(ids);
+                //ajax开始运行
+                $.ajax({
+                    url: '{% url 'batchTaskReboot' %}',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        ids: ids,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    'traditional': true,
+                    success:function(msg){
+                           if(msg.ret=='true'){
+                               alert("操作成功！");
+                               location.reload(true);
+                           }
+                           else{
+                                alert("操作失败,请核查后重试！");
+                           }
+                    }
+                });
+    }
+}
+
+function reload(){
+    $.ajax({
+                    url: '{% url 'reLoad' %}',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    'traditional': true,
+                    success:function(msg){
+                           if(msg.ret=='true'){
+                               alert("刷新成功！");
+                               location.reload(true);
+                           }
+                           else{
+                                alert("刷新失败,请核查后重试！");
+                           }
+                    }
+                });
+
 }
 
 
