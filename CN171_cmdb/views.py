@@ -7,9 +7,8 @@ from CN171_background.api import pages
 from django.shortcuts import render, redirect
 from CN171_cmdb.models import CmdbHost,CmdbApp,HostPwdOprLog
 from CN171_cmdb.forms import DetailLogForm, HostPwdEditForm
-from CN171_background.api import pages,get_object
-import csv,datetime
-
+from CN171_background.api import pages
+from CN171_tools.common_api import export_download_txt
 
 # Create your views here.
 
@@ -73,11 +72,10 @@ def hostPwdDetailLog(request):
         flag = request.GET.get("flag")
         obj1 = HostPwdOprLog.objects.get(id= logId)
         if flag == '1':
-            now = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M')
-            file_name = 'host_pwd_detail_log_' + now + '.txt'
-            text_save(file_name ,obj1.detail_log)
+            return  export_download_txt(obj1.detail_log)
         detailLogForm = DetailLogForm(instance=obj1)
         return render(request, "cmdb/host_pwd_detail_log.html", locals())
+
 
 #跳转到主机用户密码修改页面
 def redEditHostPwdPage(request):
