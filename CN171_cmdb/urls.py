@@ -8,4 +8,7 @@ urlpatterns = [
     url(r'^host_management/', cmdbviews.hostManagement, name='hostManagement'),
     url(r'^app_management/', cmdbviews.appManagement, name='appManagement'),
     url(r'^host_pwd_opr_log/', cmdbviews.hostPwdOprLog, name='hostPwdOprLog'),
+    url(r'^host_pwd_detail_log/', cmdbviews.hostPwdDetailLog, name = 'hostPwdDetailLog'),
+    url(r'^host_pwd_edit_page/',cmdbviews.redEditHostPwdPage, name='redEditHostPwdPage'),
+    url(r'^host_pwd_edit/',cmdbviews.editHostPwd, name='editHostPwd'),
 ]
