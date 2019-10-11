@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block self_head_css_js %}{% endblock %}
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h4>主机密码修改页面</h4>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <form action="{% url 'editHostPwd' %}" method="post" id="host_pwd_edit_form">
+        {% csrf_token %}
+            <div class="box" align="left">
+                <div class="box-header"></div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                 {{form.as_p}}
+               </div>
+                <input type="submit" class="btn btn-primary" style="width: 60pt" value="修改">&nbsp;&nbsp;
+                <input  class="btn btn-primary" style="width: 60pt" value="取消">
+                <br/><br/>
+            </div>
+        </form>
+    </section>
+<!-- /.content -->
+</div>
+
+<script>
+    function editHostPwd(){
+        var args = $("#host_pwd_edit_form").serialize();
+        window.location = "{% url 'editHostPwd' %}?" + args
+    }
+
+</script>
+
+{% endblock %}
