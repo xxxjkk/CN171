@@ -1,4 +1,10 @@
 {% extends 'base.html' %}
+
+{% block self_head_css_js %}
+    <link href="/static/CSS/flip.css" rel="stylesheet">
+    <link href="/static/CSS/index.css" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 
   <div class="content-wrapper">
@@ -11,7 +17,92 @@
     <section class="content">
     <div>
         <div class="box-body" >
-
+            <div class="title-top">
+                <h1>物&nbsp;&nbsp;&nbsp;联&nbsp;&nbsp;&nbsp;网&nbsp;&nbsp;&nbsp;运&nbsp;&nbsp;&nbsp;维&nbsp;&nbsp;&nbsp;平&nbsp;&nbsp;&nbsp;台&nbsp;&nbsp;&nbsp;CN171</h1>
+                <h1><span>需求定制化</span><span>运维自助化</span><span>数据可视化</span></h1>
+            </div>
+            <div class="mainContent3-center">
+					<div class="flip-container " ontouchstart="this.classList.toggle('hover');">
+						<div class="flipper">
+							<div class="side front" align="center">
+								<dl>
+									<dt><img src="/static/images/flip-cmdb.png" alt="资产管理"></dt>
+								</dl>
+                                <dd>资产管理</dd>
+							</div>
+							<div class="side back">
+                                <a href="/cmdb/host_management/">主机管理</a>
+                                <p>主要针对主机资源的主机名、类型、资源池、业务/管理IP、归属模块、归属中心、状态进行展示。</p>
+                                <a href=#>密码管理</a>
+                                <p>主要针对主机的密码进行批量变更操作，并记录每次密码操作的详细信息。</p>
+                                <a href="/cmdb/app_management/">应用管理</a>
+                                <p>主要针对应用资源的网元名、归属模块、归属中心、组网类型、归属主机、业务IP、状态进行展示。</p>
+							</div>
+						</div>
+                    </div>
+                    <div class="flip-container " ontouchstart="this.classList.toggle('hover');">
+                        <div class="flipper">
+							<div class="side front" align="center">
+								<dl>
+									<dt><img src="/static/images/flip-background.png" alt="后台管理"></dt>
+								</dl>
+                                <dd>后台管理</dd>
+							</div>
+							<div class="side back">
+                                <a href="/background/task_management/">后台管理</a>
+                                <p>主要针对CMIOT系统的各个模块中心进行启动、停止、重启、状态查询等操作。</p>
+                                <a href=#>定时任务管理</a>
+                                <p>主要针对……</p>
+							</div>
+						</div>
+                    </div>
+                    <div class="flip-container " ontouchstart="this.classList.toggle('hover');">
+                        <div class="flipper">
+							<div class="side front" align="center">
+								<dl>
+									<dt><img src="/static/images/flip-monitor.png" alt="监控管理"></dt>
+								</dl>
+                                <dd>监控管理</dd>
+							</div>
+							<div class="side back">
+                                <a href=#>网络拓扑</a>
+                                <p>主要针对……</p>
+                            </div>
+						</div>
+                    </div>
+                    <div class="flip-container " ontouchstart="this.classList.toggle('hover');">
+                        <div class="flipper">
+							<div class="side front" align="center">
+								<dl>
+									<dt><img src="/static/images/flip-order.png" alt="订单管理"></dt>
+								</dl>
+                                <dd>订单管理</dd>
+							</div>
+							<div class="side back">
+                                <a href="/order/pbossOrderStatus/">订单状态（PBOSS）</a>
+                                <p>主要针对PBOSS系统的不同状态订单情况进行监测，包括按开始时间/结束时间生成统计数据、搜索展示、导出数据。</p>
+                                <a href="/order/pbossOrderNode/">订单节点（PBOSS）</a>
+                                <p>主要针对PBOSS系统的不同节点订单情况进行监测，包括按开始时间/结束时间生成统计数据、搜索展示、导出数据。</p>
+                                <a href="/order/pbossOrderRollback/">订单回退（PBOSS）</a>
+                                <p>主要针对PBOSS系统的回退订单情况进行监测，包括按开始时间/结束时间生成统计数据、搜索展示、导出数据。</p>
+							</div>
+						</div>
+                    </div>
+                    <div class="flip-container " ontouchstart="this.classList.toggle('hover');">
+                        <div class="flipper">
+							<div class="side front" align="center">
+								<dl>
+									<dt><img src="/static/images/flip-aiops.png" alt="智能运维"></dt>
+								</dl>
+                                <dd>智能运维</dd>
+							</div>
+							<div class="side back">
+                                <a href=#>容量预测</a>
+                                <p>主要针对系统业务和容量进行周期性的统计分析，利用LSTM算法进行系统容量预测。</p>
+							</div>
+						</div>
+                    </div>
+            </div>
         </div>
         <!-- /.box-body -->
         <!-- /.box-footer-->

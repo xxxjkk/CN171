@@ -1,0 +1,44 @@
+
+h1{ font-family:”Microsoft JhengHei”}
+
+body{font:12px"微软雅黑","Arial Narrow",HELVETICA;-webkit-text-size-adjust:100%;}
+a{color:#2d374b;text-decoration:none}
+img{border:0;vertical-align:middle}
+
+.title-top{
+	color:#fff;
+	text-align:center;
+	height: 150px;
+}
+
+.title-top h1{
+	box-sizing: border-box;
+	color: #3F4F7C;
+	font-size: 32px;
+	height: 60px;
+}
+
+.title-top span{
+	display: inline-block;
+	color: #3F4F7C;
+	font-size: 24px;
+}
+.title-top span:after{
+	content: "";
+	display: inline-block;
+	width: 5px;
+	height: 5px;
+	border-radius: 5px;
+	background: #7484A5;
+	margin: 0 15px;
+	vertical-align: middle;
+}
+.title-top span:last-child:after{
+	width:0;
+	height:0;
+}
+.title-top p{
+	display: inline-block;
+	color: #3F4F7C;
+	font-size: 16px;
+}
