@@ -8,9 +8,10 @@ from django.shortcuts import render
 from CN171_background import models
 from CN171_background.api import pages,get_object
 from django.shortcuts import render, redirect
+
+from CN171_background.forms import BgForm
 from CN171_background.models import BgTaskManagement, BgTaskLog
 from CN171_tools import connecttool
-from CN171_background.forms import BgForm
 from django.db.models import Q
 from datetime import datetime
 
@@ -592,21 +593,11 @@ def taskLogSearch(request):
 
 
 #后台日志详情页面
-def taskLogDetail(request, bg_log_id):
-    status = 0
+def taskLogDetail(request):
+    bg_log_id = request.GET.get("bg_log_id")
     obj = get_object(BgTaskLog, bg_log_id=bg_log_id)
     log_dir = obj.bg_log_dir
-    with open('log_dir', 'r') as f:
-        print(f.read())
-        log = f.read()
-    if request.method == 'POST':
-        bgform = BgForm(request.POST, instance=obj)
-        if bgform.is_valid():
-            bgform.save()
-            status = 1
-        else:
-            status = 2
-    else:
-        bgform = BgForm(instance=obj)
-    return render(request, 'background/task_edit.html', locals())
+    with open(log_dir, 'r') as f:
+         log = f.read()
+    return render(request, 'background/task_log_detail.html', locals(),{'log':log})
 
