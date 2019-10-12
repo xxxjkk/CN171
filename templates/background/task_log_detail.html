@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block self_head_css_js %}{% endblock %}
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h4>后台日志详情</h4>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <form method="post" id="task_log_form">
+        {% csrf_token %}
+            <div class="box" align="center">
+                <div class="box-header"></div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                 {{log}}
+               </div>&nbsp;&nbsp;&nbsp;
+                <a href="#"><li style="width: 60pt" class="btn btn-primary" onclick="returnPrePage()">返回</li></a>
+                <br/>
+                    <span id="exportTxtSpanId" style="color:red;display:none">1111</span>
+                <br/><br/>
+            </div>
+        </form>
+    </section>
+<!-- /.content -->
+</div>
+
+<script>
+
+  function returnPrePage(){
+     {# document.referrer  上一页的url，location.href  本页的url，location.search href  ？后面的参数  #}
+      window.location.href=document.referrer;
+  }
+
+</script>
+
+{% endblock %}

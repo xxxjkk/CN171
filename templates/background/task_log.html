@@ -171,6 +171,10 @@ function detail(n){
     content: ['/cmdb/asset/detail/' + n]
   });
 }
+
+function taskLogDetail(logId){
+      window.location = "{% url 'taskLogDetail' %}?bg_log_id=" + logId
+   }
 </script>
 
 {% endblock %}
