@@ -64,13 +64,13 @@
                             <tbody>
                                 {% for log_dict in page_objects %}
                                 <tr class="even gradeX">
-                                        <td width="7%" style="text-align:center;">{{log_dict.bg_log_id}}</td>
-                                        <td width="7%" style="text-align:center;">{{log_dict.bg_module}}</td>
-                                        <td width="12%" style="text-align:center;">{{log_dict.bg_domain}}</td>
+                                        <td width="8%" style="text-align:center;"><span class="numberClass"></span></td>
+                                        <td width="8%" style="text-align:center;">{{log_dict.bg_module}}</td>
+                                        <td width="8%" style="text-align:center;">{{log_dict.bg_domain}}</td>
                                         <td width="8%" style="text-align:center;">{{log_dict.bg_operation_user}}</td>
-                                        <td width="12%" style="text-align:center;">{{log_dict.bg_operation}}</td>
+                                        <td width="8%" style="text-align:center;">{{log_dict.bg_operation}}</td>
                                         <td width="12%" style="text-align:center;">{{log_dict.bg_opr_result}}</td>
-                                        <td width="12%" style="text-align:center;">{{log_dict.bg_operation_time}}</td>
+                                        <td width="18%" style="text-align:center;">{{log_dict.bg_operation_time}}</td>
                                         <td width="18%" style="text-align:center;">
                                             <a href="#" style="list-style-type:none" onclick="return taskLogDetail({{log_dict.bg_log_id}})">详细日志</a>
                                         </td>
@@ -116,6 +116,14 @@
 <input id="handle_status" value="" hidden="hidden">
 </div>
 <script>
+$(function(){
+     function number(){
+          for(var i=0;i< $(".numberClass").length;i++){
+	      $(".numberClass").get(i).innerHTML = i+1;
+          }
+     }
+     number();
+});
     function searchTaskLog(){
         var args = $("#task_log_form").serialize();
         starttimepicker = document.getElementById('start-picker').value;
