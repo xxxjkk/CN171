@@ -1,9 +1,10 @@
 # -*-coding:utf-8 -*-
 import os
+import re
 import sys
 import threading
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, FileResponse
 from django.shortcuts import render
 from CN171_background import models
 from CN171_background.api import pages,get_object
@@ -599,5 +600,16 @@ def taskLogDetail(request):
     log_dir = obj.bg_log_dir
     with open(log_dir, 'r') as f:
          log = f.read()
-    return render(request, 'background/task_log_detail.html', locals(),{'log':log})
-
+    return render(request, 'background/task_log_detail.html', locals(),{'log':log,'log_dir':log_dir})
+#文件下载
+def downloadTaskLog(request):
+    log_dir = request.GET.get("log_dir")
+    file=open(log_dir,'rb')
+    downfilename = re.findall(r"log\\(.+?).log", log_dir)
+    filename = str(downfilename[0])+".log"
+    response =FileResponse(file)
+    response['Content-Type']='application/octet-stream'
+    #response['Content-Disposition']='attachment;filename="downfilename.log"'
+    #response['Content-Disposition'] = 'attachment;filename=' + downfilename
+    response['Content-Disposition'] = 'attachment;filename="{}"'.format(filename)
+    return response

@@ -16,4 +16,5 @@ urlpatterns = [
     url(r'^task_log/', backgroundviews.taskLog, name='taskLog'),
     url(r'^reLoad/', backgroundviews.reLoad, name='reLoad'),
     url(r'^taskLogDetail/', backgroundviews.taskLogDetail, name='taskLogDetail'),
+    url(r'^downloadTaskLog/', backgroundviews.downloadTaskLog, name='downloadTaskLog'),
 ]
