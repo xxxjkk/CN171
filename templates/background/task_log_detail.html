@@ -18,11 +18,11 @@
                 <div class="box-body">
                  {{log}}
                </div>&nbsp;&nbsp;&nbsp;
-                <a href="{% url 'downloadTaskLog' %}?log_dir={{log_dir}}"><li style="width: 60pt" class="btn btn-primary">导出</li></a>
-                <a href="#"><li style="width: 60pt" class="btn btn-primary" onclick="returnPrePage()">返回</li></a>
-                <br/>
-                    <span id="exportTxtSpanId" style="color:red;display:none">1111</span>
-                <br/><br/>
+                <span id="exportTxtSpanId" style="color:red;display:none">1111</span>
+            </div>
+            <div align="center">
+            <a href="{% url 'downloadTaskLog' %}?log_dir={{log_dir}}"><li style="width: 60pt" class="btn btn-primary">导出</li></a>
+            <a href="#"><li style="width: 60pt" class="btn btn-primary" onclick="returnPrePage()">返回</li></a>
             </div>
         </form>
     </section>
@@ -36,8 +36,6 @@
       window.location.href=document.referrer;
   }
 function downloadTaskLog(log_dir){
-      alert(log_dir);
-
       window.location = "{% url 'downloadTaskLog' %}?log_dir=" + log_dir;
    }
 </script>

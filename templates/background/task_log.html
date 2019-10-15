@@ -31,13 +31,13 @@
                     <div class="form-group form-inline input-daterange">
                         <div align="left">
                             <label>&nbsp;&nbsp;&nbsp;&nbsp;模块：&nbsp;</label>
-                            <input type="text" class="form-control" id="module" name="bg_module" value="{{bg_module}}" placeholder="模块">
+                            <input type="text" class="form-control" id="module"   name="bg_module" placeholder="模块">
                             <label>&nbsp;&nbsp;&nbsp;中心：&nbsp;</label>
-                            <input type="text" class="form-control" id="domain" name="bg_domain" value="{{bg_domain}}" placeholder="中心">
+                            <input type="text" class="form-control" id="domain"   name="bg_domain" placeholder="中心">
                             <label>&nbsp;&nbsp;操作时间：&nbsp;</label>
-                            <input type="text" class="form-control" id="start-picker" value="{{starttime}}"
+                            <input type="text" class="form-control" id="start-picker"  value="{{starttime}}"
                                    name="starttime" placeholder="YYYY-MM-DD hh:mm:ss" readonly>
-                            <input type="text" class="form-control" id="end-picker" value="{{endtime}}"
+                            <input type="text" class="form-control" id="end-picker"  value="{{endtime}}"
                                    name="endtime" placeholder="YYYY-MM-DD hh:mm:ss" readonly>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                             <div class="btn-group" style="float: ">
                                 <a id="search" style="display: none;" href="#" onclick="searchTaskLog()" class="btn btn-info" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;搜索&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
@@ -64,7 +64,7 @@
                             <tbody>
                                 {% for log_dict in page_objects %}
                                 <tr class="even gradeX">
-                                        <td width="8%" style="text-align:center;"><span class="numberClass"></span></td>
+                                        <td width="8%" style="text-align:center;">{{log_dict.bg_log_id}}</span></td>
                                         <td width="8%" style="text-align:center;">{{log_dict.bg_module}}</td>
                                         <td width="8%" style="text-align:center;">{{log_dict.bg_domain}}</td>
                                         <td width="8%" style="text-align:center;">{{log_dict.bg_operation_user}}</td>
@@ -130,7 +130,6 @@ $(function(){
         endtimepicker = document.getElementById('end-picker').value;
         bg_module = document.getElementById('module').value;
         bg_domain = document.getElementById('domain').value;
-        alert(bg_domain)
         if (starttimepicker && endtimepicker&&bg_module) {
             window.location ="{% url 'taskLogSearch' %}?" + args;
         }else{
