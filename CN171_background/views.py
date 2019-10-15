@@ -544,7 +544,7 @@ def taskDel(request):
 def taskLog(request):
         # 获取所有后台对象
         # page_len = request.GET.get('page_len', '')
-        taskLog_list = models.BgTaskLog.objects.all()
+        taskLog_list = models.BgTaskLog.objects.all().order_by('-bg_operation_time')
         log_list = []
         for i in taskLog_list:
             bg_id = i.bg_id
@@ -598,9 +598,10 @@ def taskLogDetail(request):
     bg_log_id = request.GET.get("bg_log_id")
     obj = get_object(BgTaskLog, bg_log_id=bg_log_id)
     log_dir = obj.bg_log_dir
-    with open(log_dir, 'r') as f:
+    with open(log_dir, 'r+') as f:
          log = f.read()
-    return render(request, 'background/task_log_detail.html', locals(),{'log':log,'log_dir':log_dir})
+         print(log[0])
+    return render(request, 'background/task_log_detail.html', locals(),{'log':log[0],'log_dir':log_dir})
 #文件下载
 def downloadTaskLog(request):
     log_dir = request.GET.get("log_dir")
