@@ -54,6 +54,7 @@ def appManagement(request):
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(app_list, request)
     return render(request, "cmdb/app_management.html", locals())
 
+#跳转到主机用户密码日志页面
 def hostPwdOprLogPage(request):
     host_pwd_opr_log_list = models.HostPwdOprLog.objects.all()
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(host_pwd_opr_log_list, request)
@@ -65,8 +66,9 @@ def hostPwdOprLog(request):
     keyword = request.GET.get("keyword", "")
     starttime = request.GET.get('starttime')
     endtime = request.GET.get('endtime')
+    host_pwd_opr_log_list = models.HostPwdOprLog.objects.all()
     if keyword:
-        host_pwd_opr_log_list = models.HostPwdOprLog.objects.filter(
+        host_pwd_opr_log_list = host_pwd_opr_log_list.filter(
             Q(opr_user_name__icontains=keyword)
         )
     if starttime:
