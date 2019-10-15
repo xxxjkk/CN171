@@ -95,6 +95,15 @@ class HostPwdOprLog(models.Model):
     def getDetailLogId(self):
         return self.id
 
+    def opr_log_save(self, opr_user_name,modified_host_user,opr_result,opr_time,detail_log):
+        self.opr_user_name=opr_user_name
+        self.modified_host_user=modified_host_user
+        self.opr_result=opr_result
+        self.opr_time=opr_time
+        self.detail_log=detail_log
+        self.save()
+
+
     class Meta:
         verbose_name = "主机密码操作日志"
         db_table ="cmdb_host_pwd_opr_log"
