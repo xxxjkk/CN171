@@ -1,0 +1,68 @@
+/* 整个容器，包括透视 */
+.flip-container {
+    perspective: 1000;
+}
+
+/* 鼠标放上去的时候翻转 */
+.flip-container:hover .flipper, .flip-container.hover .flipper {
+    transform: rotateY(180deg);
+}
+
+.flip-container, .front, .back {
+    width: 240px;
+    height: 320px;
+    display: inline-block;
+}
+
+/* 翻转速度设置 */
+.flipper {
+    transition: 0.5s;
+    transform-style: preserve-3d;
+    position: relative;
+}
+
+/* 翻转页的时候隐藏背面 */
+.front, .back {
+    backface-visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* 前面板放在上面 */
+.front {
+    z-index: 2;
+    /* for firefox 31 */
+    transform: rotateY(0deg);
+}
+.front dd{
+    font-family:"Microsoft YaHei";
+    font-size: 24px;
+}
+
+/* 背面初始的时候隐藏 */
+.back {
+    transform: rotateY(180deg);
+    display: inline-block;
+    vertical-align: middle;
+    background: #d2d6de;
+    box-sizing: border-box;
+    box-shadow: rgba(0, 0, 0, 0.5) 0px 0px 20px;
+    border-radius: 4px;
+}
+
+/* p标签字体配置 */
+.back p{
+    font-family:"Microsoft YaHei";
+    font-size: 14px;
+    text-indent: 28px;
+}
+
+/* a标签字体配置 */
+.back a{
+    font-family:"Microsoft YaHei";
+    font-size: 18px;
+    color: #0000ff;
+    font-weight: bold;
+    text-align: center;
+}

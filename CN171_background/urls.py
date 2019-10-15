@@ -10,4 +10,11 @@ urlpatterns = [
     url(r'^taskEdit/(?P<bg_id>\d+)/$', backgroundviews.taskEdit, name='taskEdit'),
     url(r'^taskAdd/$', backgroundviews.taskAdd, name='taskAdd'),
     url(r'^taskDel/$', backgroundviews.taskDel, name='taskDel'),
+    url(r'^batchTaskStop/', backgroundviews.batchTaskStop, name='batchTaskStop'),
+    url(r'^batchTaskReboot/', backgroundviews.batchTaskReboot, name='batchTaskReboot'),
+    url(r'^taskLogSearch/', backgroundviews.taskLogSearch, name='taskLogSearch'),
+    url(r'^task_log/', backgroundviews.taskLog, name='taskLog'),
+    url(r'^reLoad/', backgroundviews.reLoad, name='reLoad'),
+    url(r'^taskLogDetail/', backgroundviews.taskLogDetail, name='taskLogDetail'),
+    url(r'^downloadTaskLog/', backgroundviews.downloadTaskLog, name='downloadTaskLog'),
 ]
