@@ -13,9 +13,8 @@ class DetailLogForm(forms.ModelForm):
         }
 
 class HostPwdEditForm(forms.Form):
-    modified_host_list_file = forms.CharField(label=u'主机列表', error_messages={'required': '请输入要变更的用户'},
-      widget=forms.FileInput(attrs={'class': 'form-control', 'style': 'width:300px;','placeholder': u'必填项'}))
-    modified_host_user= forms.CharField(label=u'变更用户', error_messages={'required':'请输入要变更的用户'},
+    modified_host_list_file = forms.FileField(label=u'选择要变更的主机列表文件', error_messages={'required':'请选择要变更的主机列表文件'})  #改成True有问题
+    modified_host_user= forms.CharField(label=u'变更用户', error_messages={'required':'请输入要变更的用户','style':'color:red;'},
       widget=forms.TextInput(attrs={'class': 'form-control', 'style': 'width:200px;','placeholder': u'必填项'}))
     old_password = forms.CharField(label=u'原密码', error_messages={'required': '请输入原始密码'},
       widget=forms.PasswordInput(attrs={'class': 'form-control', 'style': 'width:200px;','placeholder': u'必填项'}))
@@ -37,3 +36,9 @@ class HostPwdEditForm(forms.Form):
             if password1 != password2:
                 raise forms.ValidationError(u'两次密码输入不一致')
         return password2
+
+
+
+class NormalUserForm(forms.Form):
+    username = forms.CharField()
+    headImg = forms.FileField()
