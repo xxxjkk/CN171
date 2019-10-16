@@ -103,9 +103,9 @@ class HostPwdOprLog(models.Model):
         self.detail_log=detail_log
         self.save()
 
-
     class Meta:
         verbose_name = "主机密码操作日志"
+        ordering = ['-opr_time']
         db_table ="cmdb_host_pwd_opr_log"
 
 

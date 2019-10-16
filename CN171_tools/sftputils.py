@@ -136,17 +136,7 @@ def put(sftp,local,remote):
     flag=_copy(sftp=sftp,local=local,remote=remote)
     return flag
 
-def sftp_upload(sftp,local,remote):
-    try:
-        if os.path.isdir(local):#判断本地参数是目录还是文件
-            for f in os.listdir(local):#遍历本地目录
-                sftp.put(os.path.join(local+f),os.path.join(remote+f))#上传目录中的文件
-        else:
-            sftp.put(local,remote)#上传文件
-        return True
-    except Exception as e:
-        print('upload exception:',e)
-        return False
+
 #判断filePath目录不存在则创建
 def path_not_exist_create(filePath):
     try:

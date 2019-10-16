@@ -56,12 +56,19 @@ $(document).ready(function(){
                         tag.innerHTML = args.msg;
                         $("#host_pwd_edit_form").find('input[name="reset1"]').after(tag);
                 }else {
-                    $.each(args.msg,function (index,value) {
+                    if(args.form_status){
                         var tag = document.createElement('span');
                         tag.className='c1';
-                        tag.innerHTML = value[0];
-                        $("#host_pwd_edit_form").find('input[name="'+ index +'"]').after(tag);
+                        tag.innerHTML = args.msg;
+                        $("#host_pwd_edit_form").find('input[name="reset1"]').after(tag);
+                    }else{
+                        $.each(args.msg1,function (index,value) {
+                            var tag = document.createElement('span');
+                            tag.className='c1';
+                            tag.innerHTML = value[0];
+                            $("#host_pwd_edit_form").find('input[name="'+ index +'"]').after(tag);
                     })
+                    }
                 }
             }
         })
