@@ -40,6 +40,31 @@ def ssh_connect(conntarget):
         print('ssh %s@%s: %s' % (username, hostname, e))
         exit()
 
+#建立与客户机通道，并激活shell终端
+def build_shell_channel(conntarget):
+    hostname, port, username, password=get_init_parameter(conntarget)
+    try:
+        trans=paramiko.Transport((hostname, 22))
+        trans.start_client()
+        # 用户名密码方式
+        trans.auth_password(username, password)
+        # 打开一个通道
+        channel = trans.open_session()
+        channel.settimeout(7200)
+        # 获取一个终端
+        channel.get_pty()
+        # 激活器
+        channel.invoke_shell()
+    except Exception as e:
+        print(e)
+    return trans, channel
+
+#关闭远程客户机的shell终端和channel通道
+def close_shell_channel(trans, channel):
+    if channel:
+        channel.close()
+    if trans:
+        trans.close()
 
 # 远程执行命令方法
 def ssh_exec_cmd(ssh_fd, cmd):
@@ -95,3 +120,42 @@ def pbossOrderMake(type):
         print(item)
     ssh_close(sshd)
     return "成功"
+
+
+def get_init_parameter(conntarget):
+    if conntarget == "Ansible":
+        hostname = config.get('Ansible', 'ansible_host')
+        port=config.get('Ansible','ansible_port')
+        username = config.get('Ansible', 'ansible_user')
+        password = config.get('Ansible', 'ansible_password')
+    elif conntarget == "PBOSS":
+        hostname = config.get('PBOSS', 'pboss_order_host')
+        port=config.get('PBOSS','pboss_order_port')
+        username = config.get('PBOSS', 'pboss_order_user')
+        password = config.get('PBOSS', 'pboss_order_password')
+    else:
+        print(conntarget + "not find!")
+        exit()
+    return hostname, port, username, password
+
+def get_init_parameter1(conntarget):
+    if conntarget == "Ansible":
+        ansible_general_host_pwd = config.get('Ansible', 'ansible_general_host_pwd')
+        ansible_root_host_pwd=config.get('Ansible','ansible_root_host_pwd')
+    elif conntarget == "PBOSS":
+        ansible_general_host_pwd = config.get('PBOSS', 'ansible_general_host_pwd')
+        ansible_root_host_pwd = config.get('PBOSS', 'ansible_root_host_pwd')
+    else:
+        print(conntarget + "not find!")
+        exit()
+    return ansible_general_host_pwd, ansible_root_host_pwd
+
+def get_init_parameter2(conntarget):
+    if conntarget == "Ansible":
+        remote_path = config.get('Ansible', 'remote_path')
+    elif conntarget == "PBOSS":
+        remote_path = config.get('PBOSS', 'remote_path')
+    else:
+        print(conntarget + "not find!")
+        exit()
+    return remote_path

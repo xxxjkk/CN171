@@ -1,4 +1,5 @@
 import datetime
+import time
 
 from django.db.models import Q
 from django.http import HttpResponse
@@ -98,14 +99,14 @@ def redEditHostPwdPage(request):
 #修改主机用户密码
 def editHostPwd(request):
     form = HostPwdEditForm(request.POST, request.FILES)
-    ret = {'status': True, 'msg': None}
+    ret = {'status': False, 'msg': None,'form_status': True, 'msg1':None}
+    opr_result = "失败"
     if form.is_valid():
+        detail_log_info = ""
         file_obj = request.FILES.get('modified_host_list_file')
         modified_host_user =request.POST.get("modified_host_user")
         old_password = request.POST.get("old_password")
-        new_password1 = request.POST.get("new_password1")
         username = request.session['user_name']
-
         file_path = os.path.join(BASE_DIR, "temp")
         path_not_exist_create(file_path)
         file_name_path=os.path.join(file_path,file_obj.name)
@@ -118,31 +119,67 @@ def editHostPwd(request):
             f.close()
             #将服务器文件sftp到Ansible主机
             client, sftp=sftpconnect("CMIOT")
-            remote_path="/home/baiyang"
+            remote_path=get_init_parameter2('Ansible')
             flag=put(sftp,file_name_path, remote_path)
             sftpDisconnect(client)
             #执行命令
             if(flag):
-                cmd="ansible -i %s all -u ansbmk -k -b -K -f 500 -m shell -a 'echo %s:%s|chpasswd'" \
-                    %(remote_path,modified_host_user,old_password)
-                cmd1="%s" %("bY!123456")
-                cmd2 = "%s" % ("bY!123456")
-                ssh_fd = ssh_connect("Ansible")
-                stdin, stdout, stderr=ssh_exec_cmd(ssh_fd, cmd)
-                stdin1, stdout1, stderr1=ssh_exec_cmd(ssh_fd, cmd1)
-                stdin2, stdout2, stderr2=ssh_exec_cmd(ssh_fd, cmd2)
-                ssh_close(ssh_fd)
-                #保存操作记录
-                hostPwdOprLog=HostPwdOprLog()
-                hostPwdOprLog.opr_log_save(username,modified_host_user,"失败",datetime.datetime.now(),stdout2)
-                ret['status'] = True
-                ret['msg'] = "修改成功！"
+                detail_log_info, retStr = excute_edit_commond(remote_path, modified_host_user, old_password)
+                if retStr:
+                    ret['status'] = True
+                    ret['msg'] = "修改成功！"
+                    opr_result="成功"
+                else:
+                    ret['msg'] = "修改失败，详细信息请查看日志！"
+            else:
+                ret['msg'] = "上传文件失败！"
         except Exception as e:
             print(e)
+        # 保存操作记录
+        hostPwdOprLog = HostPwdOprLog()
+        hostPwdOprLog.opr_log_save(username, modified_host_user, opr_result, datetime.datetime.now(), detail_log_info)
     else:
-        ret['status'] = False
-        ret['msg'] = form.errors  # 这是一个对象
+        ret['msg1'] = form.errors  # 这是一个对象
         print(form.errors)
     v = json.dumps(ret)  # 转换为字典类型
     return HttpResponse(v)
+
+
+#登录到相应的主机执行修改命令
+def excute_edit_commond(remote_path, modified_host_user, old_password):
+    retStr = False
+    #修改主机密码的命令
+    cmd = "ansible -i %s all -u ansbmk -k -b -K -f 500 -m shell -a 'echo %s:%s|chpasswd'\r" \
+          % (remote_path, modified_host_user, old_password)
+    #ansible普通用户密码
+    ansible_general_host_pwd,ansible_root_host_pwd = get_init_parameter1("Ansible")
+    cmd1 = "%s" % (ansible_general_host_pwd+"\r")
+    #ansibile root用户密码
+    cmd2 = "%s" % (ansible_root_host_pwd+"\r")
+    trans, channel = build_shell_channel("Ansible")
+    # 发送要执行的命令
+    channel.send(cmd)
+    while True:
+        time.sleep(0.2)
+        rst = channel.recv(1024)
+        rst = rst.decode('utf-8')
+        print(rst)
+        # 通过命令执行提示符来判断命令是否执行完成
+        if 'SSH password' in rst:
+            channel.send(cmd1)  # SSH password  普通用户密码
+            time.sleep(0.5)
+            ret = channel.recv(1024)
+            ret = ret.decode('utf-8')
+            print(ret)
+            if "SUDO password" in ret:
+                channel.send(cmd2)  # ansibile主机 root用户密码
+                time.sleep(0.5)
+                detail_log = channel.recv(1024)
+                detail_log = detail_log.decode('utf-8')
+                print(detail_log)
+                if "FAILED" not in detail_log and "SUCCESS" in detail_log:
+                    retStr = True
+                break
+    close_shell_channel(trans, channel)
+    return detail_log, retStr
 
