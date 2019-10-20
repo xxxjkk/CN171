@@ -1,12 +1,14 @@
-{% extends 'base.html' %}
-{% block self_head_css_js %}{% endblock %}
-{% block content %}
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% include 'link_css.html' %}
+    {% include 'head_script.html' %}
+</head>
+<body>
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <h4>后台日志详情</h4>
-    </section>
 
     <!-- Main content -->
     <section class="content">
@@ -18,11 +20,9 @@
                 <div class="box-body">
                  {{log}}
                </div>&nbsp;&nbsp;&nbsp;
-                <a href="{% url 'downloadTaskLog' %}?log_dir={{log_dir}}"><li style="width: 60pt" class="btn btn-primary">导出</li></a>
-                <a href="#"><li style="width: 60pt" class="btn btn-primary" onclick="returnPrePage()">返回</li></a>
-                <br/>
-                    <span id="exportTxtSpanId" style="color:red;display:none">1111</span>
-                <br/><br/>
+            </div>
+            <div align="center">
+            <a href="{% url 'downloadTaskLog' %}?log_dir={{log_dir}}"><li style="width: 60pt" class="btn btn-primary">导出</li></a>
             </div>
         </form>
     </section>
@@ -31,14 +31,13 @@
 
 <script>
 
-    function returnPrePage(){
-        {# document.referrer  上一页的url，location.href  本页的url，location.search href  ？后面的参数  #}
-        window.location.href=document.referrer;
-    }
-    function downloadTaskLog(log_dir){
-          alert(log_dir);
-          window.location = "{% url 'downloadTaskLog' %}?log_dir=" + log_dir;
-    }
+  function returnPrePage(){
+     {# document.referrer  上一页的url，location.href  本页的url，location.search href  ？后面的参数  #}
+      window.location.href=document.referrer;
+  }
+function downloadTaskLog(log_dir){
+      window.location = "{% url 'downloadTaskLog' %}?log_dir=" + log_dir;
+   }
 </script>
-
-{% endblock %}
+</body>
+</html>
