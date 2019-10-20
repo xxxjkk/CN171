@@ -31,15 +31,14 @@
 
 <script>
 
-  function returnPrePage(){
-     {# document.referrer  上一页的url，location.href  本页的url，location.search href  ？后面的参数  #}
-      window.location.href=document.referrer;
-  }
-function downloadTaskLog(log_dir){
-      alert(log_dir);
-
-      window.location = "{% url 'downloadTaskLog' %}?log_dir=" + log_dir;
-   }
+    function returnPrePage(){
+        {# document.referrer  上一页的url，location.href  本页的url，location.search href  ？后面的参数  #}
+        window.location.href=document.referrer;
+    }
+    function downloadTaskLog(log_dir){
+          alert(log_dir);
+          window.location = "{% url 'downloadTaskLog' %}?log_dir=" + log_dir;
+    }
 </script>
 
 {% endblock %}

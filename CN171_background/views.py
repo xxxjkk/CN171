@@ -598,9 +598,12 @@ def taskLogDetail(request):
     bg_log_id = request.GET.get("bg_log_id")
     obj = get_object(BgTaskLog, bg_log_id=bg_log_id)
     log_dir = obj.bg_log_dir
+    # log = "11111111111111111"
     with open(log_dir, 'r') as f:
          log = f.read()
-    return render(request, 'background/task_log_detail.html', locals(),{'log':log,'log_dir':log_dir})
+    return render(request, 'background/task_log_detail.html', locals(),{'log':log[0],'log_dir':log_dir})
+
+
 #文件下载
 def downloadTaskLog(request):
     log_dir = request.GET.get("log_dir")

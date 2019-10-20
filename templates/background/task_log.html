@@ -169,19 +169,9 @@ function change_info(){
 </script>
 
 <script>
-function detail(n){
-    layer.open({
-    type: 2,
-    title: '主机信息',
-    closeBtn: 1,
-    area: ['700px', '550px'],
-    shadeClose: true, //点击遮罩关闭
-    content: ['/cmdb/asset/detail/' + n]
-  });
-}
 
 function taskLogDetail(logId){
-      window.location = "{% url 'taskLogDetail' %}?bg_log_id=" + logId
+      window.location = "{% url 'taskLogDetail' %}?bg_log_id="+logId;
    }
 </script>
 

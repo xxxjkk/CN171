@@ -71,15 +71,15 @@ def domainExecuteOne(exec_cmd):
 def pbossOrderMake(type):
     conntarget = "PBOSS"
     sshd = ssh_connect(conntarget)
-    script = config.get('PBOSS', 'pboss_order_script')
+
 
     #根据不同类型执行不同的生成命令
     if type == 'status':
-        exec_cmd = script + ""
+        exec_cmd = config.get('PBOSS', 'pboss_order_status_script')
     elif type == 'node':
-        exec_cmd = script + ""
+        exec_cmd = config.get('PBOSS', 'pboss_order_node_script')
     elif type == 'rollback':
-        exec_cmd = script + ""
+        exec_cmd = config.get('PBOSS', 'pboss_order_rollback_script')
     else:
         print("未找到对应类型！")
         return "失败"
@@ -95,3 +95,6 @@ def pbossOrderMake(type):
         print(item)
     ssh_close(sshd)
     return "成功"
+
+
+
