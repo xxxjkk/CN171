@@ -51,21 +51,98 @@ def taskManagement(request):
 
 # 单个按钮执行函数
 def taskExecuteOne(request):
-    bg_id = request.GET.get('bg_id')
-    bg_action = request.GET.get('bg_action')
-    bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+    bg_id = request.POST.get('bg_id')
+    msg = []
+    log_info = "执行情况\n"
+    bg_action = request.POST.get('bg_action')
+    taskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+    old_status = taskManagement.bg_status
+    conntarget = "Ansible"
+    sshd = ssh_connect(conntarget)
 
     if bg_action == 'start':
-        cmd = bgTaskManagement.bg_task_start
+        cmd = taskManagement.bg_task_start
+        taskManagement.bg_lastopr_type = "启动"
     elif bg_action == 'stop':
-        cmd = bgTaskManagement.bg_task_stop
+        cmd = taskManagement.bg_task_stop
+        taskManagement.bg_lastopr_type = "停止"
     elif bg_action == 'restart':
-        cmd = bgTaskManagement.bg_task_restart
+        cmd = taskManagement.bg_task_restart
+        taskManagement.bg_lastopr_type = "重启"
     else:
         return redirect("taskManagement")
-
-    connecttool.domainExecuteOne(cmd)
-    return redirect("taskManagement")
+    stdin, stdout, stderr = ssh_exec_cmd(sshd, cmd)
+    err_list = stderr.readlines()
+    if len(err_list) > 0:
+        print('Start failed:' + err_list[0])
+        succedmsg = False
+        taskManagement.bg_lastopr_user = request.session['user_name']
+        taskManagement.bg_lastopr_time = datetime.now()
+        taskManagement.bg_lastopr_result = "失败"
+        taskManagement.bg_status = old_status
+        taskManagement.save()
+        bg_log = BgTaskLog()
+        bg_log.bg_id = bg_id
+        bg_log.bg_operation = taskManagement.bg_lastopr_type + taskManagement.bg_module + taskManagement.bg_domain
+        bg_log.bg_operation_time = datetime.now()
+        bg_log.bg_operation_user = request.session['user_name']
+        bg_log.bg_opr_result = "失败"
+        # 写入日志文件
+        file_name = taskManagement.bg_module + "_" + taskManagement.bg_domain + \
+                    "_" + "start" + "_" + datetime.now().strftime("%Y%m%d%H%I%S")
+        bg_log_msg = str(bg_log.bg_operation_time) + ":" + \
+                     bg_log.bg_operation_user + bg_log.bg_operation + bg_log.bg_opr_result + "\n执行情况：\n" + err_list[0]
+        path = config.get('TaskManagement', 'log_path') + file_name + '.log'
+        bg_log.bg_log_dir = path
+        file = open(path, 'a+')
+        file.write(bg_log_msg)
+        file.close()
+        bg_log.save()
+    else:
+        print('Start success.')
+        for item in stdout.readlines():
+            log_info = log_info + item
+            print(item)
+            if "中心总体状态：正常" in item:
+                taskManagement.bg_status = "正常"
+            elif "中心总体状态：部分正常（满足最小集）" in item:
+                taskManagement.bg_status = "部分正常"
+            elif "中心总体状态：异常" in item:
+                taskManagement.bg_status = "异常"
+            elif "中心总体状态：停止" in item:
+                taskManagement.bg_status = "停止"
+            elif "对不起，操作失败！" in item:
+                print("因特殊原因，执行出错")
+                taskManagement.bg_status = "停止"
+            else:
+                print("循环读取...")
+        taskManagement.bg_lastopr_user = request.session['user_name']
+        taskManagement.bg_lastopr_result = "成功"
+        taskManagement.bg_lastopr_time = datetime.now()
+        taskManagement.save()
+        bg_log = BgTaskLog()
+        bg_log.bg_id = bg_id
+        bg_log.bg_operation = taskManagement.bg_status + taskManagement.bg_module + taskManagement.bg_domain
+        bg_log.bg_operation_time = datetime.now()
+        bg_log.bg_operation_user = request.session['user_name']
+        bg_log.bg_opr_result = "成功"
+        # 写入日志文件
+        file_name = taskManagement.bg_module + "_" + taskManagement.bg_domain + \
+                    "_" + "start" + "_" + datetime.now().strftime("%Y%m%d%H%I%S")
+        # str不支持时间格式直接相加
+        bg_log_msg = str(bg_log.bg_operation_time) + ":" + \
+                     bg_log.bg_operation_user + bg_log.bg_operation + '\n' + log_info
+        path = config.get(
+            'TaskManagement',
+            'log_path') + file_name + '.log'
+        bg_log.bg_log_dir = path
+        file = open(path, 'a+')
+        file.write(bg_log_msg)  # msg也就是下面的Hello world!
+        file.close()
+        bg_log.save()
+        succedmsg = "True"
+    sshd.close()
+    return JsonResponse({'ret': succedmsg})
 
 # 批量启动按钮
 def batchTaskStart(request):
@@ -94,13 +171,14 @@ def batchTaskStart(request):
     for i in threads:
         i.join()
         stdin, stdout, stderr = i.get_result()
+        log_info = "执行情况:\n"
+        bg_id = bg_ids[a]
+        taskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
         err_list = stderr.readlines()
         if len(err_list) > 0:
             print('Start failed:' + err_list[0])
             failmsg = False
             msg.append(failmsg)
-            bg_id = bg_ids[a]
-            taskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
             taskManagement.bg_lastopr_user = request.session['user_name']
             taskManagement.bg_lastopr_time = datetime.now()
             taskManagement.bg_lastopr_result = "失败"
@@ -117,7 +195,7 @@ def batchTaskStart(request):
             file_name = taskManagement.bg_module + "_" + taskManagement.bg_domain + \
                         "_" + "start" + "_" + datetime.now().strftime("%Y%m%d%H%I%S")
             bg_log_msg = str(bg_log.bg_operation_time) + ":" + \
-                         bg_log.bg_operation_user + bg_log.bg_operation + bg_log.bg_opr_result + err_list[0]
+                         bg_log.bg_operation_user + bg_log.bg_operation + bg_log.bg_opr_result +"\n执行情况：\n"+err_list[0]
             path = config.get('TaskManagement', 'log_path') + file_name + '.log'
             bg_log.bg_log_dir = path
             file = open(path, 'a+')
@@ -127,12 +205,29 @@ def batchTaskStart(request):
             a = a + 1
         else:
             print('Start success.')
-            bg_id = bg_ids[a]
-            taskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+            for item in stdout.readlines():
+                log_info = log_info + item
+                print(item)
+                if "中心总体状态：正常" in item:
+                    taskManagement.bg_status = "正常"
+                    a = a + 1
+                elif "中心总体状态：部分正常（满足最小集）" in item:
+                    taskManagement.bg_status = "部分正常"
+                    a = a + 1
+                elif "中心总体状态：异常" in item:
+                    taskManagement.bg_status = "异常"
+                    a = a + 1
+                elif "中心总体状态：停止" in item:
+                    taskManagement.bg_status = "停止"
+                    a = a + 1
+                elif "对不起，操作失败！" in item:
+                    print("因特殊原因，执行出错")
+                    taskManagement.bg_status =  "停止"
+                else:
+                    print("循环读取...")
             taskManagement.bg_lastopr_user = request.session['user_name']
             taskManagement.bg_lastopr_result = "成功"
             taskManagement.bg_lastopr_type = "启动"
-            taskManagement.bg_status = "正常"
             taskManagement.bg_lastopr_time = datetime.now()
             bg_log = BgTaskLog()
             bg_log.bg_id = bg_id
@@ -146,20 +241,17 @@ def batchTaskStart(request):
                         "_" + "start" + "_" + datetime.now().strftime("%Y%m%d%H%I%S")
             # str不支持时间格式直接相加
             bg_log_msg = str(bg_log.bg_operation_time) + ":" + \
-                         bg_log.bg_operation_user + bg_log.bg_operation + bg_log.bg_opr_result
+                         bg_log.bg_operation_user + bg_log.bg_operation +'\n'+log_info
             path = config.get(
                 'TaskManagement',
                 'log_path') + file_name + '.log'
             bg_log.bg_log_dir = path
             file = open(path, 'a+')
-            file.write('\n' + bg_log_msg)  # msg也就是下面的Hello world!
+            file.write(bg_log_msg)  # msg也就是下面的Hello world!
             file.close()
             bg_log.save()
             succedmsg = True
             msg.append(succedmsg)
-            a = a + 1
-        for item in stdout.readlines():
-            print(item + i.getName())
     for j in msg:
         if not j:
             returnmsg = "false"
@@ -172,6 +264,7 @@ def batchTaskStop(request):
     bg_ids = request.POST.getlist('ids', [])
     sshdStop = ssh_connect(conntarget)
     returnmsg = "true"
+    log_info = "执行情况\n"
     msg = []
     a = 0
     threads = []
@@ -218,12 +311,12 @@ def batchTaskStop(request):
             file_name = taskManagement.bg_module + "_" + taskManagement.bg_domain + \
                         "_" + "stop" + "_" + datetime.now().strftime("%Y%m%d%H%I%S")
             bg_log_msg = str(bg_log.bg_operation_time) + ":" + \
-                         bg_log.bg_operation_user + bg_log.bg_operation + bg_log.bg_opr_result + err_list[0]
+                         bg_log.bg_operation_user + bg_log.bg_operation + bg_log.bg_opr_result +"\n执行情况：\n"+ err_list[0]
             path = config.get(
                 'TaskManagement', 'log_path') + file_name + '.log'
             bg_log.bg_log_dir = path
             file = open(path, 'a+')
-            file.write('\n' + bg_log_msg)  # msg也就是下面的Hello world!
+            file.write('\n' + bg_log_msg)
             file.close()
             bg_log.save()
             a = a + 1
@@ -231,10 +324,34 @@ def batchTaskStop(request):
             print('Start success.')
             bg_id = bg_ids[a]
             taskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+            for item in stdout.readlines():
+                log_info = log_info + item
+                print(item)
+                if "中心总体状态：正常" in item:
+                    taskManagement.bg_status = "正常"
+                    a = a + 1
+                elif "中心总体状态：部分正常（满足最小集）" in item:
+                    taskManagement.bg_status = "部分正常"
+                    a = a + 1
+                elif "中心总体状态：异常" in item:
+                    taskManagement.bg_status = "异常"
+                    a = a + 1
+                elif "中心总体状态：停止" in item:
+                    taskManagement.bg_status = "停止"
+                    succedmsg = True
+                    msg.append(succedmsg)
+                    a = a + 1
+                elif "对不起，操作失败！" in item:
+                    print("因特殊原因，执行出错")
+                    taskManagement.bg_status = old_status
+                    succedmsg = False
+                    msg.append(succedmsg)
+                    a= a + 1
+                else:
+                    print("循环读取...")
             taskManagement.bg_lastopr_user = request.session['user_name']
             taskManagement.bg_lastopr_result = "成功"
             taskManagement.bg_lastopr_type = "停止"
-            taskManagement.bg_status = "停止"
             taskManagement.bg_lastopr_time = datetime.now()
             bg_log = BgTaskLog()
             bg_log.bg_id = bg_id
@@ -248,20 +365,15 @@ def batchTaskStop(request):
                         "_" + "stop" + "_" + datetime.now().strftime("%Y%m%d%H%I%S")
             # str不支持时间格式直接相加
             bg_log_msg = str(bg_log.bg_operation_time) + ":" + \
-                         bg_log.bg_operation_user + bg_log.bg_operation + bg_log.bg_opr_result
+                         bg_log.bg_operation_user + bg_log.bg_operation + bg_log.bg_opr_result + '\n' + log_info
             path = config.get(
                 'TaskManagement',
                 'log_path') + file_name + '.log'
             bg_log.bg_log_dir = path
             file = open(path, 'a+')
-            file.write('\n' + bg_log_msg)  # msg也就是下面的Hello world!
+            file.write(bg_log_msg)  # msg也就是下面的Hello world!
             file.close()
             bg_log.save()
-            succedmsg = True
-            msg.append(succedmsg)
-            a = a + 1
-        for item in stdout.readlines():
-            print(item + i.getName())
     for j in msg:
         if not j:
             returnmsg = "false"
@@ -274,6 +386,7 @@ def batchTaskReboot(request):
     sshdStop = ssh_connect(conntarget)
     returnmsg = "true"
     msg = []
+    log_info = "执行情况\n"
     a = 0
     threads = []
     for bg_id in bg_ids:
@@ -289,7 +402,6 @@ def batchTaskReboot(request):
         else:
             status_msg = False
             msg.append(status_msg)
-
       # start threads 此处并不会执行线程，而是将任务分发到每个线程，同步线程。等同步完成后再开始执行start方法
     for i in threads:
         i.start()
@@ -328,18 +440,35 @@ def batchTaskReboot(request):
             file.write('\n' + bg_log_msg)  # msg也就是下面的Hello world!
             file.close()
             bg_log.save()
-
             a = a + 1
-
-
         else:
             print('Start success.')
             bg_id = bg_ids[a]
             taskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+            for item in stdout.readlines():
+                log_info = log_info + item
+                print(item)
+                if "中心总体状态：正常" in item:
+                    taskManagement.bg_status = "正常"
+                    a = a + 1
+                elif "中心总体状态：部分正常（满足最小集）" in item:
+                    taskManagement.bg_status = "部分正常"
+                    a = a + 1
+                elif "中心总体状态：异常" in item:
+                    taskManagement.bg_status = "异常"
+                    a = a + 1
+                elif "中心总体状态：停止" in item:
+                    taskManagement.bg_status = "停止"
+                    a = a + 1
+                elif "对不起，操作失败！" in item:
+                    print("因特殊原因，执行出错")
+                    taskManagement.bg_status = old_status
+                    a = a + 1
+                else:
+                    print("循环读取...")
             taskManagement.bg_lastopr_user = request.session['user_name']
             taskManagement.bg_lastopr_result = "成功"
             taskManagement.bg_lastopr_type = "重启"
-            taskManagement.bg_status = "正常"
             taskManagement.bg_lastopr_time = datetime.now()
             bg_log = BgTaskLog()
             bg_log.bg_id = bg_id
@@ -353,18 +482,17 @@ def batchTaskReboot(request):
                         "_" + "reboot" + "_" + datetime.now().strftime("%Y%m%d%H%I%S")
             # str不支持时间格式直接相加
             bg_log_msg = str(bg_log.bg_operation_time) + ":" + \
-                         bg_log.bg_operation_user + bg_log.bg_operation + bg_log.bg_opr_result
+                         bg_log.bg_operation_user + bg_log.bg_operation + bg_log.bg_opr_result + '\n' + log_info
             path = config.get(
                 'TaskManagement',
                 'log_path') + file_name + '.log'
             bg_log.bg_log_dir = path
             file = open(path, 'a+')
-            file.write('\n' + bg_log_msg)  # msg也就是下面的Hello world!
+            file.write(bg_log_msg)  # msg也就是下面的Hello world!
             file.close()
             bg_log.save()
             succedmsg = True
             msg.append(succedmsg)
-            a = a + 1
         for item in stdout.readlines():
             print(item + i.getName())
     for j in msg:
@@ -380,6 +508,7 @@ def reLoad(request):
     threads = []
     a=0
     returnmsg = "true"
+    log_info = "执行情况\n"
     msg = []
     sshdReLoad = ssh_connect(conntarget)
     for id in idlist:
@@ -425,20 +554,18 @@ def reLoad(request):
             for item in stdout.readlines():
                 print(item)
                 taskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
-                if  "查询结果:正常" in item:
+                if  "中心总体状态：正常" in item:
                     taskManagement.bg_status = "正常"
                     a = a + 1
-                elif "查询结果:部分正常" in item:
+                elif "中心总体状态：部分正常（满足最小集）" in item:
                     taskManagement.bg_status = "部分正常"
                     a = a + 1
-                elif "查询结果:异常" in item:
+                elif "中心总体状态：异常" in item:
                     taskManagement.bg_status = "异常"
                     a = a + 1
-                elif  "查询结果:停止" in item:
+                elif  "中心总体状态：停止" in item:
                     taskManagement.bg_status = "停止"
                     a = a + 1
-                elif "执行结果:成功" in item:
-                    taskManagement.bg_lastopr_result = "成功"
                 else:
                     print("执行出错")
                 taskManagement.bg_lastopr_user = request.session['user_name']
@@ -456,7 +583,7 @@ def reLoad(request):
                             "_" + "reload" + "_" + datetime.now().strftime("%Y%m%d%H%I%S")
                 # str不支持时间格式直接相加
                 bg_log_msg = str(bg_log.bg_operation_time) + ":" + \
-                             bg_log.bg_operation_user + bg_log.bg_operation + bg_log.bg_opr_result
+                             bg_log.bg_operation_user + bg_log.bg_operation + bg_log.bg_opr_result +'\n' + log_info
                 path = config.get(
                     'TaskManagement', 'log_path') + file_name + '.log'
                 bg_log.bg_log_dir = path
