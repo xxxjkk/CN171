@@ -304,6 +304,7 @@ function reload(){
 </script>
 <script>
 function checkSubmit(status, bg_id, action) {
+    var id = document.getElementsByName('id');
     switch(action)
     {
         case "start":
@@ -312,7 +313,27 @@ function checkSubmit(status, bg_id, action) {
                 if (!confirm(msg)) {
                     window.event.returnValue = false;
                 }else{
-                    window.location = "{% url 'taskExecuteOne' %}?bg_id="+bg_id+"&bg_action=start";
+                    {# window.location = "{% url 'taskExecuteOne' %}?bg_id="+bg_id+"&bg_action=start";#}
+                    $.ajax({
+                            url: '{% url 'taskExecuteOne' %}',
+                            type: 'post',
+                            dataType: 'json',
+                            data: {
+                                bg_id: bg_id,
+                                bg_action: action,
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            'traditional': true,
+                            success:function(msg){
+                                   if(msg.ret=='True'){
+                                       alert("操作成功！");
+                                       location.reload(true);
+                                   }
+                                   else{
+                                        alert("操作失败,请核查后重试！");
+                                   }
+                            }
+                    });
                 }
              }else{
                 msg = "中心非“停止”状态！"
@@ -325,7 +346,26 @@ function checkSubmit(status, bg_id, action) {
                 if (!confirm(msg)) {
                     window.event.returnValue = false;
                 }else{
-                    window.location = "{% url 'taskExecuteOne' %}?bg_id="+bg_id+"&bg_action=stop";
+                    $.ajax({
+                            url: '{% url 'taskExecuteOne' %}',
+                            type: 'post',
+                            dataType: 'json',
+                            data: {
+                                bg_id: bg_id,
+                                bg_action: action,
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            'traditional': true,
+                            success:function(msg){
+                                   if(msg.ret=='True'){
+                                       alert("操作成功！");
+                                       location.reload(true);
+                                   }
+                                   else{
+                                        alert("操作失败,请核查后重试！");
+                                   }
+                            }
+                    });
                 }
              }else{
                 msg = "中心已处于“停止”状态！"
@@ -338,7 +378,26 @@ function checkSubmit(status, bg_id, action) {
                 if (!confirm(msg)) {
                     window.event.returnValue = false;
                 }else{
-                    window.location = "{% url 'taskExecuteOne' %}?bg_id="+bg_id+"&bg_action=restart";
+                    $.ajax({
+                            url: '{% url 'taskExecuteOne' %}',
+                            type: 'post',
+                            dataType: 'json',
+                            data: {
+                                bg_id: bg_id,
+                                bg_action: action,
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            'traditional': true,
+                            success:function(msg){
+                                   if(msg.ret=='True'){
+                                       alert("操作成功！");
+                                       location.reload(true);
+                                   }
+                                   else{
+                                        alert("操作失败,请核查后重试！");
+                                   }
+                            }
+                    });
                 }
              }else{
                 msg = "中心处于“停止”状态，请先启动！"
