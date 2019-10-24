@@ -4,7 +4,7 @@ import re
 import sys
 import threading
 
-from django.http import HttpResponse, JsonResponse, FileResponse
+from django.http import HttpResponse, JsonResponse, FileResponse, HttpResponseRedirect
 from django.shortcuts import render
 from CN171_background import models
 from CN171_background.api import pages,get_object
@@ -12,9 +12,11 @@ from django.shortcuts import render, redirect
 
 from CN171_background.forms import BgForm
 from CN171_background.models import BgTaskManagement, BgTaskLog
+from CN171_login.views import my_login_required
 from CN171_tools import connecttool
 from django.db.models import Q
 from datetime import datetime
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 try:
@@ -29,6 +31,7 @@ config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
 conntarget = "Ansible"
 
 
+@my_login_required
 def taskManagement(request):
     # 获取所有后台对象
     # page_len = request.GET.get('page_len', '')
@@ -50,6 +53,7 @@ def taskManagement(request):
 
 
 # 单个按钮执行函数
+@my_login_required
 def taskExecuteOne(request):
     bg_id = request.POST.get('bg_id')
     msg = []
@@ -145,6 +149,7 @@ def taskExecuteOne(request):
     return JsonResponse({'ret': succedmsg})
 
 # 批量启动按钮
+@my_login_required
 def batchTaskStart(request):
     bg_ids = request.POST.getlist('ids', [])
     sshdStart = ssh_connect(conntarget)
@@ -259,7 +264,8 @@ def batchTaskStart(request):
     return JsonResponse({'ret': returnmsg})
     #return redirect("taskManagement")
 
-
+#批量停止功能
+@my_login_required
 def batchTaskStop(request):
     bg_ids = request.POST.getlist('ids', [])
     sshdStop = ssh_connect(conntarget)
@@ -381,6 +387,7 @@ def batchTaskStop(request):
     return JsonResponse({'ret': returnmsg})
 
 # 批量重启
+@my_login_required
 def batchTaskReboot(request):
     bg_ids = request.POST.getlist('ids', [])
     sshdStop = ssh_connect(conntarget)
@@ -503,6 +510,7 @@ def batchTaskReboot(request):
 
 
 # 批量刷新页面
+@my_login_required
 def reLoad(request):
     idlist = BgTaskManagement.objects.values_list('bg_id', flat=True)
     threads = []
@@ -616,6 +624,7 @@ class MyThread(threading.Thread):
             return None
 
 #后台中心编辑函数
+@my_login_required
 def taskEdit(request, bg_id):
     status = 0
     obj = get_object(BgTaskManagement, bg_id=bg_id)
@@ -632,6 +641,7 @@ def taskEdit(request, bg_id):
     return render(request, 'background/task_edit.html', locals())
 
 #后台中心添加函数
+@my_login_required
 def taskAdd(request):
     status = 0
     if request.method == "POST":
@@ -652,6 +662,7 @@ def taskAdd(request):
         return render(request, "background/task_add.html", locals())
 
 #后台中心删除函数
+@my_login_required
 def taskDel(request):
     bg_id = request.GET.get('bg_id', '')
     if bg_id:
@@ -668,6 +679,7 @@ def taskDel(request):
     return HttpResponse(u'删除成功')
 
 #后台日志展示界面
+@my_login_required
 def taskLog(request):
         # 获取所有后台对象
         # page_len = request.GET.get('page_len', '')
@@ -689,6 +701,7 @@ def taskLog(request):
         return render(request, "background/task_log.html", locals())
 
 #后台日志搜索界面
+@my_login_required
 def taskLogSearch(request):
     log_list = []
     starttime = request.GET.get('starttime')
@@ -721,6 +734,7 @@ def taskLogSearch(request):
 
 
 #后台日志详情页面
+@my_login_required
 def taskLogDetail(request):
     bg_log_id = request.GET.get("bg_log_id")
     obj = get_object(BgTaskLog, bg_log_id=bg_log_id)
@@ -730,6 +744,7 @@ def taskLogDetail(request):
          print(log[0])
     return render(request, 'background/task_log_detail.html', locals(),{'log':log[0],'log_dir':log_dir})
 #文件下载
+@my_login_required
 def downloadTaskLog(request):
     log_dir = request.GET.get("log_dir")
     file=open(log_dir,'rb')
