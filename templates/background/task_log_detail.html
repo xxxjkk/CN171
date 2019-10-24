@@ -7,27 +7,25 @@
     {% include 'head_script.html' %}
 </head>
 <body>
-<div class="content-wrapper">
     <!-- Content Header (Page header) -->
 
     <!-- Main content -->
-    <section class="content">
-        <form method="post" id="task_log_form">
+    <section class="content" >
+        <div class="box">
+        <form method="post" id="task_log_form" >
         {% csrf_token %}
-            <div class="box" align="center">
-                <div class="box-header" id=""></div>
                 <!-- /.box-header -->
-                <div class="box-body">
-                 {{log}}
-               </div>&nbsp;&nbsp;&nbsp;
-            </div>
+                <div style="white-space:pre-line" align="left" class="box" >
+                 {{log}}&nbsp;&nbsp;
+                </div>
             <div align="center">
             <a href="{% url 'downloadTaskLog' %}?log_dir={{log_dir}}"><li style="width: 60pt" class="btn btn-primary">导出</li></a>
             </div>
         </form>
+        </div>
     </section>
 <!-- /.content -->
-</div>
+
 
 <script>
 
