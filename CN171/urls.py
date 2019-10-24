@@ -13,6 +13,8 @@ urlpatterns = [
       url(r'^index/', loginviews.index, name='index'),
       url(r'^logout/', loginviews.logout, name='logout'),
       url(r'^login/', loginviews.login, name='login'),
+      url(r'^loginnotice/', loginviews.loginNotice, name='loginnotice'),
+
 
      # url(r'^login/', include('CN171_login.urls')),
       url(r'^cmdb/', include('CN171_cmdb.urls')),
@@ -21,5 +23,6 @@ urlpatterns = [
       url(r'^config/', include('CN171_config.urls')),
       url(r'^monitor/', include('CN171_monitor.urls')),
       url(r'^order/', include('CN171_order.urls')),
-
+      url(r'^aiops/', include('CN171_aiops.urls')),
+      url(r'^crontab/', include('CN171_crontab.urls')),
 ]

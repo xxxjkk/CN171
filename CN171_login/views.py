@@ -12,6 +12,9 @@ def index(request):
         #提示未登陆，5秒后返回
         return render(request, "login/login_notice.html", locals())
 
+def loginNotice(request):
+    # 提示未登陆，5秒后返回
+    return render(request, "login/login_notice.html", locals())
 
 def login(request):
     if request.session.get('is_login', None):
@@ -56,7 +59,7 @@ def my_login_required(func):
             return func(request)
         else:
             # 当前没有用户登录，跳转到登录页面
-            return HttpResponseRedirect('/login')
+            return HttpResponseRedirect('/loginnotice')
     return check_login_status
 
 # def register(request):

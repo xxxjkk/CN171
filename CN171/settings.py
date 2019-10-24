@@ -51,6 +51,9 @@ INSTALLED_APPS = [
     'CN171_login',
     'CN171_monitor',
     'CN171_order',
+    'CN171_crontab',
+    'djcelery',
+
 ]
 
 MIDDLEWARE = [
@@ -152,3 +155,47 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
+
+
+# 设置邮件域名
+EMAIL_HOST = 'smtp.163.com'
+# 设置端口号，为数字
+EMAIL_PORT = 25
+#设置发件人邮箱
+EMAIL_HOST_USER = config.get('PBOSS', 'pboss_order_mail_inbox')
+# 设置发件人 授权码
+EMAIL_HOST_PASSWORD = config.get('PBOSS', 'pboss_order_mail_password')
+# 设置是否启用安全链接
+EMAIL_USER_TLS = True
+
+
+
+
+#Celery配置
+# import djcelery
+# djcelery.setup_loader()
+# BROKER_BACKEND = 'redis'
+# BROKER_URL = 'redis://39.104.61.178:6379/1'
+# CELERY_RESULT_BACKEND = 'redis://39.104.61.178:6379/2'  #不配置则直接使用默认数据库
+# CELERY_IMPORTS = ('CN171_crontab.tasks', )
+# CELERY_TIMEZONE = 'Asia/Shanghai'
+# CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
+
+
+# Broker配置，使用Redis作为消息中间件
+BROKER_URL = 'redis://39.104.61.178:6379/1'
+
+# BACKEND配置，使用django orm作为结果存储
+CELERY_RESULT_BACKEND = 'redis://39.104.61.178:6379/2'
+
+# 结果序列化方案
+CELERY_RESULT_SERIALIZER = 'json'
+
+#设置时区
+CELERY_TIMEZONE = 'Asia/Shanghai'
+
+#设置beat数据库
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+
+

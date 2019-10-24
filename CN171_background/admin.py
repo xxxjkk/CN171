@@ -4,6 +4,6 @@ from django.contrib import admin
 from django.contrib import admin
 from . import models
 
-admin.site.register(models.BgTaskManagement)
-
-admin.site.register(models.BgTaskLog)
+# admin.site.register(models.BgTaskManagement)
+#
+# admin.site.register(models.BgTaskLog)
