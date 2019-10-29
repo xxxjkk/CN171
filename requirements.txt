@@ -1,10 +1,10 @@
-amqp==2.5.1
+amqp==1.4.9
 anyjson==0.3.3
 asn1crypto==0.24.0
 autopep8==1.4.4
 bcrypt==3.1.7
-billiard==3.6.1.0
-celery==4.3.0
+billiard==3.3.0.23
+celery==3.1.26.post2
 celery-with-redis==3.0
 certifi==2019.9.11
 cffi==1.12.3
@@ -20,7 +20,7 @@ et-xmlfile==1.0.1
 idna==2.8
 importlib-metadata==0.23
 jdcal==1.4.1
-kombu==4.6.5
+kombu==3.0.37
 more-itertools==7.2.0
 mysqlclient==1.4.4
 numpy==1.17.2
