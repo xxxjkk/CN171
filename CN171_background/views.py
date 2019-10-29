@@ -16,7 +16,6 @@ from CN171_login.views import my_login_required
 from CN171_tools import connecttool
 from django.db.models import Q
 from datetime import datetime
-from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 try:
