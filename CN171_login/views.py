@@ -52,11 +52,11 @@ def logout(request):
 #登录验证装饰器
 def my_login_required(func):
     '''自定义 登录验证 装饰器'''
-    def check_login_status(request):
+    def check_login_status(request, *args, **kwargs):
         '''检查登录状态'''
         if request.session.has_key('user_id'):
             # 当前有用户登录，正常跳转
-            return func(request)
+            return func(request, *args, **kwargs)
         else:
             # 当前没有用户登录，跳转到登录页面
             return HttpResponseRedirect('/loginnotice')
