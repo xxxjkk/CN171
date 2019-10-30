@@ -41,13 +41,13 @@ def pbossOrderMakebyMail(type, starttime, endtime):
     endtime = time.strftime('%Y/%m/%d %H:%M:%S', time.strptime(endtime, '%Y-%m-%d %H:%M:%S'))
 
     #根据不同类型执行不同的生成命令
-    if type == 'status':
+    if type == "状态":
         topic = "订单观察状态 " + starttime + "-" + endtime
         exec_result = sendEmail(topic, content, pboss_mail_inbox, pboss_mail_outbox)
-    elif type == 'node':
+    elif type == "节点":
         topic = "订单观察节点 " + starttime + "-" + endtime
         exec_result = sendEmail(topic, content, pboss_mail_inbox, pboss_mail_outbox)
-    elif type == 'rollback':
+    elif type == "回退":
         topic = "订单观察回退 " + starttime + "-" + endtime
         print(topic)
         print(content)
@@ -120,6 +120,8 @@ def retrMail():
 
     # 关闭连接
     server.quit()
+
+    return "成功"
 
 # indent用于缩进显示
 def print_info(msg, indent=0):

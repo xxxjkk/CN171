@@ -198,11 +198,7 @@
                     success: function (data) {
                         var data=JSON.parse(data)
                         if (data.existflag){
-                            if (!confirm(data.existdes)) {
-                                window.event.returnValue = false;
-                            }else{
-                                alert("保留功能，暂不开放")
-                            }
+                            alert(data.existdes)
                         }else{
                             if(data.executeflag == "成功"){
                                 alert("执行成功，待后台完成数据生成，详情请观察生成记录！")

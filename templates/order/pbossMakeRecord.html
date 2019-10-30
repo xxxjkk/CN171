@@ -26,23 +26,27 @@
                       <thead>
                         <tr>
                             <!--垂直居中：vertical-align: middle;-->
-                            <th width="5%" style="text-align:center;vertical-align: middle;">序号</th>
-                            <th width="10%" style="text-align:center;vertical-align: middle;">类型</th>
+                            <th width="3%" style="text-align:center;vertical-align: middle;">序号</th>
+                            <th width="8%" style="text-align:center;vertical-align: middle;">类型</th>
+                            <th width="10%" style="text-align:center;vertical-align: middle;">生成时间</th>
                             <th width="5%" style="text-align:center;vertical-align: middle;">生成方式</th>
-                            <th width="15%" style="text-align:center;vertical-align: middle;">生成时间</th>
+                            <th width="10%" style="text-align:center;vertical-align: middle;">开始时间</th>
+                            <th width="10%" style="text-align:center;vertical-align: middle;">结束时间</th>
                             <th width="5%" style="text-align:center;vertical-align: middle;">执行结果</th>
-                            <th width="25%" style="text-align:center;vertical-align: middle;">文件地址</th>
+                            <th width="20%" style="text-align:center;vertical-align: middle;">文件地址</th>
                         </tr>
                       </thead>
                       <tbody>
                         {% for record in page_objects %}
                         <tr class="even gradeX">
-                            <td width="5%" style="text-align:center;vertical-align: middle;">{{record.record_id}}</td>
-                            <td width="10%" style="text-align:center;vertical-align: middle;">{{record.record_type}}</td>
+                            <td width="3%" style="text-align:center;vertical-align: middle;">{{record.record_id}}</td>
+                            <td width="8%" style="text-align:center;vertical-align: middle;">{{record.record_type}}</td>
+                            <td width="10%" style="text-align:center;vertical-align: middle;">{{record.record_createtime}}</td>
                             <td width="5%" style="text-align:center;vertical-align: middle;">{{record.record_mode}}</td>
-                            <td width="15%" style="text-align:center;vertical-align: middle;">{{record.record_createtime}}</td>
+                            <td width="10%" style="text-align:center;vertical-align: middle;">{{record.record_starttime}}</td>
+                            <td width="10%" style="text-align:center;vertical-align: middle;">{{record.record_endtime}}</td>
                             <td width="5%" style="text-align:center;vertical-align: middle;">{{record.record_result}}</td>
-                            <td width="25%" style="text-align:center;vertical-align: middle;">{{record.record_filedir}}</td>
+                            <td width="20%" style="text-align:center;vertical-align: middle;">{{record.record_filedir}}</td>
                         </tr>
                         {% endfor %}
                       </tbody>

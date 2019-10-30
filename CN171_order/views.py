@@ -3,14 +3,14 @@ from django.shortcuts import render
 
 from CN171_order.models import PbossOrderStatus,PbossOrderRecord,PbossOrderNode,PbossOrderRollback
 from CN171_background.api import pages
-from CN171_tools.connecttool import pbossOrderMake
 from CN171_tools.mailutils import pbossOrderMakebyMail
 from datetime import datetime
-from django.contrib.auth.decorators import login_required
+from CN171_login.views import my_login_required
 
 # Create your views here.
 
 #PBOSS订单状态主函数
+@my_login_required
 def pbossOrderStatus(request):
     order_list = PbossOrderStatus.objects.all()
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(
@@ -32,44 +32,13 @@ def pbossOrderStatusMake(request):
     starttime = request.POST.get('starttime')
     endtime  = request.POST.get('endtime')
 
-    #若相关时间段已存在数据，是否仍然生成标识，由前台传入
-    flag = request.POST.get('flag')
+    #调用PBOSS订单观察生成记录插入公共函数
+    res = pbossMakeRecordInsert("状态", starttime, endtime)
 
-    if flag:
-        return None
-    else:
-        order_list = PbossOrderStatus.objects.filter(order_starttime=starttime,order_endtime=endtime)
-        if order_list:
-            back_dic = {'existflag': "存在",'existdes': "相关时间段已经存在观察数据，是否仍然执行生成操作？"}
-        else:
-            pbrecord = PbossOrderRecord()
-            pbrecord.record_type = "PBOSS订单-状态"
-            pbrecord.record_mode = "手动生成"
-            pbrecord.record_createtime = datetime.now()
-            pbrecord.record_result = "执行中"
-            pbrecord.record_filedir = "-"
-            pbrecord.record_starttime = starttime
-            pbrecord.record_endtime = endtime
-
-            #ssh模式
-            # execresult = pbossOrderMake("status")
-
-            #邮件模式
-            execresult = pbossOrderMakebyMail("status", starttime, endtime)
-
-
-            if execresult == "成功":
-                back_dic = {'executeflag': "成功"}
-                pbrecord.record_result = "执行中"
-            elif execresult == "失败":
-                back_dic  = {'executeflag': "失败",'faildes': "执行异常"}
-                pbrecord.record_result = "失败"
-
-            pbrecord.save()
-        import json
-        return HttpResponse(json.dumps(back_dic))
+    return res
 
 #PBOSS订单节点主函数
+@my_login_required
 def pbossOrderNode(request):
     order_list = PbossOrderNode.objects.all()
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(
@@ -91,43 +60,13 @@ def pbossOrderNodeMake(request):
     starttime = request.POST.get('starttime')
     endtime  = request.POST.get('endtime')
 
-    #若相关时间段已存在数据，是否仍然生成标识，由前台传入
-    flag = request.POST.get('flag')
+    # 调用PBOSS订单观察生成记录插入公共函数
+    res = pbossMakeRecordInsert("节点", starttime, endtime)
 
-    if flag:
-        return None
-    else:
-        order_list = PbossOrderNode.objects.filter(order_starttime=starttime,order_endtime=endtime)
-        if order_list:
-            back_dic = {'existflag': "存在",'existdes': "相关时间段已经存在观察数据，是否仍然执行生成操作？"}
-        else:
-            pbrecord = PbossOrderRecord()
-            pbrecord.record_type = "PBOSS订单-节点"
-            pbrecord.record_mode = "手动生成"
-            pbrecord.record_createtime = datetime.now()
-            pbrecord.record_result = "执行中"
-            pbrecord.record_filedir = "-"
-            pbrecord.record_starttime = starttime
-            pbrecord.record_endtime = endtime
-
-            #ssh模式
-            # execresult = pbossOrderMake("node")
-
-            #邮件模式
-            execresult = pbossOrderMakebyMail("node", starttime, endtime)
-
-            if execresult == "成功":
-                back_dic = {'executeflag': "成功"}
-                pbrecord.record_result = "执行中"
-            elif execresult == "失败":
-                back_dic  = {'executeflag': "失败",'faildes': "执行异常"}
-                pbrecord.record_result = "失败"
-
-            pbrecord.save()
-        import json
-        return HttpResponse(json.dumps(back_dic))
+    return res
 
 #PBOSS订单回退主函数
+@my_login_required
 def pbossOrderRollback(request):
     order_list = PbossOrderRollback.objects.all()
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(
@@ -149,40 +88,10 @@ def pbossOrderRollbackMake(request):
     starttime = request.POST.get('starttime')
     endtime = request.POST.get('endtime')
 
-    # 若相关时间段已存在数据，是否仍然生成标识，由前台传入
-    flag = request.POST.get('flag')
+    # 调用PBOSS订单观察生成记录插入公共函数
+    res = pbossMakeRecordInsert("回退", starttime, endtime)
 
-    if flag:
-        return None
-    else:
-        order_list = PbossOrderRollback.objects.filter(order_starttime=starttime, order_endtime=endtime)
-        if order_list:
-            back_dic = {'existflag': "存在", 'existdes': "相关时间段已经存在观察数据，是否仍然执行生成操作？"}
-        else:
-            pbrecord = PbossOrderRecord()
-            pbrecord.record_type = "PBOSS订单-回退"
-            pbrecord.record_mode = "手动生成"
-            pbrecord.record_createtime = datetime.now()
-            pbrecord.record_filedir = "-"
-            pbrecord.record_starttime = starttime
-            pbrecord.record_endtime = endtime
-
-            #ssh模式
-            # execresult = pbossOrderMake("rollback")
-
-            #邮件模式
-            execresult = pbossOrderMakebyMail("rollback", starttime, endtime)
-
-            if execresult == "成功":
-                back_dic = {'executeflag': "成功"}
-                pbrecord.record_result = "执行中"
-            elif execresult == "失败":
-                back_dic = {'executeflag': "失败", 'faildes': "执行异常"}
-                pbrecord.record_result = "失败"
-
-            pbrecord.save()
-        import json
-        return HttpResponse(json.dumps(back_dic))
+    return res
 
 #PBOSS订单观察生成记录查询后台函数
 def pbossMakeRecordQuery(request):
@@ -193,12 +102,41 @@ def pbossMakeRecordQuery(request):
     return render(request, "order/pbossMakeRecord.html", locals())
 
 #PBOSS订单观察生成记录插入公共函数
-def pbossMakeRecordInsert(request):
-    return None
+def pbossMakeRecordInsert(type, starttime, endtime):
+    record_type = "PBOSS订单-" + type
+    order_record = PbossOrderRecord.objects.filter(record_type=record_type, record_result="执行中", record_starttime=starttime,
+                                                   record_endtime=endtime)
+    if order_record:
+        back_dic = {'existflag': "存在",'existdes': "相关起始时间段已经存在执行中的任务，请等待执行完成后再进行新的生成操作，"
+                                                  "详情请见生成记录！"}
+    else:
+        pbrecord = PbossOrderRecord()
+        pbrecord.record_type = record_type
+        pbrecord.record_mode = "手动生成"
+        pbrecord.record_createtime = datetime.now()
+        pbrecord.record_result = "执行中"
+        pbrecord.record_filedir = "-"
+        pbrecord.record_starttime = starttime
+        pbrecord.record_endtime = endtime
+
+        #ssh模式
+        # execresult = pbossOrderMake("status")
+
+        #邮件模式
+        execresult = pbossOrderMakebyMail(type, starttime, endtime)
+
+        if execresult == "成功":
+            back_dic = {'executeflag': "成功"}
+            pbrecord.record_result = "执行中"
+        elif execresult == "失败":
+            back_dic  = {'executeflag': "失败",'faildes': "执行异常"}
+            pbrecord.record_result = "失败"
+
+        pbrecord.save()
+    import json
+    return HttpResponse(json.dumps(back_dic))
 
 
-def test(request):
-    return render(request, "test.html", locals())
 
 
 

@@ -27,7 +27,7 @@ localfiledir = config.get('PBOSS', 'pboss_order_local_filedir')
 localfilebakdir = config.get('PBOSS', 'pboss_order_local_filedirbak')
 
 #excel文件读取主函数
-def excelread(request):
+def excelread():
     #获取文件夹下的所有文件
     files = os.listdir(localfiledir)
 
@@ -51,7 +51,6 @@ def excelread(request):
         else:
             print("未知类型文件《" + file + "》，不进行处理")
 
-    return render(request, "test.html")
 
 #状态类型excel文件读函数
 def statusExcelRead(file):

@@ -9,8 +9,7 @@
 from django.conf.urls import url
 from CN171_order import views as orderviews
 from CN171_order import excelutils
-from CN171_order import testmail
-from CN171_tools import mailutils
+from CN171_tools import testmail
 
 urlpatterns = [
 
@@ -32,7 +31,4 @@ urlpatterns = [
     #pboss订单观察生成记录页面
     url(r'^pbossMakeRecord/', orderviews.pbossMakeRecordQuery, name='pbossMakeRecord'),
 
-    url(r'^test/', orderviews.test, name='test'),
-    url(r'^mail/', testmail.test, name='mail'),
-    url(r'^excel/', excelutils.excelread, name='excel'),
 ]
