@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block self_head_css_js %}
+    <script src="/static/layer/layer.js"></script>
+    <script src="/static/js/base.js"></script>
+    <script src="/static/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="/static/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="/static/plugins/datatables/dataTables.bootstrap.css"></script>
+
+    <script src="/static/incubator-echarts-4.4.0-dist/echarts.min.js"></script>
+
+{% endblock %}
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h4>容量预测</h4>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <form action="" method="post" id="capacityForm">
+        {% csrf_token %}
+            <div class="box">
+                <div class="box-header">
+                    <div class="form-group form-inline input-daterange">
+                          &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;<label>数据库名:  &nbsp;</label>
+                        <input type="text" name="dbname" id="database">
+
+                        &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;
+
+                        <label>预测开始时间:  &nbsp;</label>
+                        <input type="text" class="form-control" name="starttime" placeholder="YYYY-MM-DD hh:mm:ss" id="start-picker" readonly value="{{ starttime }}">
+
+                          &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;<label>容量总量:  &nbsp;</label>
+                        <input type="text" >
+                    </div>
+                    <div class="form-group form-inline input-daterange">
+                          &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;<label>表空间名:  &nbsp;</label>
+                        <input type="text" name="tablespace" id="tablespace">&nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;
+
+
+                        <label>预测结束时间:  &nbsp;</label>
+                        <input type="text" class="form-control" name="endtime" placeholder="YYYY-MM-DD hh:mm:ss" id="end-picker" readonly value="{{ endtime }}">
+                          &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;<label>告警阈值:  &nbsp;</label>
+                        <input type="text" >
+
+                        &nbsp;  &nbsp;  &nbsp&nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;
+                        <div class="btn-group">
+                            <a id="make" style="display: none" href="#" class="btn btn-success" onclick="">生 成</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+
+                <div class="box-body" align="center">
+                    <div class="div1" id="main1" style="width: 600px;height:400px;"></div>
+                    <div class="div2" id="main2" style="width: 600px;height:400px;"></div>
+               </div>
+            </div>
+        </form>
+    </section>
+<!-- /.content -->
+
+</div>
+
+<style>
+.div1 {
+float: left;
+}
+.div2 {
+float: left;
+}
+</style>
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main1'));
+
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            text: '按时间预测结果'
+        },
+        tooltip: {},
+        legend: {
+            data:['预测线', '实际线']
+        },
+        xAxis: {
+            type: 'category',
+            data: ['10月1日', '10月3日', '10月5日', '10月7日', '10月9日', '10月11日', '10月13日', '10月15日', '10月17日', '10月19日', '10月21日', '10月23日']
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                name: '预测线',
+                type: 'line',
+                data: [10, 13, 12, 15, 19, 20, 21, 22, 25, 29, 30, 31]
+            },
+            {
+                name: '实际线',
+                type: 'line',
+                data: [5, 8, 7, 10, 14, 15]
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main2'));
+
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            text: '按容量预测结果'
+        },
+        tooltip: {},
+        legend: {
+            data:['预测线']
+        },
+        xAxis: {
+            type: 'category',
+            data: ['10月1日', '10月3日', '10月5日', '10月7日', '10月9日', '10月11日', '10月13日', '10月15日', '10月17日', '10月19日', '10月21日', '10月23日']
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [{
+            name: '预测线',
+            type: 'line',
+            data: [10, 13, 12, 15, 19, 20, 21, 22, 25, 29, 30, 31],
+        }]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+
+
+{% endblock %}

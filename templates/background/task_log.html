@@ -131,10 +131,10 @@ $(function(){
         endtimepicker = document.getElementById('end-picker').value;
         bg_module = document.getElementById('module').value;
         bg_domain = document.getElementById('domain').value;
-        if (starttimepicker && endtimepicker&&bg_module) {
+        if (starttimepicker || endtimepicker||bg_module||bg_domain) {
             window.location ="{% url 'taskLogSearch' %}?" + args;
         }else{
-            msg = "不能为空!";
+            msg = "起止时间/模块/中心不能为空!";
             alert(msg);
         }
     }
@@ -187,7 +187,7 @@ function taskLogDetail(logId){
     type: 2,
     title: '后台日志详情',
     closeBtn: 1,
-    area: ['700px', '550px'],
+    area: ['700px', '600px'],
     shadeClose: true, //点击遮罩关闭
     content: ['/background/taskLogDetail/?bg_log_id='+ logId],
 {#    end:function(){#}

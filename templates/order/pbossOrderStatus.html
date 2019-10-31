@@ -173,30 +173,34 @@
     function makebytime(){
         starttimepicker = document.getElementById('start-picker').value;
         endtimepicker = document.getElementById('end-picker').value;
-        if (!confirm("确定生成?")) {
-            window.event.returnValue = false;
-        }else{
-            $.ajax({
-                type: "post",
-                data: {starttime: starttimepicker,endtime: endtimepicker,csrfmiddlewaretoken: '{{ csrf_token }}'},
-                url: "{% url 'pbossOrderStatusMake' %}",
-                success: function (data) {
-                    var data=JSON.parse(data)
-                    if (data.existflag){
-                        if (!confirm(data.existdes)) {
-                            window.event.returnValue = false;
+        if (starttimepicker && endtimepicker) {
+            if (!confirm("确定生成?")) {
+                window.event.returnValue = false;
+            }else{
+                $.ajax({
+                    type: "post",
+                    data: {starttime: starttimepicker,endtime: endtimepicker,csrfmiddlewaretoken: '{{ csrf_token }}'},
+                    url: "{% url 'pbossOrderStatusMake' %}",
+                    success: function (data) {
+                        var data=JSON.parse(data)
+                        if (data.existflag){
+                            alert(data.existdes)
                         }else{
-                            alert("保留功能，暂不开放")
-                        }
-                    }else{
-                        if(data.executeflag == "成功"){
-                            alert("执行成功，待后台完成数据生成，详情请观察生成记录！")
-                        }else{
-                            alert("执行失败，失败原因为：" + data.faildes)
+                            if(data.executeflag == "成功"){
+                                alert("执行成功，待后台完成数据生成，详情请观察生成记录！")
+                            }else{
+                                alert("执行失败，失败原因为：" + data.faildes)
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
+        }else if (starttimepicker){
+            alert("结束时间不能为空!");
+        }else if (endtimepicker){
+            alert("开始时间不能为空!");
+        }else{
+            alert("开始/结束时间不能为空!");
         }
     }
 </script>

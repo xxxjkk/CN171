@@ -9,7 +9,7 @@
 }
 
 .flip-container, .front, .back {
-    width: 240px;
+    width: 220px;
     height: 320px;
     display: inline-block;
 }
@@ -56,6 +56,7 @@
     font-family:"Microsoft YaHei";
     font-size: 14px;
     text-indent: 28px;
+    text-align: left;
 }
 
 /* a标签字体配置 */

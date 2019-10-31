@@ -1,3 +1,4 @@
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from . import models
 from .forms import UserForm
@@ -11,6 +12,9 @@ def index(request):
         #提示未登陆，5秒后返回
         return render(request, "login/login_notice.html", locals())
 
+def loginNotice(request):
+    # 提示未登陆，5秒后返回
+    return render(request, "login/login_notice.html", locals())
 
 def login(request):
     if request.session.get('is_login', None):
@@ -44,6 +48,19 @@ def logout(request):
     request.session.flush()
     return redirect('/login/')
 
+
+#登录验证装饰器
+def my_login_required(func):
+    '''自定义 登录验证 装饰器'''
+    def check_login_status(request, *args, **kwargs):
+        '''检查登录状态'''
+        if request.session.has_key('user_id'):
+            # 当前有用户登录，正常跳转
+            return func(request, *args, **kwargs)
+        else:
+            # 当前没有用户登录，跳转到登录页面
+            return HttpResponseRedirect('/loginnotice')
+    return check_login_status
 
 # def register(request):
 #     if request.session.get('is_login', None):
