@@ -19,8 +19,8 @@ class BgTaskManagement(models.Model):
     bg_task_query = models.TextField(u"查询脚本" )
     bg_insert_time = models.DateTimeField(u"录入时间", auto_now_add=True)
 
-    def __unicode__(self):
-        return self.dis_name
+    def __str__(self):
+        return "模块:"+self.bg_module + " 中心:" + self.bg_domain
 
     class Meta:
         verbose_name = u'后台管理表'
@@ -39,7 +39,7 @@ class BgTaskLog(models.Model):
     bg_operation_time = models.DateTimeField(u"操作时间")
     bg_log_dir = models.CharField(u"详细日志", max_length=256,null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.dis_name
 
     class Meta:
@@ -52,7 +52,7 @@ class BgDomainStatusDict(models.Model):
     bg_domainstatus_id = models.AutoField(primary_key=True)
     bg_domainstatus = models.CharField(max_length=32, null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.dis_name
 
     class Meta:
