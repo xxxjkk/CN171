@@ -9,7 +9,6 @@
 from django.conf.urls import url
 from CN171_order import views as orderviews
 from CN171_order import excelutils
-from CN171_tools import testmail
 
 urlpatterns = [
 
