@@ -1,7 +1,9 @@
 from django import forms
-from django.forms import widgets
+from django.forms import widgets, models
 from django.forms.widgets import *
-from CN171_cmdb.models import HostPwdOprLog
+
+from CN171_background.models import BgTaskManagement
+from CN171_cmdb.models import HostPwdOprLog, CmdbHost
 
 
 class DetailLogForm(forms.ModelForm):
@@ -23,8 +25,6 @@ class HostPwdEditForm(forms.Form):
     new_password2 = forms.CharField(label=u'新密码', error_messages={'required': '请重复新输入密码'},
       widget=forms.PasswordInput(attrs={'class': 'form-control', 'style': 'width:200px;','placeholder': u'必填项'}))
 
-
-
     #验证两次密码是否一致
     def clean_new_password2(self):
         password1 = self.cleaned_data.get('new_password1')
@@ -42,3 +42,25 @@ class HostPwdEditForm(forms.Form):
 class NormalUserForm(forms.Form):
     username = forms.CharField()
     headImg = forms.FileField()
+
+
+class CmdbHostForm(forms.ModelForm):
+    class Meta:
+        model= CmdbHost
+        fields=('bg','cmdb_host_name','cmdb_host_type','cmdb_host_pod','cmdb_host_system','cmdb_host_busip','cmdb_host_manip','cmdb_host_cpu','cmdb_host_RAM','cmdb_host_local_disc','cmdb_host_outlay_disc','cmdb_host_status')
+
+        widgets = {
+            'bg': Select( attrs={'class': 'form-control', 'style': 'width:530px;', 'placeholder': u'必选项'}),
+            'cmdb_host_name': TextInput(attrs={'class': 'form-control', 'style': 'width:530px;', 'placeholder': u'必填项'}),
+            'cmdb_host_type': TextInput(attrs={'class': 'form-control', 'style': 'width:530px;', 'placeholder': u'必填项'}),
+            'cmdb_host_pod': TextInput(attrs={'class': 'form-control', 'style': 'width:530px;', 'placeholder': u'必填项'}),
+            'cmdb_host_system': TextInput(attrs={'class': 'form-control', 'style': 'width:530px;', 'placeholder': u'必填项'}),
+            'cmdb_host_busip': TextInput(attrs={'class': 'form-control', 'style': 'width:530px;', 'placeholder': u'必填项'}),
+            'cmdb_host_manip': TextInput(attrs={'class': 'form-control', 'style': 'width:530px;', 'placeholder': u'必填项'}),
+            'cmdb_host_cpu': TextInput(attrs={'class': 'form-control', 'style': 'width:530px;', 'placeholder': u'必填项'}),
+            'cmdb_host_RAM': TextInput(attrs={'class': 'form-control', 'style': 'width:530px;', 'placeholder': u'必填项'}),
+            'cmdb_host_local_disc': TextInput(attrs={'class': 'form-control', 'style': 'width:530px;', 'placeholder': u'必填项'}),
+            'cmdb_host_outlay_disc': TextInput(attrs={'class': 'form-control', 'style': 'width:530px;', 'placeholder': u'必填项'}),
+            'cmdb_host_status': Select(attrs={'class': 'form-control', 'style': 'width:530px;'}),
+        }
+

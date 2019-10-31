@@ -12,6 +12,8 @@ urlpatterns = [
     url(r'^host_pwd_detail_log/', cmdbviews.hostPwdDetailLog, name = 'hostPwdDetailLog'),
     url(r'^host_pwd_edit_page/',cmdbviews.redEditHostPwdPage, name='redEditHostPwdPage'),
     url(r'^host_pwd_edit/',cmdbviews.editHostPwd, name='editHostPwd'),
-
+    url(r'^cluster_app_detail/',cmdbviews.clusterAppDetail, name='clusterAppDetail'),
+    url(r'^host_add_page/',cmdbviews.hostAddPage,name='hostAddPage'),
+    url(r'^host_del/',cmdbviews.hostDel,name='hostDel')
 
 ]
