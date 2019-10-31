@@ -5,12 +5,12 @@
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h4>主机密码修改页面</h4>
+        <h4>添加主机页面</h4>
     </section>
 
     <!-- Main content -->
     <section class="content">
-        <form id="host_pwd_edit_form" method="post" enctype="multipart/form-data">
+        <form id="host_add_form" method="post" >
         {% csrf_token %}
             <div class="box" align="left">
                 <div class="box-header"></div>
@@ -18,7 +18,7 @@
                 <div class="box-body">
                  {{form.as_p}}
                </div>
-                <input id="btn" class="btn btn-primary" style="width: 60pt" value="修改">&nbsp;&nbsp;
+                <input id="btn" class="btn btn-primary" style="width: 60pt" value="保存">&nbsp;&nbsp;
                 <input type="reset" name="reset1" class="btn btn-primary" style="width: 60pt" value="取消">
                 <br/><br/>
             </div>
@@ -33,13 +33,20 @@ $(document).ready(function(){
        $('.c1').remove();
        var form_data = new FormData();
        form_data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-       form_data.append('modified_host_list_file', $('#id_modified_host_list_file')[0].files[0]);
-       form_data.append('modified_host_user', $('#id_modified_host_user').val());
-       form_data.append('old_password', $('#id_old_password').val());
-       form_data.append('new_password1', $('#id_new_password1').val());
-       form_data.append('new_password2', $('#id_new_password2').val());
+       form_data.append('bg', $('#id_bg').val());
+       form_data.append('cmdb_host_name', $('#id_cmdb_host_name').val());
+       form_data.append('cmdb_host_type', $('#id_cmdb_host_type').val());
+       form_data.append('cmdb_host_pod', $('#id_cmdb_host_pod').val());
+       form_data.append('cmdb_host_system', $('#id_cmdb_host_system').val());
+       form_data.append('cmdb_host_busip', $('#id_cmdb_host_busip').val());
+       form_data.append('cmdb_host_manip', $('#id_cmdb_host_manip').val());
+       form_data.append('cmdb_host_cpu', $('#id_cmdb_host_cpu').val());
+       form_data.append('cmdb_host_RAM', $('#id_cmdb_host_RAM').val());
+       form_data.append('cmdb_host_local_disc', $('#id_cmdb_host_local_disc').val());
+       form_data.append('cmdb_host_outlay_disc', $('#id_cmdb_host_outlay_disc').val());
+       form_data.append('cmdb_host_status', $('#id_cmdb_host_status').val());
        $.ajax({
-            url:'{% url 'editHostPwd' %}',
+            url:'{% url 'hostAddPage' %}',
             data:form_data,
             type: 'POST',
             dataType: 'json',
@@ -54,19 +61,21 @@ $(document).ready(function(){
                         var tag = document.createElement('span');
                         tag.className='c1';
                         tag.innerHTML = args.msg;
-                        $("#host_pwd_edit_form").find('input[name="reset1"]').after(tag);
+                        $("#host_add_form").find('input[name="reset1"]').after(tag);
                 }else {
                     if(args.form_status){
                         var tag = document.createElement('span');
                         tag.className='c1';
                         tag.innerHTML = args.msg;
-                        $("#host_pwd_edit_form").find('input[name="reset1"]').after(tag);
+                        $("#host_add_form").find('input[name="reset1"]').after(tag);
                     }else{
                         $.each(args.msg1,function (index,value) {
                             var tag = document.createElement('span');
                             tag.className='c1';
                             tag.innerHTML = value[0];
-                            $("#host_pwd_edit_form").find('input[name="'+ index +'"]').after(tag);
+                            if(index=='bg')
+                                $("#host_add_form").find('input[name="'+ index +'"]').after(tag);
+                            $("#host_add_form").find('input[name="'+ index +'"]').after(tag);
                     })
                     }
                 }
@@ -74,11 +83,7 @@ $(document).ready(function(){
         })
     })
 
-    {#  $('#id_modified_host_list_file').change(function(){  #}
-     {#    alert( this.value);#}
-   {# })#}
 })
-
 
 </script>
 
