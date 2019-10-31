@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block self_head_css_js %}{% endblock %}
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h4>主机密码修改页面</h4>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <form id="host_pwd_edit_form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+            <div class="box" align="left">
+                <div class="box-header"></div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                 {{form.as_p}}
+               </div>
+                <input id="btn" class="btn btn-primary" style="width: 60pt" value="修改">&nbsp;&nbsp;
+                <input type="reset" name="reset1" class="btn btn-primary" style="width: 60pt" value="取消">
+                <br/><br/>
+            </div>
+        </form>
+    </section>
+<!-- /.content -->
+</div>
+
+<script>
+$(document).ready(function(){
+    $('#btn').click(function(e){
+       $('.c1').remove();
+       var form_data = new FormData();
+       form_data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+       form_data.append('modified_host_list_file', $('#id_modified_host_list_file')[0].files[0]);
+       form_data.append('modified_host_user', $('#id_modified_host_user').val());
+       form_data.append('old_password', $('#id_old_password').val());
+       form_data.append('new_password1', $('#id_new_password1').val());
+       form_data.append('new_password2', $('#id_new_password2').val());
+       $.ajax({
+            url:'{% url 'editHostPwd' %}',
+            data:form_data,
+            type: 'POST',
+            dataType: 'json',
+            // 告诉jQuery不要去处理发送的数据, 发送对象。
+            processData : false,
+            // 告诉jQuery不要去设置Content-Type请求头
+            contentType : false,
+            // 获取POST所需的csrftoken
+            success:function (args) {
+                //console.log(args);
+                if (args.status){
+                        var tag = document.createElement('span');
+                        tag.className='c1';
+                        tag.innerHTML = args.msg;
+                        $("#host_pwd_edit_form").find('input[name="reset1"]').after(tag);
+                }else {
+                    if(args.form_status){
+                        var tag = document.createElement('span');
+                        tag.className='c1';
+                        tag.innerHTML = args.msg;
+                        $("#host_pwd_edit_form").find('input[name="reset1"]').after(tag);
+                    }else{
+                        $.each(args.msg1,function (index,value) {
+                            var tag = document.createElement('span');
+                            tag.className='c1';
+                            tag.innerHTML = value[0];
+                            $("#host_pwd_edit_form").find('input[name="'+ index +'"]').after(tag);
+                    })
+                    }
+                }
+            }
+        })
+    })
+
+    {#  $('#id_modified_host_list_file').change(function(){  #}
+     {#    alert( this.value);#}
+   {# })#}
+})
+
+
+</script>
+
+{% endblock %}

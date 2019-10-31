@@ -96,7 +96,7 @@
                                                style="list-style-type:none">停止</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                             <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','restart')"
                                                style="list-style-type:none">重启</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                                            <a href="#" style="list-style-type:none">详情</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                                            <a href="#" onclick="appDetailByMoDo('{{task.bg_module}}','{{task.bg_domain}}')" style="list-style-type:none">详情</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                             <a href="#" style="list-style-type:none" onclick="return taskedit({{ task.bg_id }})">编辑</a>
                                         </td>
                                         <td width="12%" style="text-align:center;">{{task.bg_lastopr_user}}</td>
@@ -164,6 +164,9 @@ function change_info(){
    window.location = "{% url 'taskManagement' %}?" + args
   }
 
+function appDetailByMoDo(bg_module, bg_domain){
+    window.location="{% url 'appDetailByMoDo' %}?bg_module=" + bg_module + "&bg_domain=" + bg_domain;
+}
 
 </script>
 <script>
