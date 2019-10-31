@@ -6,6 +6,7 @@ import threading
 
 from django.http import HttpResponse, JsonResponse, FileResponse, HttpResponseRedirect
 from CN171_background import models
+from CN171_background.action import taskOneAction, checkResultAction
 from CN171_background.api import pages,get_object
 from django.shortcuts import render, redirect
 
@@ -59,7 +60,15 @@ def taskExecuteOne(request):
     bgTaskManagement.bg_status = "进行中"
     bgTaskManagement.save()
     bg_action = request.POST.get('bg_action')
-    tasks.taskOne.delay(bg_id,bg_action,opr_user)
+    bg_log = BgTaskLog()
+    bg_log.bg_id = bg_id
+    bg_log.bg_operation_time = datetime.now()
+    bg_log.bg_operation_user = opr_user
+    bg_log.bg_opr_result = "待执行"
+    # 写入日志文件
+    bg_log.save()
+    bg_log_id = bg_log.bg_log_id
+    tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id)
     return JsonResponse({'ret': "True"})
 
 # 批量启动按钮
@@ -74,7 +83,15 @@ def batchTaskStart(request):
         if  bgTaskManagement.bg_status=="停止":
             bgTaskManagement.bg_status = "进行中"
             bgTaskManagement.save()
-            tasks.taskOne.delay(bg_id,bg_action,opr_user)
+            bg_log = BgTaskLog()
+            bg_log.bg_id = bg_id
+            bg_log.bg_operation_time = datetime.now()
+            bg_log.bg_operation_user = opr_user
+            bg_log.bg_opr_result = "待执行"
+            # 写入日志文件
+            bg_log.save()
+            bg_log_id = bg_log.bg_log_id
+            tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id)
             returnmsg = "True"
         else:
             returnmsg = "False"
@@ -93,7 +110,15 @@ def batchTaskStop(request):
         if  bgTaskManagement.bg_status == "正常"or bgTaskManagement.bg_status == "部分正常" or bgTaskManagement.bg_status == "异常" :
             bgTaskManagement.bg_status = "进行中"
             bgTaskManagement.save()
-            tasks.taskOne.delay(bg_id,bg_action,opr_user)
+            bg_log = BgTaskLog()
+            bg_log.bg_id = bg_id
+            bg_log.bg_operation_time = datetime.now()
+            bg_log.bg_operation_user = opr_user
+            bg_log.bg_opr_result = "待执行"
+            # 写入日志文件
+            bg_log.save()
+            bg_log_id = bg_log.bg_log_id
+            tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id)
             returnmsg = "True"
         else:
             returnmsg = "False"
@@ -111,7 +136,15 @@ def batchTaskReboot(request):
         if bgTaskManagement.bg_status == "正常" or bgTaskManagement.bg_status == "部分正常" or bgTaskManagement.bg_status == "异常":
             bgTaskManagement.bg_status = "进行中"
             bgTaskManagement.save()
-            tasks.taskOne.delay(bg_id, bg_action, opr_user)
+            bg_log = BgTaskLog()
+            bg_log.bg_id = bg_id
+            bg_log.bg_operation_time = datetime.now()
+            bg_log.bg_operation_user = opr_user
+            bg_log.bg_opr_result = "待执行"
+            # 写入日志文件
+            bg_log.save()
+            bg_log_id = bg_log.bg_log_id
+            tasks.taskOne.delay(bg_id, bg_action, opr_user,bg_log_id)
             returnmsg = "True"
         else:
             returnmsg = "False"
@@ -130,7 +163,15 @@ def reLoad(request):
         if bgTaskManagement.bg_status != "进行中":
             bgTaskManagement.bg_status = "进行中"
             bgTaskManagement.save()
-            tasks.taskOne.delay(bg_id, bg_action, opr_user)
+            bg_log = BgTaskLog()
+            bg_log.bg_id = bg_id
+            bg_log.bg_operation_time = datetime.now()
+            bg_log.bg_operation_user = opr_user
+            bg_log.bg_opr_result = "待执行"
+            # 写入日志文件
+            bg_log.save()
+            bg_log_id = bg_log.bg_log_id
+            tasks.taskOne.delay(bg_id, bg_action, opr_user,bg_log_id)
             returnmsg = "True"
         else:
             returnmsg = "False"
@@ -237,27 +278,42 @@ def taskLogSearch(request):
     endtime = request.GET.get('endtime')
     bg_module = request.GET.get('bg_module')
     bg_domain = request.GET.get('bg_domain')
+    bg_id_list = []
     # bg_operation = request.GET.get('bg_operation')
     #bg_opr_user = request.GET.get('bg_opr_user')
-    tm = models.BgTaskManagement.objects.get(bg_module=bg_module , bg_domain=bg_domain)
-    print(tm.bg_module)
-    bg_id = tm.bg_id
-    taskLog_list = BgTaskLog.objects.filter(bg_operation_time__gte=starttime,bg_operation_time__lte=endtime,bg_id=bg_id)
-
-    for i in taskLog_list:
-        bg_id = i.bg_id
-        bg_log_id = i.bg_log_id
-        taskManagement_i = models.BgTaskManagement.objects.get(bg_id=bg_id)
-        bg_module = taskManagement_i.bg_module
-        bg_domain = taskManagement_i.bg_domain
-        bg_operation_user = i.bg_operation_user
-        bg_operation = i.bg_operation
-        bg_opr_result = i.bg_opr_result
-        bg_operation_time = i.bg_operation_time
-        log_dict = {"bg_log_id": bg_log_id, "bg_module": bg_module, "bg_domain": bg_domain,
-                    "bg_operation_user": bg_operation_user, "bg_operation": bg_operation,
-                    "bg_opr_result": bg_opr_result, "bg_operation_time": bg_operation_time}
-        log_list.append(log_dict)
+    if bg_domain and bg_module:
+        tm = models.BgTaskManagement.objects.get(bg_domain=bg_domain,bg_module=bg_module)
+        bg_id = tm.bg_id
+        bg_id_list.append(bg_id)
+    elif bg_domain:
+        tm = models.BgTaskManagement.objects.filter(bg_domain=bg_domain)
+        for i in tm:
+            bg_id = i.bg_id
+            bg_id_list.append(bg_id)
+    elif bg_module:
+        tm = models.BgTaskManagement.objects.filter(bg_module=bg_module)
+        for i in tm:
+            bg_id = i.bg_id
+            bg_id_list.append(bg_id)
+    for id in bg_id_list:
+        if starttime and endtime:
+            taskLog_list = BgTaskLog.objects.filter(bg_operation_time__gte=starttime, bg_operation_time__lte=endtime,bg_id=bg_id)
+        else:
+            taskLog_list = BgTaskLog.objects.filter(bg_id=bg_id)
+        for i in taskLog_list:
+            bg_id = i.bg_id
+            bg_log_id = i.bg_log_id
+            taskManagement_i = models.BgTaskManagement.objects.get(bg_id=bg_id)
+            bg_module = taskManagement_i.bg_module
+            bg_domain = taskManagement_i.bg_domain
+            bg_operation_user = i.bg_operation_user
+            bg_operation = i.bg_operation
+            bg_opr_result = i.bg_opr_result
+            bg_operation_time = i.bg_operation_time
+            log_dict = {"bg_log_id": bg_log_id, "bg_module": bg_module, "bg_domain": bg_domain,
+                        "bg_operation_user": bg_operation_user, "bg_operation": bg_operation,
+                         "bg_opr_result": bg_opr_result, "bg_operation_time": bg_operation_time}
+            log_list.append(log_dict)
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(log_list, request)
     return render(request, "background/task_log.html", locals())
 
@@ -268,10 +324,14 @@ def taskLogDetail(request):
     bg_log_id = request.GET.get("bg_log_id")
     obj = get_object(BgTaskLog, bg_log_id=bg_log_id)
     log_dir = obj.bg_log_dir
-    with open(log_dir, 'r+',newline = "\n") as f:
-         log = f.read()
-         print(log[0])
-    return render(request, 'background/task_log_detail.html', locals(),{'log':log[0],'log_dir':log_dir})
+    try:
+        with open(log_dir, 'r+', encoding='utf-8') as f:
+            log = f.read()
+            log_info = log[0]
+            print(log[0])
+    except:
+        log_info = "日志还未生成完毕"
+    return render(request, 'background/task_log_detail.html', locals(),{'log':log_info,'log_dir':log_dir})
 #文件下载
 @my_login_required
 def downloadTaskLog(request):
