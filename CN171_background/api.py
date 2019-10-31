@@ -19,7 +19,7 @@ def pages(post_objects, request):
 
     page_len = request.GET.get('page_len', '')
     if not page_len:
-        page_len = 2
+        page_len = 10
     paginator = Paginator(post_objects, page_len)
     try:
         current_page = int(request.GET.get('page', '1'))

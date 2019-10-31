@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block self_head_css_js %}
+    <script src="/static/layer/layer.js"></script>
+    <script src="/static/js/base.js"></script>
+    <script src="/static/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="/static/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="/static/plugins/datatables/dataTables.bootstrap.css"></script>
+
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/index.css">
+
+{% endblock %}
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h4>智能告警分析</h4>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+<div class="data_main">
+        <div class="main_left fl">
+            <div class="left_1" style="cursor: pointer;">
+                <!--左上边框-->
+                <div class="t_line_box">
+                    <i class="t_l_line"></i>
+                    <i class="l_t_line"></i>
+                </div>
+                <!--右上边框-->
+                <div class="t_line_box">
+                    <i class="t_r_line"></i>
+                    <i class="r_t_line"></i>
+                </div>
+                <!--左下边框-->
+                <div class="t_line_box">
+                    <i class="l_b_line"></i>
+                    <i class="b_l_line"></i>
+                </div>
+                    <!--右下边框-->
+                    <div class="t_line_box">
+                    <i class="r_b_line"></i>
+                    <i class="b_r_line"></i>
+                </div>
+                <div class="main_title">
+                    <img src="img/t_4.png" alt="">
+                    告警数量
+                </div>
+				<div id="chart_1" class="echart t_btn7" style="width:100%;height: 280px;"></div>
+            </div>
+        </div>
+
+        <div class="main_right fr">
+            <div class="right_1">
+                <!--左上边框-->
+                <div class="t_line_box">
+                    <i class="t_l_line"></i>
+                    <i class="l_t_line"></i>
+                </div>
+                <!--右上边框-->
+                <div class="t_line_box">
+                    <i class="t_r_line"></i>
+                    <i class="r_t_line"></i>
+                </div>
+                <!--左下边框-->
+                <div class="t_line_box">
+                    <i class="l_b_line"></i>
+                    <i class="b_l_line"></i>
+                </div>
+                    <!--右下边框-->
+                    <div class="t_line_box">
+                    <i class="r_b_line"></i>
+                    <i class="b_r_line"></i>
+                </div>
+                <div class="main_title">
+                    <img src="img/t_4.png" alt="">
+                    KPI指标
+                </div>
+                <div id="chart_2" class="chart" style="width:100%;height: 280px;"></div>
+            </div>
+        </div>
+    </div>
+    </section>
+<!-- /.content -->
+
+</div>
+{% endblock %}

@@ -138,7 +138,7 @@ def batchTaskStop(request):
 def batchTaskReboot(request):
     bg_ids = request.POST.getlist('ids', [])
     returnmsg = "true"
-    bg_action = 'stop'
+    bg_action = 'restart'
     opr_user = request.session['user_name']
     for bg_id in bg_ids:
         bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
@@ -308,7 +308,7 @@ def taskLogSearch(request):
         if starttime and endtime:
             taskLog_list = BgTaskLog.objects.filter(bg_operation_time__gte=starttime, bg_operation_time__lte=endtime,bg_id=bg_id)
         else:
-            taskLog_list = BgTaskLog.objects.filter(bg_id=bg_id)
+            taskLog_list = BgTaskLog.objects.filter(bg_id=id)
         for i in taskLog_list:
             bg_id = i.bg_id
             bg_log_id = i.bg_log_id
