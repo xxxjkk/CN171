@@ -4,9 +4,11 @@
 # @Author: zhulong
 # @File  : connecttool.py
 # @Software: CN171
-
+import re
 import sys
 import os
+from functools import reduce
+
 import paramiko
 try:
     import ConfigParser as cp
@@ -158,3 +160,51 @@ def get_init_parameter2(conntarget):
         print(conntarget + "not find!")
         exit()
     return remote_path
+
+def readFile(file_path):
+    exec_cmd = "cat "+ file_path
+    log_msg = ""
+    sshd = ssh_connect("Ansible")
+    stdin, stdout, stderr = ssh_exec_cmd(sshd, exec_cmd)
+    err_list = stderr.readlines()
+    if len(err_list) > 0:
+        print('Read failed:' + err_list[0])
+        sys.exit(0)
+    else:
+        print('Start success.')
+        for item in stdout.readlines():
+            log_msg = log_msg + item
+        return log_msg
+    ssh_close(sshd)
+
+#远程下载文件
+def remote_scp(remote_path,local_path):
+    hostname, port, username, password = get_init_parameter("Ansible")
+    port = str2int(port)
+    t = paramiko.Transport((hostname, port))
+    t.connect(username=username, password=password)  # 登录远程服务器
+    sftp = paramiko.SFTPClient.from_transport(t)  # sftp传输协议
+    src = remote_path
+    des = local_path
+    log_dir_name = src.split("/")
+    a = len(log_dir_name)
+    downfilename = log_dir_name[a - 1]
+    dir_name = str(downfilename)
+    try:
+        sftp.get(src, des)
+        t.close()
+        sshd = ssh_connect("Ansible")
+        cmd = "rm -rf " + dir_name
+        ssh_exec_cmd(sshd, cmd)
+        ssh_close(sshd)
+    except IOError:
+        print("not exist")
+
+
+
+def str2int(s):
+    def fn(x,y):
+        return x*10+y
+    def char2num(s):
+        return {'0':0,'1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9}[s]
+    return reduce(fn,map(char2num,s))
