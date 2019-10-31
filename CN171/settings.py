@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     'CN171_order',
     'CN171_crontab',
     'djcelery',
-
 ]
 
 MIDDLEWARE = [
@@ -186,7 +185,7 @@ EMAIL_USER_TLS = True
 # Broker配置，使用Redis作为消息中间件
 BROKER_URL = 'redis://39.104.61.178:6379/1'
 
-# BACKEND配置，使用django orm作为结果存储
+# BACKEND配置，使用Redis作为结果存储
 CELERY_RESULT_BACKEND = 'redis://39.104.61.178:6379/2'
 
 # 结果序列化方案
