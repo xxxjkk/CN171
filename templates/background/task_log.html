@@ -131,10 +131,10 @@ $(function(){
         endtimepicker = document.getElementById('end-picker').value;
         bg_module = document.getElementById('module').value;
         bg_domain = document.getElementById('domain').value;
-        if (starttimepicker && endtimepicker && bg_module) {
+        if (starttimepicker || endtimepicker||bg_module||bg_domain) {
             window.location ="{% url 'taskLogSearch' %}?" + args;
         }else{
-            msg = "开始时间/结束时间/模块不能为空!";
+            msg = "起止时间/模块/中心不能为空!";
             alert(msg);
         }
     }
