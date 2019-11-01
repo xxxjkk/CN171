@@ -8,7 +8,8 @@
 import os,shutil
 import pandas
 import time
-from django.shortcuts import render
+import json
+
 from CN171_order.models import PbossOrderStatus,PbossOrderRecord,PbossOrderNode,PbossOrderRollback
 from datetime import datetime
 
@@ -54,33 +55,23 @@ def excelread():
 
 #状态类型excel文件读函数
 def statusExcelRead(file):
-    #迁移前文件路径、迁移后文件路径
-    srcfile = localfiledir + file
-    dstfile = localfilebakdir + file
+    #文件名分拆
+    fndisass = fileNameDisass(file)
 
-    # 开始解析上传的excel表格
-    df = pandas.DataFrame(pandas.read_excel(srcfile))
-
-    # 截取文件名中的开始时间、结束时间
-    file_name = file.split('.')[0]
-    if '_' in file_name:
-        starttimestr = file_name.split('_')[-3]
-        endtimestr = file_name.split('_')[-1]
-    elif ' ' in file_name:
-        starttimestr = file_name.split(' ')[-3]
-        endtimestr = file_name.split(' ')[-1]
-    starttime = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(starttimestr, '%Y%m%d%H%M%S'))
-    endtime = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(endtimestr, '%Y%m%d%H%M%S'))
-
-    # 判断是否有执行中的任务，若有则以任务的创建时间为准，并更新任务状态、文件路径
-    record = recordSave(starttime, endtime, file, dstfile, "PBOSS订单-状态")
+    #判断是否有执行中的任务，若有则以任务的创建时间为准，并更新任务状态、文件路径
+    record = recordSave(fndisass.starttime, fndisass.endtime, file, fndisass.dstfile, "PBOSS订单-状态")
 
     #文件迁移
-    shutil.move(srcfile,dstfile)
+    shutil.move(fndisass.srcfile,fndisass.dstfile)
 
-    # 获取表头
+    #开始解析上传的excel表格
+    df = pandas.DataFrame(pandas.read_excel(fndisass.srcfile))
+
+    #获取表头
     df_head = df.columns.values.tolist()
 
+    #设置默认值
+    namecol=0
     #找到表中名称对应列
     for i in range(len(df_head)):
         if df_head[i] == "CODENAME":
@@ -91,8 +82,8 @@ def statusExcelRead(file):
         if (df_head[i] != "CODENAME") and (df_head[i] != "CODEFLAG"):
             pbstatus = PbossOrderStatus()
             pbstatus.order_area = df_head[i]
-            pbstatus.order_starttime = starttime
-            pbstatus.order_endtime = endtime
+            pbstatus.order_starttime = fndisass.starttime
+            pbstatus.order_endtime = fndisass.endtime
             pbstatus.order_createtime = record.record_createtime
             for j in range(df.shape[0]):
                 if df.iloc[j, namecol] == "结束":
@@ -121,29 +112,22 @@ def statusExcelRead(file):
 
 #节点类型excel文件读函数
 def nodeExcelRead(file):
-    # 迁移前文件路径、迁移后文件路径
-    srcfile = localfiledir + file
-    dstfile = localfilebakdir + file
+    #文件名分拆
+    fndisass = fileNameDisass(file)
 
-    # 开始解析上传的excel表格
-    df = pandas.DataFrame(pandas.read_excel(srcfile))
+    #判断是否有执行中的任务，若有则以任务的创建时间为准，并更新任务状态、文件路径
+    record = recordSave(fndisass.starttime, fndisass.endtime, file, fndisass.dstfile, "PBOSS订单-节点")
 
-    # 截取文件名中的开始时间、结束时间
-    file_name = file.split('.')[0]
-    starttimestr = file_name.split('_')[-3]
-    endtimestr = file_name.split('_')[-1]
-    starttime = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(starttimestr, '%Y%m%d%H%M%S'))
-    endtime = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(endtimestr, '%Y%m%d%H%M%S'))
+    #文件迁移
+    shutil.move(fndisass.srcfile, fndisass.dstfile)
 
-    # 判断是否有执行中的任务，若有则以任务的创建时间为准，并更新任务状态、文件路径
-    record = recordSave(starttime, endtime, file, dstfile, "PBOSS订单-节点")
-
-    # 文件迁移
-    shutil.move(srcfile, dstfile)
-
+    #开始解析上传的excel表格
+    df = pandas.DataFrame(pandas.read_excel(fndisass.srcfile))
     # 获取表头
     df_head = df.columns.values.tolist()
 
+    #设置默认值
+    namecol = 0
     #找到表中名称对应列
     for i in range(len(df_head)):
         if df_head[i] == "NODENAME":
@@ -154,8 +138,8 @@ def nodeExcelRead(file):
         if (df_head[i] != "NODENAME") and (df_head[i] != "SYSDATE") and (df_head[i] != "NODEID"):
             pbnode = PbossOrderNode()
             pbnode.order_area = df_head[i]
-            pbnode.order_starttime = starttime
-            pbnode.order_endtime = endtime
+            pbnode.order_starttime = fndisass.starttime
+            pbnode.order_endtime = fndisass.endtime
             pbnode.order_createtime = record.record_createtime
             for j in range(df.shape[0]):
                 if df.iloc[j, namecol] == "HLR节点":
@@ -188,34 +172,25 @@ def nodeExcelRead(file):
 
 #回退类型excel文件读函数
 def rollbackExcelRead(file):
-    # 迁移前文件路径、迁移后文件路径
-    srcfile = localfiledir + file
-    dstfile = localfilebakdir + file
-
-    # 开始解析上传的excel表格
-    df = pandas.DataFrame(pandas.read_excel(srcfile))
-
-    # 截取文件名中的开始时间、结束时间
-    file_name = file.split('.')[0]
-    starttimestr = file_name.split('_')[-3]
-    endtimestr = file_name.split('_')[-1]
-    starttime = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(starttimestr, '%Y%m%d%H%M%S'))
-    endtime = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(endtimestr, '%Y%m%d%H%M%S'))
+    # 文件名分拆
+    fndisass = fileNameDisass(file)
 
     # 判断是否有执行中的任务，若有则以任务的创建时间为准，并更新任务状态、文件路径
-    record = recordSave(starttime, endtime, file, dstfile, "PBOSS订单-回退")
+    record = recordSave(fndisass.starttime, fndisass.endtime, file, fndisass.dstfile, "PBOSS订单-回退")
 
     # 文件迁移
-    shutil.move(srcfile, dstfile)
+    shutil.move(fndisass.srcfile, fndisass.dstfile)
 
+    # 开始解析上传的excel表格
+    df = pandas.DataFrame(pandas.read_excel(fndisass.srcfile))
     # 获取表头
     df_head = df.columns.values.tolist()
 
     # 文件数据入库
     for i in range(df.shape[0]):
         pbrollback = PbossOrderRollback()
-        pbrollback.order_starttime = starttime
-        pbrollback.order_endtime = endtime
+        pbrollback.order_starttime = fndisass.starttime
+        pbrollback.order_endtime = fndisass.endtime
         pbrollback.order_createtime = record.record_createtime
         for j in range(len(df_head)):
             if df_head[j] == "OWNERNAME":
@@ -229,6 +204,32 @@ def rollbackExcelRead(file):
             print(pbrollback.order_area, df.iloc[i, j])
         pbrollback.save()
     return None
+
+
+#文件名分拆函数
+def fileNameDisass(file):
+    # 迁移前文件路径、迁移后文件路径
+    srcfile = localfiledir + file
+    dstfile = localfilebakdir + file
+
+    # 截取文件名中的开始时间、结束时间
+    file_name = file.split('.')[0]
+    starttimestr = None
+    endtimestr = None
+    if '_' in file_name:
+        starttimestr = file_name.split('_')[-3]
+        endtimestr = file_name.split('_')[-1]
+    elif ' ' in file_name:
+        starttimestr = file_name.split(' ')[-3]
+        endtimestr = file_name.split(' ')[-1]
+    starttime = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(starttimestr, '%Y%m%d%H%M%S'))
+    endtime = time.strftime('%Y-%m-%d %H:%M:%S', time.strptime(endtimestr, '%Y%m%d%H%M%S'))
+
+    #将文件名分拆结果组成list
+    fndisass = {'srcfile': srcfile,'dstfile': dstfile, 'starttime': starttime, 'endtime': endtime}
+
+    return json.dumps(fndisass)
+
 
 #记录入库函数
 def recordSave(starttime, endtime, file, dstfile, type):
