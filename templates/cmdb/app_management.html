@@ -77,11 +77,6 @@
                     <ul style="margin-top: 0;">
                     <label for="page_len">
                       <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
-                        {% ifequal page_len '2' %}
-                            <option value="2" selected>2</option>
-                        {% else %}
-                            <option value="2">2</option>
-                        {% endifequal %}
                         {% ifequal page_len '10' %}
                             <option value="10" selected>10</option>
                         {% else %}

@@ -12,11 +12,11 @@
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header"></section>
+    <section class="content-header">主机管理</section>
 
     <!-- Main content -->
     <section class="content">
-        <form action="" method="post" id="host_management_form">
+        <form action="" method="post" id="host_management_form" enctype="multipart/form-data">
         {% csrf_token %}
             <div class="box">
                 <div class="box-header">
@@ -31,10 +31,16 @@
                     </div>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <div class="btn-group">
-                        <a id="taskadd" class="btn btn-danger" style="display: none"  name="btn btn-info">批量导入</a>
+                        <input type="file" id="hostInfoId">
+                    </div>
+                    <div class="btn-group">
+                        <a id="importHostInfo" class="btn btn-danger" style="display: none"  name="btn btn-info">批量导入</a>
                     </div>
                      <div class="btn-group">
-                        <a id="taskdel" class="btn btn-danger" style="display: none"  name="btn btn-info">批量导出</a>
+                        <a id="exportHostInfo" class="btn btn-danger" style="display: none"  name="btn btn-info">批量导出</a>
+                    </div>
+                    <div class="btn-group">
+                        <span id="mesId"></span>
                     </div>
                     <div class="input-group inline-group col-md-3" style="float: right">
                                 <input type="text" class="form-control" id="search_input" name="keyword" value="{{keyword}}" placeholder="Search">
@@ -69,7 +75,7 @@
                                             <input type="checkbox" id="id" class="i-checks" name="id" value="{{host.cmdb_host_id}}"/>
                                         </td>
                                         <td width="24%" style="text-align:center;">
-                                            <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','start')"
+                                            <a href="#" onclick="return hostDetail('{{host.cmdb_host_id}}')"
                                                style="list-style-type:none">{{host.cmdb_host_name}}</a>
                                         </td>
                                         <td width="10%" style="text-align:center;">{{host.cmdb_host_type}}</td>
@@ -78,7 +84,18 @@
                                         <td width="13%" style="text-align:center;">{{host.cmdb_host_manip}}</td>
                                         <td width="7%" style="text-align:center;">{{host.bg.bg_module}}</td>
                                         <td width="7%" style="text-align:center;">{{host.bg.bg_domain}}</td>
-                                        <td width="21%" style="text-align:center;">{{host.get_cmdb_host_status_display}}</td>
+                                        <td width="21%" style="text-align:center;">
+                                             {% if host.cmdb_host_status == '1' %}
+                                            <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:green;"></label>
+                                            {% elif host.cmdb_host_status == '2' %}
+                                                <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:red;"></label>
+                                            {% elif host.cmdb_host_status == '3' %}
+                                                <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:gray;"></label>
+                                            {% elif host.cmdb_host_status == '4' %}
+                                                <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:orange;"></label>
+                                            {% endif %}
+                                            {{host.get_cmdb_host_status_display}}
+                                        </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -88,11 +105,6 @@
                     <ul style="margin-top: 0;">
                     <label for="page_len">
                       <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
-                        {% ifequal page_len '2' %}
-                            <option value="2" selected>2</option>
-                        {% else %}
-                            <option value="2">2</option>
-                        {% endifequal %}
                         {% ifequal page_len '10' %}
                             <option value="10" selected>10</option>
                         {% else %}
@@ -150,7 +162,6 @@ function hostAddPage(){
 {#批量删除#}
 $('#hostDel').click(function () {
         var host_id_all = getIDall();
-        alert(host_id_all);
         if (host_id_all == ''){
             alert("请至少选择一行!");
             return false;
@@ -166,6 +177,53 @@ $('#hostDel').click(function () {
             });
         }
     });
+
+{#导出主机信息#}
+$('#exportHostInfo').click(function () {
+        var host_id_all = getIDall();
+        if (host_id_all == ''){
+            alert("请至少选择一行!");
+            return false;
+        }else{
+            window.location="{% url 'export_host_info' %}?host_id_all="+host_id_all;
+        }
+});
+
+
+{#导入主机信息#}
+$('#importHostInfo').click(function () {
+       var form_data = new FormData();
+       form_data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+       form_data.append('hostInfoFile', $('#hostInfoId')[0].files[0]);
+        $.ajax({
+            url:'{% url 'import_host_info' %}',
+            data:form_data,
+            type: 'POST',
+            dataType: 'json',
+            // 告诉jQuery不要去处理发送的数据, 发送对象。
+            processData : false,
+            // 告诉jQuery不要去设置Content-Type请求头
+            contentType : false,
+            // 获取POST所需的csrftoken
+            success:function (args) {
+                alert(args.msg);
+                if("上传成功" == args.msg){
+                    window.location="{% url 'hostManagement' %}";
+                }
+            }
+        });
+});
+
+function hostDetail(hostId){
+    layer.open({
+        type: 2,
+        title: '集群中应用信息',
+        closeBtn: 1,
+        area: ['700px', '550px'],
+        shadeClose: true, //点击遮罩关闭
+        content: ['{% url 'hostDetail' %}?hostId=' + hostId],
+        });
+}
 </script>
 
 

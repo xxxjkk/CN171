@@ -5,10 +5,12 @@ from django.db.models import Q
 from django.http import HttpResponse
 from CN171_cmdb import models,forms
 from django.shortcuts import render, redirect
+
+from CN171_cmdb.exceloper import excel_export_host, excel_import_host
 from CN171_cmdb.models import CmdbHost, CmdbApp, HostPwdOprLog, CmdbAppCluster
 from CN171_cmdb.forms import DetailLogForm, HostPwdEditForm, NormalUserForm, CmdbHostForm
 from CN171_background.api import pages, get_object
-from CN171_tools.common_api import export_download_txt
+from CN171_tools.common_api import export_download_txt, to_ints
 from CN171_tools.connecttool import *
 from CN171_tools.sftputils import *
 import json
@@ -42,6 +44,13 @@ def hostManagement(request):
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(host_list, request)
     return render(request, "cmdb/host_management.html", locals())
 
+
+def hostDetail(request):
+    hostId = request.GET.get("hostId")
+    host = CmdbHost.objects.get(cmdb_host_id=hostId)
+    return render(request, "cmdb/host_detail.html", locals())
+
+
 def appManagement(request):
     app_list = []
     keyword = request.GET.get("keyword", "")
@@ -54,6 +63,7 @@ def appManagement(request):
         cluster_list = models.CmdbAppCluster.objects.all()
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(cluster_list, request)
     return render(request, "cmdb/app_management.html", locals())
+
 
 #批量删除应用
 def appDel(request):
@@ -233,4 +243,25 @@ def hostDel(request):
                 bg_item = get_object(CmdbHost, cmdb_host_id=cmdb_host_id)
                 bg_item.delete()
     return HttpResponse(u'删除成功')
+
+#导出主机信息
+def export_host_info(request):
+    list_obj=[]
+    host_id_all = to_ints(request.GET.get('host_id_all'))
+    if host_id_all:
+        list_obj=CmdbHost.objects.filter(cmdb_host_id__in=host_id_all)
+    return excel_export_host(list_obj)
+
+#导入主机信息
+def import_host_info(request):
+    ret = {'msg': None}
+    file_obj = request.FILES.get('hostInfoFile')
+    if file_obj:
+        ret['msg']= excel_import_host(file_obj)
+    else:
+        ret['msg'] = "请选择上传的文件！"
+    v = json.dumps(ret)  # 转换为字典类型
+    return HttpResponse(v)
+
+
 
