@@ -25,51 +25,51 @@
                             <tbody>
                                 <tr class="even gradeX">
                                     <td>主机名</td>
-                                    <td>{{ host.hostname }}</td>
+                                    <td>{{ host.cmdb_host_name }}</td>
                                 </tr>
                                 <tr class="even gradeX">
                                     <td>业务IP</td>
-                                    <td>{{ host.ip }}</td>
+                                    <td>{{ host.cmdb_host_busip }}</td>
                                 </tr>
                                 <tr class="even gradeX">
                                     <td>管理IP</td>
-                                    <td>{{ host.ip }}</td>
+                                    <td>{{ host.cmdb_host_manip }}</td>
                                 </tr>
                                 <tr class="even gradeX">
                                     <td>模块</td>
-                                    <td>{{ host.cpu_model }}</td>
+                                    <td>{{ host.bg.bg_module }}</td>
                                 </tr>
                                 <tr class="even gradeX">
                                     <td>中心</td>
-                                    <td>{{ host.cpu_num }}</td>
+                                    <td>{{ host.bg.bg_domain }}</td>
                                 </tr>
                                 <tr class="even gradeX">
                                     <td>状态</td>
-                                    <td>{{ host.memory }}G</td>
+                                    <td>{{ host.get_cmdb_host_status_display }}</td>
                                 </tr>
                                 <tr class="even gradeX">
                                     <td>操作系统</td>
-                                    <td>{{ host.sn }}</td>
+                                    <td>{{ host.cmdb_host_system }}</td>
                                 </tr>
                                 <tr class="even gradeX">
                                     <td>CPU</td>
-                                    <td>{{ host.os }}</td>
+                                    <td>{{ host.cmdb_host_cpu }}</td>
                                 </tr>
                                 <tr class="even gradeX">
                                     <td>内存</td>
-                                    <td>{{ host.vendor }}</td>
+                                    <td>{{ host.cmdb_host_RAM }}</td>
                                 </tr>
                                 <tr class="even gradeX">
                                     <td>本地磁盘</td>
-                                    <td>{{ host.idc }}</td>
+                                    <td>{{ host.cmdb_host_local_disc }}</td>
                                 </tr>
                                 <tr class="even gradeX">
                                     <td>外置磁盘</td>
-                                    <td>{{ host.asset_no }}</td>
+                                    <td>{{ host.cmdb_host_outlay_disc }}</td>
                                 </tr>
                                 <tr class="even gradeX">
                                     <td>录入时间</td>
-                                    <td>{{ host.up_time }}</td>
+                                    <td>{{ host.cmdb_host_insert_time }}</td>
                                 </tr>
                             </tbody>
                   </table>
