@@ -10,7 +10,7 @@ from CN171_aiops import views as aiopsviews
 
 urlpatterns = [
 
-    #pboss order_status页面
+    #智能运维页面
     url(r'^capacity/', aiopsviews.capacity, name='capacity'),
     url(r'^warningpboss/', aiopsviews.warningPboss, name='warningpboss'),
 ]
