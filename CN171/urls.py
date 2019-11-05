@@ -2,6 +2,8 @@ from django.urls import path
 from django.conf.urls import include,url
 from django.contrib import admin
 from CN171_login import views as loginviews
+from django.views import static
+from django.conf import settings
 
 urlpatterns = [
      #Django的管理页面
@@ -25,4 +27,8 @@ urlpatterns = [
       url(r'^order/', include('CN171_order.urls')),
       url(r'^crontab/', include('CN171_crontab.urls')),
       url(r'^aiops/', include('CN171_aiops.urls')),
+
+
+      url(r'^static/(?P<path>.*)$', static.serve,
+        {'document_root': settings.STATIC_ROOT}, name='static')
 ]

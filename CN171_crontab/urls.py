@@ -11,5 +11,5 @@ from CN171_crontab import views as crontabviews
 app_name = "CN171_crontab"
 
 urlpatterns = [
-    url(r'^add/', crontabviews.addaction, name='add'),
+
 ]

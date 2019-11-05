@@ -30,9 +30,9 @@ config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
 SECRET_KEY = '42427w*ffn#8a&!@8bd*ia^j93&0$ufe#re*5dmt&&l^y-0jj5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -130,10 +130,9 @@ USE_L10N = True
 USE_TZ = False
 
 
-# Static files (CSS, JavaScript, Images)
+# Static files (css, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = '/static/'
 
 pymysql.install_as_MySQLdb()
 
@@ -149,10 +148,13 @@ DATABASES = {
     }
 }
 
-
+# 默认
 STATIC_URL = '/static/'
+# 项目根目录下的static文件夹
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
+# 不能和STATIC_ROOT路径相同
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, 'static'),
 ]
 
 

@@ -1,6 +1,6 @@
 body {
     height: 100%;
-    background: white url("../images/login-bg.jpg") no-repeat right bottom;
+    background: white url("/static/images/login-bg.jpg") no-repeat right bottom;
     background-size: 100% 100%;
 }
 .form-login {

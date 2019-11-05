@@ -1,5 +1,7 @@
-from django.conf.urls import include,url
+from django.conf.urls import url
 from CN171_background import views as backgroundviews
+from django.views import static
+from django.conf import settings
 
 urlpatterns = [
 
@@ -18,4 +20,7 @@ urlpatterns = [
     url(r'^taskLogDetail/', backgroundviews.taskLogDetail, name='taskLogDetail'),
     url(r'^downloadTaskLog/', backgroundviews.downloadTaskLog, name='downloadTaskLog'),
     url(r'^appDetailByMoDo/', backgroundviews.appDetailByMoDo, name='appDetailByMoDo'),
+
+    url(r'^static/(?P<path>.*)$', static.serve,
+        {'document_root': settings.STATIC_ROOT}, name='static')
 ]
