@@ -346,11 +346,17 @@ def taskLogDetail(request):
 def downloadTaskLog(request):
     log_dir = request.GET.get("log_dir")
     file=open(log_dir,'rb')
-    downfilename = re.findall(r"log\\(.+?).log", log_dir)
-    filename = str(downfilename[0])+".log"
+
+    #适配Linux环境，截取日志文件名
+    if '/' in log_dir:
+        downfilename = log_dir.split('/')[-1]
+    #适配Windows环境，截取日志文件名
+    elif '\\' in log_dir:
+        downfilename = log_dir.split('\\')[-1]
+
     response =FileResponse(file)
     response['Content-Type']='application/octet-stream'
     #response['Content-Disposition']='attachment;filename="downfilename.log"'
     #response['Content-Disposition'] = 'attachment;filename=' + downfilename
-    response['Content-Disposition'] = 'attachment;filename="{}"'.format(filename)
+    response['Content-Disposition'] = 'attachment;filename="{}"'.format(downfilename)
     return response
