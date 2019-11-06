@@ -1,7 +1,5 @@
 # -*-coding:utf-8 -*-
 import os
-import re
-import sys
 import threading
 
 from django.http import HttpResponse, JsonResponse, FileResponse, HttpResponseRedirect
@@ -353,6 +351,9 @@ def downloadTaskLog(request):
     #适配Windows环境，截取日志文件名
     elif '\\' in log_dir:
         downfilename = log_dir.split('\\')[-1]
+    else:
+        response = "Log file not exits!"
+        return response
 
     response =FileResponse(file)
     response['Content-Type']='application/octet-stream'
