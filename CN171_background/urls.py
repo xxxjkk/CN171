@@ -21,6 +21,4 @@ urlpatterns = [
     url(r'^downloadTaskLog/', backgroundviews.downloadTaskLog, name='downloadTaskLog'),
     url(r'^appDetailByMoDo/', backgroundviews.appDetailByMoDo, name='appDetailByMoDo'),
 
-    url(r'^static/(?P<path>.*)$', static.serve,
-        {'document_root': settings.STATIC_ROOT}, name='static')
 ]
