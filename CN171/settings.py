@@ -29,6 +29,9 @@ config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '42427w*ffn#8a&!@8bd*ia^j93&0$ufe#re*5dmt&&l^y-0jj5'
 
+#设置浏览器关闭时session失效
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
