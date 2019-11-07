@@ -5,7 +5,7 @@ import threading
 from django.http import HttpResponse, JsonResponse, FileResponse, HttpResponseRedirect
 from CN171_background import models
 from CN171_background.api import pages,get_object
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 
 from CN171_background.forms import BgForm
 from CN171_background.models import BgTaskManagement, BgTaskLog
