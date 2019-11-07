@@ -30,7 +30,7 @@ config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
 SECRET_KEY = '42427w*ffn#8a&!@8bd*ia^j93&0$ufe#re*5dmt&&l^y-0jj5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1']
 
@@ -159,9 +159,9 @@ STATICFILES_DIRS = [
 
 
 # 设置邮件域名
-EMAIL_HOST = 'smtp.163.com'
+EMAIL_HOST = config.get('PBOSS', 'pboss_order_mail_host')
 # 设置端口号，为数字
-EMAIL_PORT = 25
+EMAIL_PORT = config.get('PBOSS', 'pboss_order_mail_host_port')
 #设置发件人邮箱
 EMAIL_HOST_USER = config.get('PBOSS', 'pboss_order_mail_inbox')
 # 设置发件人 授权码
@@ -172,31 +172,16 @@ EMAIL_USER_TLS = True
 
 
 
-#Celery配置
-# import djcelery
-# djcelery.setup_loader()
-# BROKER_BACKEND = 'redis'
-# BROKER_URL = 'redis://39.104.61.178:6379/1'
-# CELERY_RESULT_BACKEND = 'redis://39.104.61.178:6379/2'  #不配置则直接使用默认数据库
-# CELERY_IMPORTS = ('CN171_crontab.tasks', )
-# CELERY_TIMEZONE = 'Asia/Shanghai'
-# CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-
-
 
 # Broker配置，使用Redis作为消息中间件
-BROKER_URL = 'redis://39.104.61.178:6379/1'
-
+BROKER_URL = config.get('Celery', 'celery_broker_url')
 # BACKEND配置，使用Redis作为结果存储
-CELERY_RESULT_BACKEND = 'redis://39.104.61.178:6379/2'
-
+CELERY_RESULT_BACKEND = config.get('Celery', 'celery_result_backend')
 # 结果序列化方案
-CELERY_RESULT_SERIALIZER = 'json'
-
+CELERY_RESULT_SERIALIZER = config.get('Celery', 'celery_result_serializer')
 #设置时区
-CELERY_TIMEZONE = 'Asia/Shanghai'
-
+CELERY_TIMEZONE = config.get('Celery', 'celery_timezone')
 #设置beat数据库
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+CELERYBEAT_SCHEDULER = config.get('Celery', 'celery_beat_scheduler')
 
 
