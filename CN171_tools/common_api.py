@@ -27,3 +27,20 @@ def export_download_txt(content1):
             response.write("\r\n")
         return response
 
+#字符串数组转换成int数组
+def to_ints(all_ids):
+    all_id_ints=[]
+    if all_ids:
+        for cmdb_id in all_ids.split(','):
+            all_id_ints.append(int(cmdb_id))
+    return all_id_ints
+
+#访问二维元组，通过value获得key值 状态不对，默认停机
+def get_tuple_key(tupleObj,tupleValue):
+        for i in range(len(tupleObj)):
+            for j in range(len(tupleObj[i])):
+                if(tupleObj[i][1]==tupleValue):
+                    return tupleObj[i][0]
+                else:
+                    return '3'
+

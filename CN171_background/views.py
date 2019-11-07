@@ -1,17 +1,17 @@
 # -*-coding:utf-8 -*-
 import os
-import re
-import sys
 import threading
 
 from django.http import HttpResponse, JsonResponse, FileResponse, HttpResponseRedirect
 from CN171_background import models
 from CN171_background.action import taskOneAction, checkResultAction
 from CN171_background.api import pages,get_object
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 
 from CN171_background.forms import BgForm
 from CN171_background.models import BgTaskManagement, BgTaskLog
+from CN171_cmdb.models import CmdbAppCluster
+from CN171_tools import connecttool
 from CN171_login.views import my_login_required
 from django.db.models import Q
 from datetime import datetime
@@ -28,6 +28,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 config = cp.ConfigParser()
 config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
 conntarget = "Ansible"
+
+#模块中心下的应用集群
+def appDetailByMoDo(request):
+    bg_module=request.GET.get("bg_module")
+    bg_domain=request.GET.get("bg_domain")
+    cmdbAppCluster_list= CmdbAppCluster.objects.filter(bgTaskManagement__bg_module=bg_module, bgTaskManagement__bg_domain=bg_domain)
+    p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(cmdbAppCluster_list, request)
+    return render(request, "cmdb/app_management.html", locals())
 
 
 @my_login_required
@@ -337,13 +345,22 @@ def taskLogDetail(request):
 def downloadTaskLog(request):
     log_dir = request.GET.get("log_dir")
     file=open(log_dir,'rb')
-    downfilename = re.findall(r"log\\(.+?).log", log_dir)
-    filename = str(downfilename[0])+".log"
+
+    #适配Linux环境，截取日志文件名
+    if '/' in log_dir:
+        downfilename = log_dir.split('/')[-1]
+    #适配Windows环境，截取日志文件名
+    elif '\\' in log_dir:
+        downfilename = log_dir.split('\\')[-1]
+    else:
+        response = "Log file not exits!"
+        return response
+
     response =FileResponse(file)
     response['Content-Type']='application/octet-stream'
     #response['Content-Disposition']='attachment;filename="downfilename.log"'
     #response['Content-Disposition'] = 'attachment;filename=' + downfilename
-    response['Content-Disposition'] = 'attachment;filename="{}"'.format(filename)
+    response['Content-Disposition'] = 'attachment;filename="{}"'.format(downfilename)
     return response
 
 

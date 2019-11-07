@@ -50,30 +50,24 @@
                       <thead>
                         <tr>
                             <th width="10%" style="text-align:center;">
-                                <input id="checkall" type="checkbox" class="i-checks" name="checkall" value="checkall" data-editable='false' onclick="">
+                                <input id="checkall" type="checkbox" class="i-checks" name="checkall" value="checkall" data-editable='false' onclick="check_all('app_management_form')">
                             </th>
-                                    <th width="10%" style="text-align:center;">网元名</th>
-                                    <th width="10%" style="text-align:center;">归属模块</th>
-                                    <th width="10%" style="text-align:center;">归属中心</th>
-                                    <th width="13%" style="text-align:center;">组网</th>
-                                    <th width="24%" style="text-align:center;">主机名</th>
-                                    <th width="10%" style="text-align:center;">业务IP</th>
-                                    <th width="10%" style="text-align:center;">状态</th>
+                                    <th width="30%" style="text-align:center;">网元名</th>
+                                    <th width="20%" style="text-align:center;">归属模块</th>
+                                    <th width="20%" style="text-align:center;">归属中心</th>
+                                    <th width="20%" style="text-align:center;">状态</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for app in page_objects %}
+                                {% for cluster in page_objects %}
                                 <tr class="even gradeX">
                                         <td width="10%" style="text-align:center;">
-                                            <input type="checkbox" id="id" class="i-checks" name="id"/>
+                                            <input type="checkbox" id="id" class="i-checks" name="id" value="{{cluster.id}}"/>
                                         </td>
-                                        <td width="10%" style="text-align:center;">{{app.bg_domain}}</td>
-                                        <td width="10%" style="text-align:center;">{{app.bg_domain}}</td>
-                                        <td width="10%" style="text-align:center;">{{app.bg_status}}</td>
-                                        <td width="13%" style="text-align:center;">{{app.bg_status}}</td>
-                                        <td width="13%" style="text-align:center;">{{app.bg_lastopr_user}}</td>
-                                        <td width="24%" style="text-align:center;">{{app.bg_lastopr_type}}</td>
-                                        <td width="10%" style="text-align:center;">{{app.bg_lastopr_time}}</td>
+                                        <td width="30%" style="text-align:center;"><a href="#" onclick="return clusterAppDetail('{{cluster.id}}')" style="list-style-type:none">{{cluster.name}}</a></td>
+                                        <td width="20%" style="text-align:center;">{{cluster.bgTaskManagement.bg_module}}</td>
+                                        <td width="20%" style="text-align:center;">{{cluster.bgTaskManagement.bg_domain}}</td>
+                                        <td width="20%" style="text-align:center;">{{cluster.bgTaskManagement.bg_domain}}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -83,11 +77,6 @@
                     <ul style="margin-top: 0;">
                     <label for="page_len">
                       <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
-                        {% ifequal page_len '2' %}
-                            <option value="2" selected>2</option>
-                        {% else %}
-                            <option value="2">2</option>
-                        {% endifequal %}
                         {% ifequal page_len '10' %}
                             <option value="10" selected>10</option>
                         {% else %}
@@ -128,12 +117,24 @@
       "bAutoWidth": false,
       "bStateSave": true
     });
-  });
 
-  function change_info(){
-        var args = $("#app_management_form").serialize();
-        window.location = "{% url 'appManagement' %}?" + args
-    }
+});
+
+function change_info(){
+       var args = $("#app_management_form").serialize();
+       window.location = "{% url 'appManagement' %}?" + args
+}
+
+function clusterAppDetail1(clusterId){
+    layer.open({
+        type: 2,
+        title: '集群中应用信息',
+        closeBtn: 1,
+        area: ['700px', '550px'],
+        shadeClose: true, //点击遮罩关闭
+        content: ['{% url 'clusterAppDetail' %}?clusterId=' + clusterId],
+        });
+}
 </script>
 
 {% endblock %}

@@ -29,10 +29,13 @@ config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '42427w*ffn#8a&!@8bd*ia^j93&0$ufe#re*5dmt&&l^y-0jj5'
 
+#设置浏览器关闭时session失效
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -53,7 +56,6 @@ INSTALLED_APPS = [
     'CN171_order',
     'CN171_crontab',
     'djcelery',
-
 ]
 
 MIDDLEWARE = [
@@ -131,10 +133,9 @@ USE_L10N = True
 USE_TZ = False
 
 
-# Static files (CSS, JavaScript, Images)
+# Static files (css, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = '/static/'
 
 pymysql.install_as_MySQLdb()
 
@@ -150,17 +151,20 @@ DATABASES = {
     }
 }
 
-
+# 默认
 STATIC_URL = '/static/'
+# 项目根目录下的static文件夹
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
+# 不能和STATIC_ROOT路径相同
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, 'static'),
 ]
 
 
 # 设置邮件域名
-EMAIL_HOST = 'smtp.163.com'
+EMAIL_HOST = config.get('PBOSS', 'pboss_order_mail_host')
 # 设置端口号，为数字
-EMAIL_PORT = 25
+EMAIL_PORT = config.get('PBOSS', 'pboss_order_mail_host_port')
 #设置发件人邮箱
 EMAIL_HOST_USER = config.get('PBOSS', 'pboss_order_mail_inbox')
 # 设置发件人 授权码
@@ -171,32 +175,17 @@ EMAIL_USER_TLS = True
 
 
 
-#Celery配置
-# import djcelery
-# djcelery.setup_loader()
-# BROKER_BACKEND = 'redis'
-# BROKER_URL = 'redis://39.104.61.178:6379/1'
-# CELERY_RESULT_BACKEND = 'redis://39.104.61.178:6379/2'  #不配置则直接使用默认数据库
-# CELERY_IMPORTS = ('CN171_crontab.tasks', )
-# CELERY_TIMEZONE = 'Asia/Shanghai'
-# CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-
-
 
 # Broker配置，使用Redis作为消息中间件
-BROKER_URL = 'redis://39.104.61.178:6379/1'
-
-# BACKEND配置，使用django orm作为结果存储
-CELERY_RESULT_BACKEND = 'redis://39.104.61.178:6379/2'
-
+BROKER_URL = config.get('Celery', 'celery_broker_url')
+# BACKEND配置，使用Redis作为结果存储
+CELERY_RESULT_BACKEND = config.get('Celery', 'celery_result_backend')
 # 结果序列化方案
-CELERY_RESULT_SERIALIZER = 'json'
-
+CELERY_RESULT_SERIALIZER = config.get('Celery', 'celery_result_serializer')
 #设置时区
-CELERY_TIMEZONE = 'Asia/Shanghai'
-
+CELERY_TIMEZONE = config.get('Celery', 'celery_timezone')
 #设置beat数据库
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+CELERYBEAT_SCHEDULER = config.get('Celery', 'celery_beat_scheduler')
 
 #设置浏览器关闭时session失效
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

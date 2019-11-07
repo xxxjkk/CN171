@@ -1,5 +1,7 @@
-from django.conf.urls import include,url
+from django.conf.urls import url
 from CN171_background import views as backgroundviews
+from django.views import static
+from django.conf import settings
 
 urlpatterns = [
 
@@ -17,4 +19,6 @@ urlpatterns = [
     url(r'^reLoad/', backgroundviews.reLoad, name='reLoad'),
     url(r'^taskLogDetail/', backgroundviews.taskLogDetail, name='taskLogDetail'),
     url(r'^downloadTaskLog/', backgroundviews.downloadTaskLog, name='downloadTaskLog'),
+    url(r'^appDetailByMoDo/', backgroundviews.appDetailByMoDo, name='appDetailByMoDo'),
+
 ]

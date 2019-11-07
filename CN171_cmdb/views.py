@@ -5,10 +5,12 @@ from django.db.models import Q
 from django.http import HttpResponse
 from CN171_cmdb import models,forms
 from django.shortcuts import render, redirect
-from CN171_cmdb.models import CmdbHost,CmdbApp,HostPwdOprLog
-from CN171_cmdb.forms import DetailLogForm, HostPwdEditForm,NormalUserForm
-from CN171_background.api import pages
-from CN171_tools.common_api import export_download_txt
+
+from CN171_cmdb.exceloper import excel_export_host, excel_import_host
+from CN171_cmdb.models import CmdbHost, CmdbApp, HostPwdOprLog, CmdbAppCluster
+from CN171_cmdb.forms import DetailLogForm, HostPwdEditForm, NormalUserForm, CmdbHostForm
+from CN171_background.api import pages, get_object
+from CN171_tools.common_api import export_download_txt, to_ints
 from CN171_tools.connecttool import *
 from CN171_tools.sftputils import *
 import json
@@ -42,18 +44,46 @@ def hostManagement(request):
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(host_list, request)
     return render(request, "cmdb/host_management.html", locals())
 
+
+def hostDetail(request):
+    hostId = request.GET.get("hostId")
+    host = CmdbHost.objects.get(cmdb_host_id=hostId)
+    return render(request, "cmdb/host_detail.html", locals())
+
+
 def appManagement(request):
     app_list = []
     keyword = request.GET.get("keyword", "")
     if keyword:
-        app_list = models.CmdbApp.objects.filter(
+        app_list = models.CmdbAppCluster.objects.filter(
             Q(app_name__icontains=keyword) |
             Q(app_status__icontains=keyword)
         )
     else:
-        app_list = models.CmdbApp.objects.all()
-    p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(app_list, request)
+        cluster_list = models.CmdbAppCluster.objects.all()
+    p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(cluster_list, request)
     return render(request, "cmdb/app_management.html", locals())
+
+
+#批量删除应用
+def appDel(request):
+    if request.method == 'POST':
+        app_batch = request.GET.get('arg', '')
+        app_id_all = str(request.POST.get('app_id_all', ''))
+
+        if app_batch:
+            for app_id in app_id_all.split(','):
+                bg_item = get_object(CmdbHost, cmdb_host_id=app_id)
+                bg_item.delete()
+    return HttpResponse(u'删除成功')
+
+#集群下的APP详情
+def clusterAppDetail(request):
+    clusterId=request.GET.get("clusterId")
+    cluster_app_detail_list = models.CmdbApp.objects.filter( cluster_id=clusterId)
+    p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(cluster_app_detail_list,
+                                                                                                request)
+    return render(request, "cmdb/cluster_app_detail.html", locals())
 
 #跳转到主机用户密码日志页面
 def hostPwdOprLogPage(request):
@@ -182,4 +212,56 @@ def excute_edit_commond(remote_path, modified_host_user, old_password):
                 break
     close_shell_channel(trans, channel)
     return detail_log, retStr
+
+#GET是跳转到用户主机页面，POST是添加主机
+def hostAddPage(request):
+    if request.method == "GET":
+        form = CmdbHostForm()
+        return render(request, 'cmdb/host_add.html', locals())
+    else:
+        ret = {'status': False, 'msg': '添加主机失败！','msg1':None}
+        hostForm = CmdbHostForm(request.POST)
+        if hostForm.is_valid():
+            hostForm.save()
+            ret['status'] = True
+            ret['msg'] = "添加主机成功！"
+        else:
+            ret['msg1'] = hostForm.errors  # 这是一个对象
+            print(hostForm.errors)
+        v = json.dumps(ret)  # 转换为字典类型
+        return HttpResponse(v)
+
+
+#批量删除主机
+def hostDel(request):
+    if request.method == 'POST':
+        host_batch = request.GET.get('arg', '')
+        host_id_all = str(request.POST.get('host_id_all', ''))
+
+        if host_batch:
+            for cmdb_host_id in host_id_all.split(','):
+                bg_item = get_object(CmdbHost, cmdb_host_id=cmdb_host_id)
+                bg_item.delete()
+    return HttpResponse(u'删除成功')
+
+#导出主机信息
+def export_host_info(request):
+    list_obj=[]
+    host_id_all = to_ints(request.GET.get('host_id_all'))
+    if host_id_all:
+        list_obj=CmdbHost.objects.filter(cmdb_host_id__in=host_id_all)
+    return excel_export_host(list_obj)
+
+#导入主机信息
+def import_host_info(request):
+    ret = {'msg': None}
+    file_obj = request.FILES.get('hostInfoFile')
+    if file_obj:
+        ret['msg']= excel_import_host(file_obj)
+    else:
+        ret['msg'] = "请选择上传的文件！"
+    v = json.dumps(ret)  # 转换为字典类型
+    return HttpResponse(v)
+
+
 

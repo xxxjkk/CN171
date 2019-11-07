@@ -29,7 +29,7 @@
 
                     <div class="form-group form-inline input-daterange">
                         <div class="btn-group">
-                            <a id="editHostUserPwd" style="display: none" href="#" class="btn btn-info" onclick="redEditHostPwdPage()">更改主机用户密码</a>
+                            <a id="editHostUserPwd" style="display: none" href="#" class="btn btn-info" onclick="redEditHostPwdPage()">更改主机密码</a>
                         </div> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <label>开始时间:  &nbsp;</label>
                         <input type="text" class="form-control" name="starttime" placeholder="YYYY-MM-DD hh:mm:ss" id="start-picker" readonly value="{{ starttime }}">
@@ -75,11 +75,6 @@
                     <ul style="margin-top: 0;">
                     <label for="page_len">
                       <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
-                        {% ifequal page_len '2' %}
-                            <option value="2" selected>2</option>
-                        {% else %}
-                            <option value="2">2</option>
-                        {% endifequal %}
                         {% ifequal page_len '10' %}
                             <option value="10" selected>10</option>
                         {% else %}

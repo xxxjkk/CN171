@@ -4,6 +4,9 @@ from django.test import TestCase
 import os
 from django.core.paginator import Paginator
 
+from CN171_cmdb.models import HOST_STATUS
+from CN171_tools.common_api import get_tuple_key
+
 objects=['john', 'paul', 'george', 'ringo', 'lucy', 'meiry', 'checy', 'wind', 'flow', 'rain']
 #objects=[]
 p = Paginator(objects, 3)   #实例化一个分页器，获得分页器 3条数据为一页，实例化分页对象

@@ -7,7 +7,6 @@
 
 from __future__ import absolute_import, unicode_literals
 import os
-import CN171_crontab
 from celery import Celery
 
 #设置django环境
@@ -19,4 +18,4 @@ app = Celery('CN171')
 app.config_from_object('django.conf:settings')
 
 #发现任务文件每个app下的task.py
-app.autodiscover_tasks(['CN171_crontab.tasks','CN171_background.tasks'])
+app.autodiscover_tasks(['CN171_order.tasks','CN171_background.tasks','CN171_crontab.tasks',])
