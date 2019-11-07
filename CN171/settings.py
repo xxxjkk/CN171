@@ -198,4 +198,7 @@ CELERY_TIMEZONE = 'Asia/Shanghai'
 #设置beat数据库
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
+#设置浏览器关闭时session失效
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 
