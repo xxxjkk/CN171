@@ -4,6 +4,7 @@ import threading
 
 from django.http import HttpResponse, JsonResponse, FileResponse, HttpResponseRedirect
 from CN171_background import models
+from CN171_background.action import taskOneAction, checkResultAction
 from CN171_background.api import pages,get_object
 from django.shortcuts import render
 
@@ -360,3 +361,6 @@ def downloadTaskLog(request):
     #response['Content-Disposition'] = 'attachment;filename=' + downfilename
     response['Content-Disposition'] = 'attachment;filename="{}"'.format(downfilename)
     return response
+
+
+

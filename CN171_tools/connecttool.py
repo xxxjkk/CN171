@@ -186,15 +186,25 @@ def remote_scp(remote_path,local_path):
     sftp = paramiko.SFTPClient.from_transport(t)  # sftp传输协议
     src = remote_path
     des = local_path
-    log_dir_name = src.split("/")
-    a = len(log_dir_name)
-    downfilename = log_dir_name[a - 1]
+    #log_dir_name = src.split("/")
+    # 适配Linux环境，截取日志文件名
+    if '/' in src:
+        log_dir_name = src.split('/')[-1]
+    # 适配Windows环境，截取日志文件名
+    elif '\\' in src:
+        log_dir_name = src.split('\\')[-1]
+    else:
+        response = "Log file not exits!"
+        return response
+    #a = len(log_dir_name)
+    downfilename = log_dir_name
     dir_name = str(downfilename)
     try:
         sftp.get(src, des)
         t.close()
         sshd = ssh_connect("Ansible")
-        cmd = "rm -rf " + dir_name
+        dir_del_name = dir_name.split('.')[0]
+        cmd = "rm -rf " +dir_del_name
         ssh_exec_cmd(sshd, cmd)
         ssh_close(sshd)
     except IOError:
