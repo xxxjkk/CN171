@@ -32,6 +32,9 @@ SECRET_KEY = '42427w*ffn#8a&!@8bd*ia^j93&0$ufe#re*5dmt&&l^y-0jj5'
 #设置浏览器关闭时session失效
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
+#设置登陆超时时长（10分钟）
+SESSION_COOKIE_AGE = 60*10
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -186,8 +189,5 @@ CELERY_RESULT_SERIALIZER = config.get('Celery', 'celery_result_serializer')
 CELERY_TIMEZONE = config.get('Celery', 'celery_timezone')
 #设置beat数据库
 CELERYBEAT_SCHEDULER = config.get('Celery', 'celery_beat_scheduler')
-
-#设置浏览器关闭时session失效
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 
