@@ -43,9 +43,18 @@ def checkResult():
         for i in bgTaskLogList:
             log_dir = i.bg_log_dir
             #downfilename = re.findall(r"/(.+?).log", log_dir)
-            log_dir_name = log_dir.split("/")
-            a = len(log_dir_name)
-            downfilename = log_dir_name[a-1]
+            #log_dir_name = log_dir.split("/")
+            # 适配Linux环境，截取日志文件名
+            if '/' in log_dir:
+                log_dir_name = log_dir.split('/')[-1]
+            # 适配Windows环境，截取日志文件名
+            elif '\\' in log_dir:
+                log_dir_name = log_dir.split('\\')[-1]
+            else:
+                response = "Log file not exits!"
+                return response
+            #a = len(log_dir_name)
+            downfilename = log_dir_name
             filename = str(downfilename)
             local_path = config.get('TaskManagement', 'log_path')
             local_log_path = local_path + filename
@@ -65,15 +74,29 @@ def checkResult():
                     taskManagement.bg_lastopr_result = "成功"
                     i.bg_opr_result = "成功"
             elif "中心总体状态：部分正常（满足最小集）" in log:
-                taskManagement.bg_status = "部分正常"
-                taskManagement.bg_lastopr_result = "成功"
-                i.bg_opr_result = "失败"
+                if i.bg_operation == "刷新":
+                    taskManagement.bg_status = "部分正常"
+                    taskManagement.bg_lastopr_result = "成功"
+                    i.bg_opr_result = "成功"
+                else:
+                    taskManagement.bg_status = "部分正常"
+                    taskManagement.bg_lastopr_result = "成功"
+                    i.bg_opr_result = "失败"
             elif "中心总体状态：异常" in log:
-                taskManagement.bg_status = "异常"
-                taskManagement.bg_lastopr_result = "失败"
-                i.bg_opr_result = "失败"
+                if i.bg_operation == "刷新":
+                    taskManagement.bg_status = "异常"
+                    taskManagement.bg_lastopr_result = "成功"
+                    i.bg_opr_result = "成功"
+                else:
+                    taskManagement.bg_status = "异常"
+                    taskManagement.bg_lastopr_result = "失败"
+                    i.bg_opr_result = "失败"
             elif "中心总体状态：停止" in log:
                 if i.bg_operation == "停止":
+                    taskManagement.bg_status = "停止"
+                    taskManagement.bg_lastopr_result = "成功"
+                    i.bg_opr_result = "成功"
+                elif i.bg_operation == "刷新":
                     taskManagement.bg_status = "停止"
                     taskManagement.bg_lastopr_result = "成功"
                     i.bg_opr_result = "成功"

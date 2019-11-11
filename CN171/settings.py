@@ -187,4 +187,7 @@ CELERY_TIMEZONE = config.get('Celery', 'celery_timezone')
 #设置beat数据库
 CELERYBEAT_SCHEDULER = config.get('Celery', 'celery_beat_scheduler')
 
+#设置浏览器关闭时session失效
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 
