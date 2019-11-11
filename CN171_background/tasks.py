@@ -32,8 +32,8 @@ config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
 conntarget = "Ansible"
 
 @shared_task
-def taskOne(bg_id,bg_action,opr_user,bg_log_id):
-    taskOneAction(bg_id,bg_action,opr_user,bg_log_id)
+def taskOne(bg_id,bg_action,opr_user,bg_log_id,bg_old_status):
+    taskOneAction(bg_id,bg_action,opr_user,bg_log_id,bg_old_status)
 
 @shared_task
 def checkResult():
