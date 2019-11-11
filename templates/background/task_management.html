@@ -60,10 +60,10 @@
                                     <th width="7%" style="text-align:center;">模块</th>
                                     <th width="7%" style="text-align:center;">中心</th>
                                     <th width="7%" style="text-align:center;">状态</th>
-                                    <th class="text-center" width="26%" style="text-align:center;">功能</th>
+                                    <th class="text-center" width="18%" style="text-align:center;">功能</th>
                                     <th width="12%" style="text-align:center;">最后一次操作人员</th>
                                     <th width="12%" style="text-align:center;">最后一次操作类型</th>
-                                    <th width="14%" style="text-align:center;">最后一次操作时间</th>
+                                    <th width="16%" style="text-align:center;">最后一次操作时间</th>
                                     <th width="7%" style="text-align:center;">操作结果</th>
                                 </tr>
                             </thead>
@@ -75,7 +75,7 @@
                                         <td width="7%" style="text-align:center;">{{task.bg_domain}}</td>
                                         <td width="8%" style="text-align:center;">
                                             {% if task.bg_status == '正常' %}
-                                            <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:green;"></label>
+                                                <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:green;"></label>
                                             {% elif task.bg_status == '部分正常' %}
                                                 <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:yellow;"></label>
                                             {% elif task.bg_status == '异常' %}
@@ -85,21 +85,20 @@
                                             {% elif task.bg_status == '进行中' %}
                                                 <label style="width:10px;height:10px; vertical-align:middle;border-radius:50%;background-color:orange;"></label>
                                             {% endif %}
-                                            &nbsp;<a href="#" style="list-style-type:none">{{task.bg_status}}</a>
+                                            &nbsp;<a href="#" onclick="appDetailByMoDo('{{task.bg_module}}','{{task.bg_domain}}')" style="list-style-type:none">{{task.bg_status}}</a>
                                         </td>
-                                        <td width="22%" style="text-align:center;">
+                                        <td width="18%" style="text-align:center;">
                                             <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','start')"
                                                style="list-style-type:none">启动</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                             <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','stop')"
                                                style="list-style-type:none">停止</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                             <a href="#" onclick="checkSubmit('{{task.bg_status}}','{{task.bg_id}}','restart')"
                                                style="list-style-type:none">重启</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                                            <a href="#" onclick="appDetailByMoDo('{{task.bg_module}}','{{task.bg_domain}}')" style="list-style-type:none">详情</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                             <a href="#" style="list-style-type:none" onclick="return taskedit({{ task.bg_id }})">编辑</a>
                                         </td>
                                         <td width="12%" style="text-align:center;">{{task.bg_lastopr_user}}</td>
                                         <td width="12%" style="text-align:center;">{{task.bg_lastopr_type}}</td>
-                                        <td width="14%" style="text-align:center;">{{task.bg_lastopr_time}}</td>
+                                        <td width="16%" style="text-align:center;">{{task.bg_lastopr_time}}</td>
                                         <td width="7%" style="text-align:center;">{{task.bg_lastopr_result}}</td>
                                 </tr>
                                 {% endfor %}
@@ -489,45 +488,7 @@ function detail(n){
   });
 }
 </script>
-<script>
-function asset_import(){
-    layer.open({
-    type: 2,
-    title: 'Asset Import',
-    closeBtn: 1,
-    area: ['450px', '350px'],
-    shadeClose: true, //点击遮罩关闭
-    content: ['/cmdb/assetimport/'],
-{#    end:function(){#}
-{#                layer.msg('导入成功！',{#}
-{#                    icon: 1,#}
-{#                    time: 2000 //2秒关闭（如果不配置，默认是3秒）#}
-{#                },function(){#}
-{#                    history.go(0);#}
-{#                });#}
-{#        }#}
-    end:function(){
-    var handle_status = $("#handle_status").val();
-    if ( handle_status == '1' ) {
-        layer.msg('导入成功！',{
-            icon: 1,
-            time: 2000 //2秒关闭（如果不配置，默认是3秒）
-        },function(){
-            parent.location.reload();
-        });
-    } else if ( handle_status == '2' ) {
-        layer.msg('导入失败！',{
-            icon: 2,
-            time: 2000 //2秒关闭（如果不配置，默认是3秒）
-        },function(){
-            parent.location.reload();
-        });
-    }
-}
 
-  });
-}
-</script>
 <script>
     function export_excel(){
         var asset_id_all = getIDall();
