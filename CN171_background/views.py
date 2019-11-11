@@ -10,7 +10,6 @@ from django.shortcuts import render
 from CN171_background.forms import BgForm
 from CN171_background.models import BgTaskManagement, BgTaskLog
 from CN171_cmdb.models import CmdbAppCluster
-from CN171_tools import connecttool
 from CN171_login.views import my_login_required
 from django.db.models import Q
 from datetime import datetime
