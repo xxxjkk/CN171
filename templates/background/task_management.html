@@ -289,7 +289,7 @@ function reload(){
                                location.reload(true);
                            }
                            else{
-                                alert("刷新失败,请核查后重试！");
+                                alert("刷新失败,请核查当前状态后重试！");
                            }
                     }
                 });
@@ -327,6 +327,7 @@ function checkSubmit(status, bg_id, action) {
                                    }
                                    else{
                                         alert("操作失败,请核查后重试！");
+                                        location.reload(true);
                                    }
                             }
                     });
