@@ -17,7 +17,7 @@ except ImportError as e:
 #读取配置文件
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 config = cp.ConfigParser()
-config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
+config.read(os.path.join(BASE_DIR, 'config/cn171.conf'),encoding='utf-8')
 
 #PBOSS文件路径和备份路径
 pboss_remotefiledir = config.get('PBOSS', 'pboss_order_remote_filedir')

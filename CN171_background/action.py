@@ -25,7 +25,7 @@ except ImportError as e:
 from CN171_tools.connecttool import ssh_close, ssh_connect, ssh_exec_cmd
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 config = cp.ConfigParser()
-config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
+config.read(os.path.join(BASE_DIR, 'config/cn171.conf'),encoding='utf-8')
 conntarget = "Ansible"
 
 def taskOneAction(bg_id,bg_action,opr_user,bg_log_id):
