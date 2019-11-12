@@ -159,3 +159,27 @@ def taskOneAction(bg_id,bg_action,opr_user,bg_log_id,bg_old_status):
 #             taskManagement.save()
 #     else:
 #         print("无可执行内容")
+
+#刷新状态定时任务
+def reLoadAction():
+    idlist = BgTaskManagement.objects.values_list('bg_id', flat=True)
+    bg_action = 'query'
+    opr_user = "后台定时刷新"
+    for bg_id in idlist:
+        bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+        bg_old_status = bgTaskManagement.bg_status
+        if bgTaskManagement.bg_status != "进行中":
+            bgTaskManagement.bg_status = "进行中"
+            bgTaskManagement.save()
+            bg_log = BgTaskLog()
+            bg_log.bg_id = bg_id
+            bg_log.bg_operation_time = datetime.now()
+            bg_log.bg_operation_user = opr_user
+            bg_log.bg_opr_result = "待执行"
+            # 写入日志文件
+            bg_log.save()
+            bg_log_id = bg_log.bg_log_id
+            taskOneAction(bg_id, bg_action, opr_user, bg_log_id, bg_old_status)
+            returnmsg = "True"
+        else:
+            returnmsg = "False"

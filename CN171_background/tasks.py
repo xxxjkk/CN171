@@ -16,7 +16,7 @@ from django.shortcuts import redirect
 import os
 from datetime import datetime
 
-from CN171_background.action import taskOneAction
+from CN171_background.action import taskOneAction, reLoadAction
 from CN171_background.models import BgTaskManagement, BgTaskLog
 from CN171_tools.connecttool import ssh_connect, ssh_exec_cmd, readFile, get_init_parameter, remote_scp
 
@@ -118,3 +118,6 @@ def checkResult():
         print("无可执行内容")
 
 
+@shared_task
+def taskReload():
+    reLoadAction()
