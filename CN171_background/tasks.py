@@ -16,7 +16,7 @@ from django.shortcuts import redirect
 import os
 from datetime import datetime
 
-from CN171_background.action import taskOneAction
+from CN171_background.action import taskOneAction, reLoadAction
 from CN171_background.models import BgTaskManagement, BgTaskLog
 from CN171_tools.connecttool import ssh_connect, ssh_exec_cmd, readFile, get_init_parameter, remote_scp
 
@@ -32,8 +32,8 @@ config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
 conntarget = "Ansible"
 
 @shared_task
-def taskOne(bg_id,bg_action,opr_user,bg_log_id):
-    taskOneAction(bg_id,bg_action,opr_user,bg_log_id)
+def taskOne(bg_id,bg_action,opr_user,bg_log_id,bg_old_status):
+    taskOneAction(bg_id,bg_action,opr_user,bg_log_id,bg_old_status)
 
 @shared_task
 def checkResult():
@@ -118,3 +118,6 @@ def checkResult():
         print("无可执行内容")
 
 
+@shared_task
+def taskReload():
+    reLoadAction()

@@ -4,7 +4,7 @@ import threading
 
 from django.http import HttpResponse, JsonResponse, FileResponse, HttpResponseRedirect
 from CN171_background import models
-from CN171_background.action import taskOneAction, checkResultAction
+#from CN171_background.action import taskOneAction, checkResultAction
 from CN171_background.api import pages,get_object
 from django.shortcuts import render
 
@@ -64,6 +64,7 @@ def taskExecuteOne(request):
     bg_id = request.POST.get('bg_id')
     opr_user = request.session['user_name']
     bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+    bg_old_status = bgTaskManagement.bg_status
     bgTaskManagement.bg_status = "进行中"
     bgTaskManagement.save()
     bg_action = request.POST.get('bg_action')
@@ -75,7 +76,7 @@ def taskExecuteOne(request):
     # 写入日志文件
     bg_log.save()
     bg_log_id = bg_log.bg_log_id
-    tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id)
+    tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id,bg_old_status)
     return JsonResponse({'ret': "True"})
 
 # 批量启动按钮
@@ -87,6 +88,7 @@ def batchTaskStart(request):
     bg_action = 'start'
     for bg_id in bg_ids:
         bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+        bg_old_status = bgTaskManagement.bg_status
         if  bgTaskManagement.bg_status=="停止":
             bgTaskManagement.bg_status = "进行中"
             bgTaskManagement.save()
@@ -98,7 +100,7 @@ def batchTaskStart(request):
             # 写入日志文件
             bg_log.save()
             bg_log_id = bg_log.bg_log_id
-            tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id)
+            tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id,bg_old_status)
             returnmsg = "True"
         else:
             returnmsg = "False"
@@ -114,6 +116,7 @@ def batchTaskStop(request):
     opr_user = request.session['user_name']
     for bg_id in bg_ids:
         bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+        bg_old_status = bgTaskManagement.bg_status
         if  bgTaskManagement.bg_status == "正常"or bgTaskManagement.bg_status == "部分正常" or bgTaskManagement.bg_status == "异常" :
             bgTaskManagement.bg_status = "进行中"
             bgTaskManagement.save()
@@ -125,7 +128,7 @@ def batchTaskStop(request):
             # 写入日志文件
             bg_log.save()
             bg_log_id = bg_log.bg_log_id
-            tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id)
+            tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id,bg_old_status)
             returnmsg = "True"
         else:
             returnmsg = "False"
@@ -140,6 +143,7 @@ def batchTaskReboot(request):
     opr_user = request.session['user_name']
     for bg_id in bg_ids:
         bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+        bg_old_status = bgTaskManagement.bg_status
         if bgTaskManagement.bg_status == "正常" or bgTaskManagement.bg_status == "部分正常" or bgTaskManagement.bg_status == "异常":
             bgTaskManagement.bg_status = "进行中"
             bgTaskManagement.save()
@@ -151,7 +155,7 @@ def batchTaskReboot(request):
             # 写入日志文件
             bg_log.save()
             bg_log_id = bg_log.bg_log_id
-            tasks.taskOne.delay(bg_id, bg_action, opr_user,bg_log_id)
+            tasks.taskOne.delay(bg_id, bg_action, opr_user,bg_log_id,bg_old_status)
             returnmsg = "True"
         else:
             returnmsg = "False"
@@ -167,6 +171,7 @@ def reLoad(request):
     opr_user = request.session['user_name']
     for bg_id in idlist:
         bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+        bg_old_status = bgTaskManagement.bg_status
         if bgTaskManagement.bg_status != "进行中":
             bgTaskManagement.bg_status = "进行中"
             bgTaskManagement.save()
@@ -178,7 +183,7 @@ def reLoad(request):
             # 写入日志文件
             bg_log.save()
             bg_log_id = bg_log.bg_log_id
-            tasks.taskOne.delay(bg_id, bg_action, opr_user,bg_log_id)
+            tasks.taskOne.delay(bg_id, bg_action, opr_user,bg_log_id,bg_old_status)
             returnmsg = "True"
         else:
             returnmsg = "False"
@@ -363,4 +368,23 @@ def downloadTaskLog(request):
     return response
 
 
+# def testAction(request):
+#     bg_id = request.POST.get('bg_id')
+#     opr_user = request.session['user_name']
+#     bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+#     bg_old_status = bgTaskManagement.bg_status
+#     bgTaskManagement.bg_status = "进行中"
+#     bgTaskManagement.save()
+#     bg_log = BgTaskLog()
+#     bg_log.bg_id = bg_id
+#     bg_log.bg_operation_time = datetime.now()
+#     bg_log.bg_operation_user = opr_user
+#     bg_log.bg_opr_result = "待执行"
+#     # 写入日志文件
+#     bg_log.save()
+#     bg_log_id = bg_log.bg_log_id
+#     bg_action = "start"
+#     ret = taskOneAction(bg_id, bg_action, opr_user,bg_log_id,bg_old_status)
+#     checkResultAction()
+#     return JsonResponse({'ret': ret})
 
