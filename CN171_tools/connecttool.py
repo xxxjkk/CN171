@@ -141,25 +141,40 @@ def get_init_parameter(conntarget):
 
 def get_init_parameter1(conntarget):
     if conntarget == "Ansible":
-        ansible_general_host_pwd = config.get('Ansible', 'ansible_general_host_pwd')
-        ansible_root_host_pwd=config.get('Ansible','ansible_root_host_pwd')
+        ansible_host_pwmgnt_login_pwd = config.get('Ansible', 'ansible_host_pwmgnt_login_pwd')
+        ansible_host_pwmgnt_root_pwd=config.get('Ansible','ansible_host_pwmgnt_root_pwd')
     elif conntarget == "PBOSS":
-        ansible_general_host_pwd = config.get('PBOSS', 'ansible_general_host_pwd')
-        ansible_root_host_pwd = config.get('PBOSS', 'ansible_root_host_pwd')
+        ansible_host_pwmgnt_login_pwd = config.get('PBOSS', 'ansible_host_pwmgnt_login_pwd')
+        ansible_host_pwmgnt_root_pwd = config.get('PBOSS', 'ansible_host_pwmgnt_root_pwd')
     else:
         print(conntarget + "not find!")
         exit()
-    return ansible_general_host_pwd, ansible_root_host_pwd
+    return ansible_host_pwmgnt_login_pwd, ansible_host_pwmgnt_root_pwd
 
 def get_init_parameter2(conntarget):
     if conntarget == "Ansible":
-        remote_path = config.get('Ansible', 'remote_path')
+        ansible_host_pwmgnt_ipfile_path = config.get('Ansible', 'ansible_host_pwmgnt_ipfile_path')
     elif conntarget == "PBOSS":
-        remote_path = config.get('PBOSS', 'remote_path')
+        ansible_host_pwmgnt_ipfile_path = config.get('PBOSS', 'ansible_host_pwmgnt_ipfile_path')
     else:
         print(conntarget + "not find!")
         exit()
-    return remote_path
+    return ansible_host_pwmgnt_ipfile_path
+
+#主机管理刷新状态功能，得到初始化参数
+def get_hostmgnt_init_parameter(conntarget):
+    if conntarget == "Ansible":
+        ansible_host_hostmgnt_busiip_path = config.get('Ansible', 'ansible_host_hostmgnt_busiip_path')
+        ansible_host_hostmgnt_return_filepath = config.get('Ansible', 'ansible_host_hostmgnt_return_filepath')
+        ansible_host_hostmgnt_scrideploy_path = config.get('Ansible', 'ansible_host_hostmgnt_scrideploy_path')
+    elif conntarget == "PBOSS":
+        ansible_host_hostmgnt_busiip_path = config.get('Ansible', 'ansible_host_hostmgnt_busiip_path')
+        ansible_host_hostmgnt_return_filepath = config.get('Ansible', 'ansible_host_hostmgnt_return_filepath')
+        ansible_host_hostmgnt_scrideploy_path = config.get('Ansible', 'ansible_host_hostmgnt_scrideploy_path')
+    else:
+        print(conntarget + "not find!")
+        exit()
+    return ansible_host_hostmgnt_busiip_path,ansible_host_hostmgnt_return_filepath,ansible_host_hostmgnt_scrideploy_path
 
 def readFile(file_path):
     exec_cmd = "cat "+ file_path
