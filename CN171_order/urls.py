@@ -28,6 +28,8 @@ urlpatterns = [
     url(r'^pbossOrderRollbackMake/', orderviews.pbossOrderRollbackMake, name='pbossOrderRollbackMake'),
 
     #pboss订单观察生成记录页面
-    url(r'^pbossMakeRecord/', orderviews.pbossMakeRecordQuery, name='pbossMakeRecord'),
+    url(r'^pbossMakeRecord/', orderviews.pbossMakeRecord, name='pbossMakeRecord'),
+    url(r'^pbossMakeRecordSearch/', orderviews.pbossMakeRecordSearch, name='pbossMakeRecordSearch'),
+    url(r'^downloadRecordFile/', orderviews.downloadRecordFile, name='downloadRecordFile'),
 
 ]
