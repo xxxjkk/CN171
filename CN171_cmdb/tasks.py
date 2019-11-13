@@ -9,89 +9,94 @@
 from __future__ import absolute_import, unicode_literals
 
 import re
+from datetime import datetime
 
 from celery import shared_task
+from django.http import request
 from django.shortcuts import redirect
 
 import os
-from datetime import datetime
-
-from CN171_background.action import taskOneAction
-from CN171_background.models import BgTaskManagement, BgTaskLog
-from CN171_tools.connecttool import ssh_connect, ssh_exec_cmd, readFile, get_init_parameter, remote_scp
-
-try:
-    import ConfigParser as cp
-except ImportError as e:
-    import configparser as cp
-# 后台管理函数
-from CN171_tools.connecttool import ssh_close, ssh_connect, ssh_exec_cmd
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-config = cp.ConfigParser()
-config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
-conntarget = "Ansible"
+from CN171_cmdb.models import CmdbHost
+from CN171_tools.connecttool import remote_scp, readFile, ssh_connect, ssh_exec_cmd, get_hostmgnt_init_parameter
+from CN171_tools.sftputils import remote_scp1
 
 @shared_task
-def taskOne(bg_id,bg_action,opr_user,bg_log_id):
-    taskOneAction(bg_id,bg_action,opr_user,bg_log_id)
+def batchRefreshHostStatusTask(ansible_host_hostmgnt_return_filepath,user_name,ansible_host_hostmgnt_scrideploy_path):
+    returnmsg = "False"
+
+    file_path_return = ansible_host_hostmgnt_return_filepath
+    file_name_return = user_name+"_refresh_host_status_return"
+    conntarget = "Ansible"
+    sshd = ssh_connect(conntarget)
+    dir_cmd = "mkdir "+ file_path_return
+    ssh_exec_cmd(sshd, dir_cmd)
+
+    #cmd = "python3 osproject/bin/mach_get.py " + " >> " + file_path_return + "/" + file_name_return + ".log"
+    cmd = "python "+ansible_host_hostmgnt_scrideploy_path+"mach_get.py " + " >> " + file_path_return + "/" + file_name_return + ".log"
+    stdin, stdout, stderr = ssh_exec_cmd(sshd, cmd)
+    err_list = stderr.readlines()
+    if len(err_list) > 0:
+        print('Refresh failed:' + err_list[0])
+    else:
+        print('Start success.')
+        returnmsg = "True"
+    sshd.close()
+    return returnmsg
+
+
+def local_log_path(args):
+    pass
+
 
 @shared_task
-def checkResult():
-    bg_opr_result = "执行中"
-    bgTaskLogList = BgTaskLog.objects.filter(bg_opr_result=bg_opr_result)
-    if bgTaskLogList:
-        for i in bgTaskLogList:
-            log_dir = i.bg_log_dir
-            #downfilename = re.findall(r"/(.+?).log", log_dir)
-            log_dir_name = log_dir.split("/")
-            a = len(log_dir_name)
-            downfilename = log_dir_name[a-1]
-            filename = str(downfilename)
-            local_path = config.get('TaskManagement', 'log_path')
-            local_log_path = local_path + filename
-            i.bg_log_dir = local_log_path
-            i.save()
-            bg_id = i.bg_id
-            taskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
-            old_status = taskManagement.bg_status
-            log = readFile(log_dir)
-            if "中心总体状态：正常" in log:
-                if i.bg_operation == "停止":
-                    taskManagement.bg_status = "正常"
-                    taskManagement.bg_lastopr_result = "失败"
-                    i.bg_opr_result = "失败"
-                else:
-                    taskManagement.bg_status = "正常"
-                    taskManagement.bg_lastopr_result = "成功"
-                    i.bg_opr_result = "成功"
-            elif "中心总体状态：部分正常（满足最小集）" in log:
-                taskManagement.bg_status = "部分正常"
-                taskManagement.bg_lastopr_result = "成功"
-                i.bg_opr_result = "失败"
-            elif "中心总体状态：异常" in log:
-                taskManagement.bg_status = "异常"
-                taskManagement.bg_lastopr_result = "失败"
-                i.bg_opr_result = "失败"
-            elif "中心总体状态：停止" in log:
-                if i.bg_operation == "停止":
-                    taskManagement.bg_status = "停止"
-                    taskManagement.bg_lastopr_result = "成功"
-                    i.bg_opr_result = "成功"
-                else:
-                    taskManagement.bg_status = "停止"
-                    taskManagement.bg_lastopr_result = "失败"
-                    i.bg_opr_result = "失败"
-            elif "对不起，操作失败！" in log:
-                print("因特殊原因，执行出错")
-                taskManagement.bg_status = old_status
-                taskManagement.bg_lastopr_result = "失败"
-                i.bg_opr_result = "失败"
-            else:
-                print("下个定时任务循环读取...")
-            remote_scp(log_dir, local_log_path)
-            i.save()
-            taskManagement.save()
+def checkHostStatusResult():
+    #返回的日志文件名
+    return_log_file=request.session.get('user_name')+"_refresh_host_status_return.log"
+    #获取返回的文件路径
+    ansible_host_hostmgnt_busiip_path, ansible_host_hostmgnt_return_filepath, ansible_host_hostmgnt_scrideploy_path \
+        = get_hostmgnt_init_parameter('Ansible')
+    #返回文件的带绝对路径的文件
+    return_log_file_name = ansible_host_hostmgnt_return_filepath+return_log_file
+    #返回文件写入本地的目录
+    local_log_path="temp/cmdb/hostmgnt/status/retlog/"
+    log = readFile(return_log_file_name)
+    if log:
+        if "End" in log:
+            remote_scp1(return_log_file_name, local_log_path)
+            #读取.txt文件
+            with open(local_log_path+return_log_file , 'r') as pfp:
+                #循环读取每一行的数据
+                for line in pfp.readlines():
+                    if "start to collect" in line:
+                        continue
+                    elif "End" in line:
+                        break
+                    else:
+                        refreshHostStatus(line)
+        else:
+            print("下个定时任务循环读取...")
     else:
         print("无可执行内容")
+
+
+
+#逻辑处理，每行数据的处理，task调用
+def refreshHostStatus(line):
+    if line:
+        arrayLines = line.split("|")
+        cmdbHost = CmdbHost.objects.get(cmdb_host_busip=arrayLines[0])
+        cmdbHost.cmdb_host_insert_time = datetime.now()
+        if "Falied" in line:
+            cmdbHost.cmdb_host_status = "2"
+        else:
+            cmdbHost.cmdb_host_system = arrayLines[1]
+            cmdbHost.cmdb_host_cpu = arrayLines[2]
+            cmdbHost.cmdb_host_RAM = arrayLines[3]
+            cmdbHost.cmdb_host_local_disc =arrayLines[4]
+            cmdbHost.cmdb_host_outlay_disc=arrayLines[5]
+            cmdbHost.cmdb_host_status = "1"
+        cmdbHost.save()
+    else:
+        print("此行数据为空！")
 
 

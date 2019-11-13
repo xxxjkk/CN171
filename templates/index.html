@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 
 {% block self_head_css_js %}
-    <link href="/static/css/flip.css" rel="stylesheet">
-    <link href="/static/css/index.css" rel="stylesheet">
+    <link href="{% static 'css/flip.css' %}" rel="stylesheet">
+    <link href="{% static 'css/index.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -31,11 +32,11 @@
                                 <dd>资产管理</dd>
 							</div>
 							<div class="side back">
-                                <a href="/cmdb/host_management/">主机管理</a>
+                                <a href="{% url 'hostManagement' %}">主机管理</a>
                                 <p>主要针对主机资源的主机名、类型、资源池、业务/管理IP、归属模块、归属中心、状态进行展示。</p>
-                                <a href=#>密码管理</a>
+                                <a href="{% url 'hostPwdOprLogPage' %}">主机密码管理</a>
                                 <p>主要针对主机的密码进行批量变更操作，并记录每次密码操作的详细信息。</p>
-                                <a href="/cmdb/app_management/">应用管理</a>
+                                <a href="{% url 'appManagement' %}">应用管理</a>
                                 <p>主要针对应用资源的网元名、归属模块、归属中心、组网类型、归属主机、业务IP、状态进行展示。</p>
 							</div>
 						</div>
@@ -49,9 +50,9 @@
                                 <dd>后台管理</dd>
 							</div>
 							<div class="side back">
-                                <a href="/background/task_management/">后台管理</a>
+                                <a href="{% url 'taskManagement' %}">后台管理</a>
                                 <p>主要针对CMIOT系统的各个模块中心进行启动、停止、重启、状态查询等操作。</p>
-                                <a href="/background/task_log/">后台日志</a>
+                                <a href="{% url 'taskLog' %}">后台日志</a>
                                 <p>主要针对后台操作记录的查询、展示。</p>
                                 <a href=#>定时任务管理</a>
                                 <p>主要针对……</p>
@@ -81,11 +82,11 @@
                                 <dd>订单管理</dd>
 							</div>
 							<div class="side back">
-                                <a href="/order/pbossOrderStatus/">订单状态（PBOSS）</a>
+                                <a href="{% url 'pbossOrderStatus' %}">订单状态（PBOSS）</a>
                                 <p>主要针对PBOSS系统的不同状态订单情况进行监测，包括按开始时间/结束时间生成统计数据、搜索展示、导出数据。</p>
-                                <a href="/order/pbossOrderNode/">订单节点（PBOSS）</a>
+                                <a href="{% url 'pbossOrderNode' %}">订单节点（PBOSS）</a>
                                 <p>主要针对PBOSS系统的不同节点订单情况进行监测，包括按开始时间/结束时间生成统计数据、搜索展示、导出数据。</p>
-                                <a href="/order/pbossOrderRollback/">订单回退（PBOSS）</a>
+                                <a href="{% url 'pbossOrderRollback' %}">订单回退（PBOSS）</a>
                                 <p>主要针对PBOSS系统的回退订单情况进行监测，包括按开始时间/结束时间生成统计数据、搜索展示、导出数据。</p>
 							</div>
 						</div>
@@ -99,7 +100,7 @@
                                 <dd>智能运维</dd>
 							</div>
 							<div class="side back">
-                                <a href="/aiops/capacity/">容量预测</a>
+                                <a href="{% url 'capacity' %}">容量预测</a>
                                 <p>主要针对系统业务和容量进行周期性的统计分析，利用LSTM算法进行系统容量预测。</p>
 							</div>
 						</div>

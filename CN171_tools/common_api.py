@@ -3,6 +3,9 @@ from os.path import *
 from django.http import HttpResponse
 
 #导出txt文档
+from CN171_tools.sftputils import path_not_exist_create
+
+
 def export_txt(content1):
     now = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M')
     file_name = './download/txt/host_pwd_detail_log_' + now + '.txt'
@@ -13,6 +16,33 @@ def export_txt(content1):
     dir_path = dirname(dirname(abspath(__file__)))
     file_path=dir_path+"\download\\txt"
     return file_path
+
+#导出txt文档
+def export_txt(content1):
+    now = datetime.datetime.now().strftime('%Y_%m_%d_%H_%M')
+    file_name = './download/txt/host_pwd_detail_log_' + now + '.txt'
+    file = open(file_name, 'w')
+    file.write(content1)
+    file.close()
+    # 获取上级目录绝对路径
+    dir_path = dirname(dirname(abspath(__file__)))
+    file_path=dir_path+"\download\\txt"
+    return file_path
+
+#写入txt文档
+#在该filePath下将content1写入文件名为fileName的txt文档，
+#filePath文件所在目录 例如：temp/cmdb/hostmgnt/status/20191108，fileName 例如：文件名 root_host_busip_ip.txt
+#返回带绝对路径的文件名 D:/CN171/temp/cmdb/hostmgnt/status/20191108/host_busip_ip.txt 或者opt/app/.../..txt
+def write_txt(content1, filePath, fileName):
+    path_not_exist_create(filePath)
+    file_name = filePath + fileName + '.txt'
+    file = open(file_name, 'w')
+    file.write(content1)
+    file.close()
+    # 获取上级目录绝对路径
+    dir_path = dirname(dirname(abspath(__file__)))
+    abspath_file_name= dir_path + "\\"+ file_name
+    return abspath_file_name
 
 #导出并下载txt文件
 def export_download_txt(content1):

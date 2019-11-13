@@ -1,18 +1,16 @@
 # -*-coding:utf-8 -*-
 import os
-import re
-import sys
 import threading
 
 from django.http import HttpResponse, JsonResponse, FileResponse, HttpResponseRedirect
 from CN171_background import models
+#from CN171_background.action import taskOneAction, checkResultAction
 from CN171_background.api import pages,get_object
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 
 from CN171_background.forms import BgForm
 from CN171_background.models import BgTaskManagement, BgTaskLog
 from CN171_cmdb.models import CmdbAppCluster
-from CN171_tools import connecttool
 from CN171_login.views import my_login_required
 from django.db.models import Q
 from datetime import datetime
@@ -27,7 +25,7 @@ except ImportError as e:
 from CN171_tools.connecttool import ssh_close, ssh_connect, ssh_exec_cmd
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 config = cp.ConfigParser()
-config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
+config.read(os.path.join(BASE_DIR, 'config/cn171.conf'),encoding='utf-8')
 conntarget = "Ansible"
 
 #模块中心下的应用集群
@@ -66,6 +64,7 @@ def taskExecuteOne(request):
     bg_id = request.POST.get('bg_id')
     opr_user = request.session['user_name']
     bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+    bg_old_status = bgTaskManagement.bg_status
     bgTaskManagement.bg_status = "进行中"
     bgTaskManagement.save()
     bg_action = request.POST.get('bg_action')
@@ -77,7 +76,7 @@ def taskExecuteOne(request):
     # 写入日志文件
     bg_log.save()
     bg_log_id = bg_log.bg_log_id
-    tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id)
+    tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id,bg_old_status)
     return JsonResponse({'ret': "True"})
 
 # 批量启动按钮
@@ -89,6 +88,7 @@ def batchTaskStart(request):
     bg_action = 'start'
     for bg_id in bg_ids:
         bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+        bg_old_status = bgTaskManagement.bg_status
         if  bgTaskManagement.bg_status=="停止":
             bgTaskManagement.bg_status = "进行中"
             bgTaskManagement.save()
@@ -100,7 +100,7 @@ def batchTaskStart(request):
             # 写入日志文件
             bg_log.save()
             bg_log_id = bg_log.bg_log_id
-            tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id)
+            tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id,bg_old_status)
             returnmsg = "True"
         else:
             returnmsg = "False"
@@ -116,6 +116,7 @@ def batchTaskStop(request):
     opr_user = request.session['user_name']
     for bg_id in bg_ids:
         bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+        bg_old_status = bgTaskManagement.bg_status
         if  bgTaskManagement.bg_status == "正常"or bgTaskManagement.bg_status == "部分正常" or bgTaskManagement.bg_status == "异常" :
             bgTaskManagement.bg_status = "进行中"
             bgTaskManagement.save()
@@ -127,7 +128,7 @@ def batchTaskStop(request):
             # 写入日志文件
             bg_log.save()
             bg_log_id = bg_log.bg_log_id
-            tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id)
+            tasks.taskOne.delay(bg_id,bg_action,opr_user,bg_log_id,bg_old_status)
             returnmsg = "True"
         else:
             returnmsg = "False"
@@ -142,6 +143,7 @@ def batchTaskReboot(request):
     opr_user = request.session['user_name']
     for bg_id in bg_ids:
         bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+        bg_old_status = bgTaskManagement.bg_status
         if bgTaskManagement.bg_status == "正常" or bgTaskManagement.bg_status == "部分正常" or bgTaskManagement.bg_status == "异常":
             bgTaskManagement.bg_status = "进行中"
             bgTaskManagement.save()
@@ -153,7 +155,7 @@ def batchTaskReboot(request):
             # 写入日志文件
             bg_log.save()
             bg_log_id = bg_log.bg_log_id
-            tasks.taskOne.delay(bg_id, bg_action, opr_user,bg_log_id)
+            tasks.taskOne.delay(bg_id, bg_action, opr_user,bg_log_id,bg_old_status)
             returnmsg = "True"
         else:
             returnmsg = "False"
@@ -169,6 +171,7 @@ def reLoad(request):
     opr_user = request.session['user_name']
     for bg_id in idlist:
         bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+        bg_old_status = bgTaskManagement.bg_status
         if bgTaskManagement.bg_status != "进行中":
             bgTaskManagement.bg_status = "进行中"
             bgTaskManagement.save()
@@ -180,7 +183,7 @@ def reLoad(request):
             # 写入日志文件
             bg_log.save()
             bg_log_id = bg_log.bg_log_id
-            tasks.taskOne.delay(bg_id, bg_action, opr_user,bg_log_id)
+            tasks.taskOne.delay(bg_id, bg_action, opr_user,bg_log_id,bg_old_status)
             returnmsg = "True"
         else:
             returnmsg = "False"
@@ -346,11 +349,42 @@ def taskLogDetail(request):
 def downloadTaskLog(request):
     log_dir = request.GET.get("log_dir")
     file=open(log_dir,'rb')
-    downfilename = re.findall(r"log\\(.+?).log", log_dir)
-    filename = str(downfilename[0])+".log"
+
+    #适配Linux环境，截取日志文件名
+    if '/' in log_dir:
+        downfilename = log_dir.split('/')[-1]
+    #适配Windows环境，截取日志文件名
+    elif '\\' in log_dir:
+        downfilename = log_dir.split('\\')[-1]
+    else:
+        response = "Log file not exits!"
+        return response
+
     response =FileResponse(file)
     response['Content-Type']='application/octet-stream'
     #response['Content-Disposition']='attachment;filename="downfilename.log"'
     #response['Content-Disposition'] = 'attachment;filename=' + downfilename
-    response['Content-Disposition'] = 'attachment;filename="{}"'.format(filename)
+    response['Content-Disposition'] = 'attachment;filename="{}"'.format(downfilename)
     return response
+
+
+# def testAction(request):
+#     bg_id = request.POST.get('bg_id')
+#     opr_user = request.session['user_name']
+#     bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+#     bg_old_status = bgTaskManagement.bg_status
+#     bgTaskManagement.bg_status = "进行中"
+#     bgTaskManagement.save()
+#     bg_log = BgTaskLog()
+#     bg_log.bg_id = bg_id
+#     bg_log.bg_operation_time = datetime.now()
+#     bg_log.bg_operation_user = opr_user
+#     bg_log.bg_opr_result = "待执行"
+#     # 写入日志文件
+#     bg_log.save()
+#     bg_log_id = bg_log.bg_log_id
+#     bg_action = "start"
+#     ret = taskOneAction(bg_id, bg_action, opr_user,bg_log_id,bg_old_status)
+#     checkResultAction()
+#     return JsonResponse({'ret': ret})
+
