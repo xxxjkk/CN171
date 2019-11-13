@@ -19,4 +19,4 @@ app = Celery('CN171')
 app.config_from_object('django.conf:settings')
 
 #发现任务文件每个app下的task.py
-app.autodiscover_tasks(['CN171_crontab.tasks','CN171_background.tasks'])
+app.autodiscover_tasks(['CN171_crontab.tasks','CN171_background.tasks','CN171_cmdb.tasks'])

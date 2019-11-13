@@ -8,6 +8,7 @@
 import os
 import paramiko
 from django.shortcuts import render
+from CN171_tools.connecttool import ssh_connect,ssh_exec_cmd,ssh_close
 
 try:
     import ConfigParser as cp
@@ -85,6 +86,7 @@ def filedownload(sftp_file_path, sftp_filebak_path, dst_file_path):
                 print("文件《" + file + "》下载完成！")
 
 #本地文件拷贝到远程
+#sftp 为sftp连接句柄，local 本地文件绝对路径（包含文件名），服务器端路径（不含文件名）
 def put(sftp,local,remote):
     #检查路径是否存在
     def _is_exists(path,function):
@@ -135,6 +137,59 @@ def put(sftp,local,remote):
     #拷贝文件
     flag=_copy(sftp=sftp,local=local,remote=remote)
     return flag
+
+
+#从远程机器上下载文件（夹）到本地
+from stat import S_ISDIR as isdir
+def _check_local(local):
+    if not os.path.exists(local):
+        try:
+            os.mkdir(local)
+        except IOError as err:
+            print(err)
+def get(sftp,remote,local):
+    #检查远程文件是否存在
+    try:
+        result = sftp.stat(remote)
+    except IOError as err:
+        error = '[ERROR %s] %s: %s' %(err.errno,os.path.basename(os.path.normpath(remote)),err.strerror)
+        print(error)
+    else:
+        #判断远程文件是否为目录
+        if isdir(result.st_mode):
+            dirname = os.path.basename(os.path.normpath(remote))
+            local = os.path.join(local,dirname)
+            _check_local(local)
+            for file in sftp.listdir(remote):
+                sub_remote = os.path.join(remote,file)
+                sub_remote = sub_remote.replace('\\','/')
+                get(sftp,sub_remote,local)
+        else:
+        #拷贝文件
+            if os.path.isdir(local):
+                local = os.path.join(local,os.path.basename(remote))
+            try:
+                sftp.get(remote,local)
+            except IOError as err:
+                print(err)
+            else:
+                print('[get]',local,'<==',remote)
+
+
+#远程下载文件
+#remote_path_file 带绝对路径的文件名  local_path 本地路径
+def remote_scp1(remote_path_file,local_path):
+    t, sftp = sftpconnect("CMIOT")
+    try:
+        get(sftp,remote_path_file, local_path)
+        t.close()
+        sshd = ssh_connect("Ansible")
+        #获得该文件后直接删除该文件，而不是删除该目录下的文件
+        cmd = "rm -f " + remote_path_file
+        ssh_exec_cmd(sshd, cmd)
+        ssh_close(sshd)
+    except IOError:
+        print("not exist")
 
 
 #判断filePath目录不存在则创建
