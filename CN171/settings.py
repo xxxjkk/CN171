@@ -21,7 +21,7 @@ except ImportError as e:
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 config = cp.ConfigParser()
-config.read(os.path.join(BASE_DIR, 'config/cn171.conf'))
+config.read(os.path.join(BASE_DIR, 'config/cn171.conf'),encoding='utf-8')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -32,8 +32,8 @@ SECRET_KEY = '42427w*ffn#8a&!@8bd*ia^j93&0$ufe#re*5dmt&&l^y-0jj5'
 #设置浏览器关闭时session失效
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
-#设置登陆超时时长（10分钟）
-#SESSION_COOKIE_AGE = 60*10
+#设置登陆超时时长（30分钟）
+#SESSION_COOKIE_AGE = 60*30
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
