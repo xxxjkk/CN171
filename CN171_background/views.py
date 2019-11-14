@@ -66,9 +66,21 @@ def taskExecuteOne(request):
     bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
     bg_old_status = bgTaskManagement.bg_status
     bgTaskManagement.bg_status = "进行中"
-    bgTaskManagement.save()
     bg_action = request.POST.get('bg_action')
     bg_log = BgTaskLog()
+    if bg_action=='start':
+        bg_log.bg_operation = "启动"
+        bgTaskManagement.bg_lastopr_type = "启动"
+    elif bg_action =='restart':
+        bg_log.bg_operation = "重启"
+        bgTaskManagement.bg_lastopr_type = "重启"
+    elif bg_action =='stop':
+        bg_log.bg_operation = "停止"
+        bgTaskManagement.bg_lastopr_type = "停止"
+    bgTaskManagement.bg_lastopr_user = opr_user
+    bgTaskManagement.bg_lastopr_time = datetime.now()
+    bgTaskManagement.bg_lastopr_result = "执行中"
+    bgTaskManagement.save()
     bg_log.bg_id = bg_id
     bg_log.bg_operation_time = datetime.now()
     bg_log.bg_operation_user = opr_user
@@ -91,9 +103,14 @@ def batchTaskStart(request):
         bg_old_status = bgTaskManagement.bg_status
         if  bgTaskManagement.bg_status=="停止":
             bgTaskManagement.bg_status = "进行中"
+            bgTaskManagement.bg_lastopr_type = "启动"
+            bgTaskManagement.bg_lastopr_user = opr_user
+            bgTaskManagement.bg_lastopr_time = datetime.now()
+            bgTaskManagement.bg_lastopr_result = "执行中"
             bgTaskManagement.save()
             bg_log = BgTaskLog()
             bg_log.bg_id = bg_id
+            bg_log.bg_operation = "启动"
             bg_log.bg_operation_time = datetime.now()
             bg_log.bg_operation_user = opr_user
             bg_log.bg_opr_result = "待执行"
@@ -119,8 +136,13 @@ def batchTaskStop(request):
         bg_old_status = bgTaskManagement.bg_status
         if  bgTaskManagement.bg_status == "正常"or bgTaskManagement.bg_status == "部分正常" or bgTaskManagement.bg_status == "异常" :
             bgTaskManagement.bg_status = "进行中"
+            bgTaskManagement.bg_lastopr_type = "停止"
+            bgTaskManagement.bg_lastopr_user = opr_user
+            bgTaskManagement.bg_lastopr_time = datetime.now()
+            bgTaskManagement.bg_lastopr_result = "执行中"
             bgTaskManagement.save()
             bg_log = BgTaskLog()
+            bg_log.bg_operation = "停止"
             bg_log.bg_id = bg_id
             bg_log.bg_operation_time = datetime.now()
             bg_log.bg_operation_user = opr_user
@@ -146,8 +168,13 @@ def batchTaskReboot(request):
         bg_old_status = bgTaskManagement.bg_status
         if bgTaskManagement.bg_status == "正常" or bgTaskManagement.bg_status == "部分正常" or bgTaskManagement.bg_status == "异常":
             bgTaskManagement.bg_status = "进行中"
+            bgTaskManagement.bg_lastopr_type = "重启"
+            bgTaskManagement.bg_lastopr_user = opr_user
+            bgTaskManagement.bg_lastopr_time = datetime.now()
+            bgTaskManagement.bg_lastopr_result = "执行中"
             bgTaskManagement.save()
             bg_log = BgTaskLog()
+            bg_log.bg_operation = "重启"
             bg_log.bg_id = bg_id
             bg_log.bg_operation_time = datetime.now()
             bg_log.bg_operation_user = opr_user
@@ -178,6 +205,7 @@ def reLoad(request):
             bg_log = BgTaskLog()
             bg_log.bg_id = bg_id
             bg_log.bg_operation_time = datetime.now()
+            bg_log.bg_operation = "刷新"
             bg_log.bg_operation_user = opr_user
             bg_log.bg_opr_result = "待执行"
             # 写入日志文件
@@ -265,7 +293,7 @@ def taskDel(request):
 def taskLog(request):
         # 获取所有后台对象
         # page_len = request.GET.get('page_len', '')
-        taskLog_list = models.BgTaskLog.objects.all().order_by('-bg_operation_time')
+        taskLog_list = models.BgTaskLog.objects.all().order_by('-bg_log_id')
         log_list = []
         for i in taskLog_list:
             bg_id = i.bg_id
@@ -277,7 +305,8 @@ def taskLog(request):
             bg_operation = i.bg_operation
             bg_opr_result = i.bg_opr_result
             bg_operation_time = i.bg_operation_time
-            log_dict = {"bg_log_id":bg_log_id,"bg_module": bg_module,"bg_domain":bg_domain,"bg_operation_user":bg_operation_user,"bg_operation":bg_operation,"bg_opr_result":bg_opr_result,"bg_operation_time":bg_operation_time}
+            bg_operation_finish_time = i.bg_operation_finish_time
+            log_dict = {"bg_log_id":bg_log_id,"bg_module": bg_module,"bg_domain":bg_domain,"bg_operation_user":bg_operation_user,"bg_operation":bg_operation,"bg_opr_result":bg_opr_result,"bg_operation_time":bg_operation_time,"bg_operation_finish_time":bg_operation_finish_time}
             log_list.append(log_dict)
         p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(log_list, request)
         return render(request, "background/task_log.html", locals())
@@ -374,8 +403,21 @@ def downloadTaskLog(request):
 #     bgTaskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
 #     bg_old_status = bgTaskManagement.bg_status
 #     bgTaskManagement.bg_status = "进行中"
-#     bgTaskManagement.save()
+#     bg_action = request.POST.get('bg_action')
 #     bg_log = BgTaskLog()
+#     if bg_action == 'start':
+#         bg_log.bg_operation = "启动"
+#         bgTaskManagement.bg_lastopr_type = "启动"
+#     elif bg_action == 'restart':
+#         bg_log.bg_operation = "重启"
+#         bgTaskManagement.bg_lastopr_type = "重启"
+#     elif bg_action == 'stop':
+#         bg_log.bg_operation = "停止"
+#         bgTaskManagement.bg_lastopr_type = "停止"
+#     bgTaskManagement.bg_lastopr_user = opr_user
+#     bgTaskManagement.bg_lastopr_time = datetime.now()
+#     bgTaskManagement.bg_lastopr_result = "执行中"
+#     bgTaskManagement.save()
 #     bg_log.bg_id = bg_id
 #     bg_log.bg_operation_time = datetime.now()
 #     bg_log.bg_operation_user = opr_user
@@ -383,7 +425,6 @@ def downloadTaskLog(request):
 #     # 写入日志文件
 #     bg_log.save()
 #     bg_log_id = bg_log.bg_log_id
-#     bg_action = "start"
 #     ret = taskOneAction(bg_id, bg_action, opr_user,bg_log_id,bg_old_status)
 #     checkResultAction()
 #     return JsonResponse({'ret': ret})

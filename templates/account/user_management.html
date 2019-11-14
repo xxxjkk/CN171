@@ -1,15 +1,13 @@
 {% extends 'base.html' %}
-
+{% load staticfiles %}
 {% block self_head_css_js %}
-    <script src="/static/layer/layer.js"></script>
-    <script src="/static/js/base.js"></script>
-    <script src="/static/plugins/datatables/jquery.dataTables.min.js"></script>
-    <script src="/static/plugins/datatables/dataTables.bootstrap.min.js"></script>
-    <script src="/static/plugins/datatables/dataTables.bootstrap.css"></script>
-
+    <script src="{% static 'layer/layer.js' %}"></script>
+    <script src="{% static 'js/base.js' %}"></script>
+    <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'plugins/datatables/dataTables.bootstrap.min.js' %}"></script>
+    <script src="{% static 'plugins/datatables/dataTables.bootstrap.css' %}"></script>
 {% endblock %}
 {% block content %}
-
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header"></section>
@@ -21,10 +19,10 @@
             <div class="box">
                 <div class="box-header">
                     <div class="btn-group">
-						 <a id="taskstart" style="display: none" href="#" onclick="" class="btn btn-success">添加用户</a>
+						 <a id="useradd" style="display: none" href="#" onclick="return useradd()" class="btn btn-success">添加用户</a>
                     </div>
                     <div class="btn-group">
-                         <a id="taskstop" style="display: none" href="#" class="btn btn-success">删除用户</a>
+                         <a id="userDel" style="display: none" href="#" onclick="userDel('确定删除所选用户吗？')" class="btn btn-success">删除用户</a>
                     </div>
 
                     <div class="input-group inline-group col-md-3" style="float: right">
@@ -41,7 +39,7 @@
                       <thead>
                         <tr>
                             <th width="10%" style="text-align:center;">
-                                <input id="checkall" type="checkbox" class="i-checks" name="checkall" value="checkall" data-editable='false' onclick="">
+                                <input id="checkall" type="checkbox" class="i-checks" name="checkall" value="checkall" data-editable='false' onclick="check_all('user_management_form')">
                             </th>
                                     <th width="12%" style="text-align:center;">用户</th>
                                     <th width="12%" style="text-align:center;">姓名</th>
@@ -62,7 +60,7 @@
                                         <td width="12%" style="text-align:center;">{{user.acc_role_name}}</td>
                                         <td width="12%" style="text-align:center;">{{user.acc_user_status}}</td>
                                         <td width="20%" style="text-align:center;">{{user.acc_user_createtime}}</td>
-                                        <td width="22%" style="text-align:center;"><a href="#" onclick=""
+                                        <td width="22%" style="text-align:center;"><a href="#" onclick="return useredit({{user.acc_user_id}})"
                                                style="list-style-type:none">编辑</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
                                             <a href="#" onclick=""
                                                style="list-style-type:none">启用</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
@@ -131,4 +129,92 @@ function change_info(){
  }
 </script>
 
+<script>
+function useradd(){
+    layer.open({
+    type: 2,
+    title: '新增用户',
+    closeBtn: 1,
+    area: ['700px', '550px'],
+    shadeClose: true, //点击遮罩关闭
+    content: ['/account/userAdd/'],
+{#    end:function(){#}
+{#            var handle_status = $("#handle_status").val();#}
+{#            if ( handle_status == '1' ) {#}
+{#                layer.msg('保存成功！',{#}
+{#                    icon: 1,#}
+{#                    time: 2000 //2秒关闭（如果不配置，默认是3秒）#}
+{#                });#}
+{#            } else if ( handle_status == '2' ) {#}
+{#                layer.msg('修改失败！',{#}
+{#                    icon: 2,#}
+{#                    time: 2000 //2秒关闭（如果不配置，默认是3秒）#}
+{#                });#}
+{#            }#}
+{#        }#}
+  });
+}
+function useredit(acc_user_id){
+    layer.open({
+    type: 2,
+    title: '修改用户信息',
+    closeBtn: 1,
+    area: ['700px', '550px'],
+    shadeClose: true, //点击遮罩关闭
+    content: ['/account/userEdit/'+'?'+'acc_user_id'+'='+acc_user_id],
+{#    end:function(){#}
+{#            var handle_status = $("#handle_status").val();#}
+{#            if ( handle_status == '1' ) {#}
+{#                layer.msg('保存成功！',{#}
+{#                    icon: 1,#}
+{#                    time: 2000 //2秒关闭（如果不配置，默认是3秒）#}
+{#                });#}
+{#            } else if ( handle_status == '2' ) {#}
+{#                layer.msg('修改失败！',{#}
+{#                    icon: 2,#}
+{#                    time: 2000 //2秒关闭（如果不配置，默认是3秒）#}
+{#                });#}
+{#            }#}
+{#        }#}
+  });
+}
+</script>
+<script>
+    function userDel(a) {
+    if (!confirm(a)) {
+        window.event.returnValue = false;
+    }else{
+    //将所有复选框的默认值放入id数组中
+                var id = document.getElementsByName('id');
+                var ids = [];
+                //将所有选中复选框的默认值写入到id数组中
+                for (var i = 0; i < id.length; i++) {
+                    if (id[i].checked){
+                        ids.push(id[i].value);
+                      }
+                }
+                console.log(ids);
+                //ajax开始运行
+                $.ajax({
+                    url: '{% url 'userDel' %}',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        ids: ids,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    'traditional': true,
+                    success:function(msg){
+                           if(msg.ret=="True"){
+                               alert("删除成功！");
+                               location.reload(true);
+                           }
+                           else{
+                                alert("操作失败,请核查后重试！");
+                           }
+                    }
+                });
+    }
+}
+</script>
 {% endblock %}
