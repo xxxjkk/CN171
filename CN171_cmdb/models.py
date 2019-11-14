@@ -8,6 +8,14 @@ HOST_STATUS = (
     (str(3), u"停机"),
     (str(4), u"启动中"),
     )
+
+CLUSTER_STATUS = (
+    (str(1), u"正常"),
+    (str(2), u"部分正常（满足最小集）"),
+    (str(3), u"异常"),
+    (str(4), u"停止"),
+    )
+
 class CmdbHost(models.Model):
     # ''' cmdb_host 表'''
     cmdb_host_id = models.AutoField(u"主机id", primary_key=True)
@@ -61,6 +69,7 @@ class CmdbAppCluster(models.Model):
     # 后台管理ID，主要是模块+中心，当后台管理项删除，集群（虚拟概念）默认存在为999，不删除
     bgTaskManagement = models.ForeignKey('CN171_background.BgTaskManagement', on_delete=models.SET_DEFAULT,default=999)
     name=models.CharField(u'集群名称', max_length=56, null=True, blank=True)
+    cluster_status = models.CharField(u"状态",choices=CLUSTER_STATUS, max_length=36, null=True, blank=True)
 
     def __str__(self):
         return '集群应用的name为：'+self.name

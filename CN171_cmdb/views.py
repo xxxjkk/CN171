@@ -1,18 +1,20 @@
 import datetime
 import time
 
+from django.core import serializers
 from django.db.models import Q
-from django.http import HttpResponse
-from CN171_cmdb import models,forms
+from django.http import HttpResponse, JsonResponse
+from CN171_cmdb import models, forms, tasks
 from django.shortcuts import render, redirect
 
 from CN171_cmdb.exceloper import excel_export_host, excel_import_host
 from CN171_cmdb.models import CmdbHost, CmdbApp, HostPwdOprLog, CmdbAppCluster
 from CN171_cmdb.forms import DetailLogForm, HostPwdEditForm, NormalUserForm, CmdbHostForm
 from CN171_background.api import pages, get_object
-from CN171_tools.common_api import export_download_txt, to_ints
+from CN171_tools.common_api import export_download_txt, to_ints, write_txt
 from CN171_tools.connecttool import *
 from CN171_tools.sftputils import *
+from CN171_login.views import my_login_required
 import json
 
 # Create your views here.
@@ -27,6 +29,7 @@ def text_save(filename, data):  # filename为写入CSV文件的路径，data为�
         file.write(s)
     file.close()
 
+#主机管理页面
 def hostManagement(request):
     host_list = []
     keyword = request.GET.get("keyword", "")
@@ -44,6 +47,35 @@ def hostManagement(request):
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(host_list, request)
     return render(request, "cmdb/host_management.html", locals())
 
+#批量刷新主机状态信息
+def batchRefreshHostStatusInfo(request):
+    #ipQuerySet = CmdbHost.objects.values_list('cmdb_host_busip', flat=True)
+    #ips = "";
+    #ipQuerySetLen = len(ipQuerySet)
+    #i = 0
+    #for ip in ipQuerySet:
+    #    ips = ips + ip
+    #    if i < ipQuerySetLen - 1:
+    #        ips = ips + "\r"
+    #       i = i + 1
+    host_busi_ip_all = request.POST.get('host_busi_ip_all')
+    #ips=host_id_all.replace(",","\n")
+    nowDay=datetime.datetime.now().strftime("%Y%m%d")
+    #print(request.session.get('user_name'))
+    user_name=request.session.get('user_name')
+    #文件绝对路径
+    file_name=write_txt(host_busi_ip_all, 'temp/cmdb/hostmgnt/status/'+nowDay+"/", user_name+'_refresh_host_status_busip')
+    t, sftp = sftpconnect('CMIOT')
+    ansible_host_hostmgnt_busiip_path, ansible_host_hostmgnt_return_filepath, ansible_host_hostmgnt_scrideploy_path\
+        =get_hostmgnt_init_parameter('Ansible')
+    flag = put(sftp,file_name,ansible_host_hostmgnt_busiip_path)
+    sftpDisconnect(t)
+    if flag:
+        tasks.batchRefreshHostStatusTask.delay(ansible_host_hostmgnt_return_filepath,user_name,ansible_host_hostmgnt_scrideploy_path)
+        returnmsg = "True"
+    else:
+        returnmsg = "False"
+    return JsonResponse({'ret': returnmsg})
 
 def hostDetail(request):
     hostId = request.GET.get("hostId")
@@ -63,6 +95,31 @@ def appManagement(request):
         cluster_list = models.CmdbAppCluster.objects.all()
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(cluster_list, request)
     return render(request, "cmdb/app_management.html", locals())
+
+#查询集群下的应用列表
+def findAppsInCluster(request):
+    clusterId = request.POST.get("clusterId")
+    appListInCluster = models.CmdbApp.objects.filter(cluster_id=clusterId)
+    app_list = []
+    for app in appListInCluster:
+        app_dict = {}
+        app_dict["app_id"] = app.app_id
+        app_dict["app_name"] = app.app_name
+        app_dict["cmdb_host_busip"] = app.cmdb_host.cmdb_host_busip
+        app_dict["cmdb_host_manip"] = isNullStr(app.cmdb_host.cmdb_host_manip)
+        app_dict["bg_module"] = app.cmdb_host.bg.bg_module
+        app_dict["bg_domain"] = app.cmdb_host.bg.bg_domain
+        app_dict["app_status"] = isNullStr(app.app_status)
+        app_dict["cmdb_host_system"] = isNullStr(app.cmdb_host.cmdb_host_system)
+        app_dict["cmdb_host_cpu"] = isNullStr(app.cmdb_host.cmdb_host_cpu)
+        app_dict["cmdb_host_RAM"] = isNullStr(app.cmdb_host.cmdb_host_RAM)
+        app_dict["cmdb_host_local_disc"] = isNullStr(app.cmdb_host.cmdb_host_local_disc)
+        app_dict["cmdb_host_outlay_disc"] = isNullStr(app.cmdb_host.cmdb_host_outlay_disc)
+        app_dict["app_insert_time"] = app.app_insert_time.strftime("%Y-%m-%d %H:%M:%S")
+        app_list.append(app_dict)
+    ret = {'app_list': app_list,"appCount": len(appListInCluster)}
+    v = json.dumps(ret)  # 转换为字典类型
+    return HttpResponse(v)
 
 
 #批量删除应用
@@ -122,6 +179,7 @@ def hostPwdDetailLog(request):
 
 
 #跳转到主机用户密码修改页面
+@my_login_required
 def redEditHostPwdPage(request):
     form = HostPwdEditForm()
     return render(request, "cmdb/host_pwd_edit.html", locals())
@@ -149,12 +207,14 @@ def editHostPwd(request):
             f.close()
             #将服务器文件sftp到Ansible主机
             client, sftp=sftpconnect("CMIOT")
-            remote_path=get_init_parameter2('Ansible')
-            flag=put(sftp,file_name_path, remote_path)
+            ansible_host_pwmgnt_ipfile_path=get_init_parameter2('Ansible')
+            flag=put(sftp,file_name_path, ansible_host_pwmgnt_ipfile_path)
             sftpDisconnect(client)
             #执行命令
+            #后期添加的这一句
+            ansible_host_pwmgnt_ipfile=ansible_host_pwmgnt_ipfile_path+file_obj.name
             if(flag):
-                detail_log_info, retStr = excute_edit_commond(remote_path, modified_host_user, old_password)
+                detail_log_info, retStr = excute_edit_commond(ansible_host_pwmgnt_ipfile, modified_host_user, old_password)
                 if retStr:
                     ret['status'] = True
                     ret['msg'] = "修改成功！"
@@ -176,16 +236,16 @@ def editHostPwd(request):
 
 
 #登录到相应的主机执行修改命令
-def excute_edit_commond(remote_path, modified_host_user, old_password):
+def excute_edit_commond(ansible_host_pwmgnt_ipfile, modified_host_user, old_password):
     retStr = False
     #修改主机密码的命令
     cmd = "ansible -i %s all -u ansbmk -k -b -K -f 500 -m shell -a 'echo %s:%s|chpasswd'\r" \
-          % (remote_path, modified_host_user, old_password)
+          % (ansible_host_pwmgnt_ipfile, modified_host_user, old_password)
     #ansible普通用户密码
-    ansible_general_host_pwd,ansible_root_host_pwd = get_init_parameter1("Ansible")
-    cmd1 = "%s" % (ansible_general_host_pwd+"\r")
+    ansible_host_pwmgnt_login_pwd,ansible_host_pwmgnt_root_pwd = get_init_parameter1("Ansible")
+    cmd1 = "%s" % (ansible_host_pwmgnt_login_pwd+"\r")
     #ansibile root用户密码
-    cmd2 = "%s" % (ansible_root_host_pwd+"\r")
+    cmd2 = "%s" % (ansible_host_pwmgnt_root_pwd+"\r")
     trans, channel = build_shell_channel("Ansible")
     # 发送要执行的命令
     channel.send(cmd)
@@ -262,6 +322,11 @@ def import_host_info(request):
         ret['msg'] = "请选择上传的文件！"
     v = json.dumps(ret)  # 转换为字典类型
     return HttpResponse(v)
+
+def isNullStr(str):
+    if str == None:
+        return "--"
+    return str
 
 
 
