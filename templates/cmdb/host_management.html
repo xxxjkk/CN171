@@ -27,7 +27,7 @@
                          <a id="hostDel" style="display: none" href="#" class="btn btn-success">删除主机</a>
                     </div>
                     <div class="btn-group">
-                         <a id="taskrestart" style="display: none" href="#" class="btn btn-success">刷新状态</a>
+                         <a id="taskrestart" style="display: none" href="#" class="btn btn-success" onclick="batchRefreshHostStatusInfo()">刷新状态</a>
                     </div>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <div class="btn-group">
@@ -80,7 +80,7 @@
                                         </td>
                                         <td width="10%" style="text-align:center;">{{host.cmdb_host_type}}</td>
                                         <td width="10%" style="text-align:center;">{{host.cmdb_host_pod}}</td>
-                                        <td width="13%" style="text-align:center;">{{host.cmdb_host_busip}}</td>
+                                        <td id="busip" width="13%" style="text-align:center;">{{host.cmdb_host_busip}}</td>
                                         <td width="13%" style="text-align:center;">{{host.cmdb_host_manip}}</td>
                                         <td width="7%" style="text-align:center;">{{host.bg.bg_module}}</td>
                                         <td width="7%" style="text-align:center;">{{host.bg.bg_domain}}</td>
@@ -223,6 +223,44 @@ function hostDetail(hostId){
         shadeClose: true, //点击遮罩关闭
         content: ['{% url 'hostDetail' %}?hostId=' + hostId],
         });
+}
+
+
+{#批量刷新主机状态信息#}
+function batchRefreshHostStatusInfo(){
+   var host_busi_ip_all = getBusiIpAll();
+   if (host_busi_ip_all == ''){
+        alert("请至少选择一行!");
+        return false;
+   }else{
+          $.ajax({
+             url: '{% url 'batchRefreshHostStatusInfo' %}',
+             type: 'post',
+             dataType: 'json',
+             data: {
+                  csrfmiddlewaretoken: '{{ csrf_token }}',
+                  host_busi_ip_all:host_busi_ip_all
+             },
+             traditional: true,
+             success:function(msg){
+                if(msg.ret == 'True'){
+                    alert("指令发送成功，执行中！");
+                    location.reload(true);
+                }else{
+                    alert("刷新失败,请核查后重试！");
+                }
+             }
+           });
+   }
+}
+
+function getBusiIpAll(){
+    var check_array = [];
+    $(".gradeX input:checked").each(function () {
+        var busiIp = $(this).parent().parent().children("#busip").text();
+        check_array.push(busiIp);
+    });
+    return check_array.join("\n");
 }
 </script>
 
