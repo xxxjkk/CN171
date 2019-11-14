@@ -3,17 +3,6 @@
     <script src="/static/layer/layer.js"></script>
 {% endblock %}
 {% block content %}
-<script>
-    window.onload=init;
-    function init() {
-        showhide(7);
-    }
-    function showhide(n) {
-        var box = document.getElementById("config");
-        box.className="active";
-    }
-</script>
-
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -24,115 +13,52 @@
     <!-- Main content -->
     <section class="content">
         <div id="dialog">
-        <div class="box">
-            <form class="form-horizontal" action="" method="POST">
-                <div class="box-body">
-                  <span><b>脚本路径设置</b></span>
-                <div class="form-group">
-                  <label for="ansible_path" class="col-sm-2 control-label">Ansible路径:</label>
-
-                  <div class="col-sm-10">
-                      <input type="text" value="/adf/asdf" id="ansible_path" name="ansible_path" style="width:450px;">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="roles_path" class="col-sm-2 control-label">Roles路径:</label>
-
-                  <div class="col-sm-10">
-                      <input type="text" value="/asdfasd/sdfasd" id="roles_path" name="roles_path" style="width:450px;">
-                  </div>
-                </div>
-                <div class="form-group" >
-                  <label for="pbook_path" class="col-sm-2 control-label">playbook路径:</label>
-
-                  <div class="col-sm-10" >
-                    <input type="text" value="/sadf/sdf" id="pbook_path" name="pbook_path" style="width:450px;">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="scripts_path" class="col-sm-2 control-label">Scripts路径:</label>
-
-                  <div class="col-sm-10">
-                    <input type="text" value="/sdfs/asdf" id="scripts_path" name="scripts_path" style="width:450px;">
-                  </div>
-                </div>
-                <hr>
-                  <p><b>数据库设置</b></p>
-                <div class="form-group">
-                  <label for="engine" class="col-sm-2 control-label">Host:</label>
-
-                  <div class="col-sm-10">
-                    <input type="text" value="主机A" id="engine" name="engine" style="width:450px;">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="host" class="col-sm-2 control-label">Port:</label>
-
-                  <div class="col-sm-10">
-                    <input type="text" value="12434" id="host" name="host" style="width:450px;">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="user" class="col-sm-2 control-label">User:</label>
-
-                  <div class="col-sm-10">
-                    <input type="text" value="Tom" id="user" name="user" style="width:450px;">
-                  </div>
-                </div>
-                <div class="form-group">
-                  <label for="password" class="col-sm-2 control-label">Password:</label>
-
-                  <div class="col-sm-10">
-                    <input type="password" value="*****" id="password" name="password" style="width:450px;">
-                  </div>
+            <div class="box">
+                <form class="form-horizontal" action="" method="POST">
+                    <div class="box-body">
+                        {% for section in sectionlist %}
+                            <span><b>{{section}}</b></span>
+                            {% for item in items %}
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">{{item}}</label>
+                                </div>
+                            {% endfor %}
+<!--                            <div class="form-group">-->
+<!--                                <label for="ansible_path1" class="col-sm-2 control-label">Ansible路径:</label>-->
+<!--                                <div class="col-sm-10">-->
+<!--                                    <input type="text" value="/adf/asdf" id="ansible_path1" name="ansible_path" style="width:650px;">-->
+<!--                                </div>-->
+<!--                            </div>-->
+                        {% endfor %}
                     </div>
-              <!-- /.box-body -->
-              <div class="box-footer">
-                  <button type="submit" onclick="checkSubmit()" class="btn btn-info pull-left" style="width: 120px"><b>保存（save）</b></button>
-                  <div class="btn btn-info pull-left" style="width: 120px" onclick="return test1();"><b>重启（CN171）</b></div>
-              </div>
-              <!-- /.box-footer -->
+                    <!-- /.box-body -->
+
+                    <div class="box-footer">
+                        <div class="btn-group">
+                            <a id="save" style="width: 150px" href="#" class="btn btn-info" onclick="saveSubmit()">保&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;存</a>
+                        </div>  &nbsp;  &nbsp;  &nbsp;  &nbsp;
+                        <div class="btn-group">
+                            <a id="restart" style="width: 150px" href="#" class="btn btn-warning" onclick="restart()">重&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;启（CN171）</a>
+                        </div>
+                    </div>
+                    <!-- /.box-footer -->
+                </form>
+                <div class="form-group">
+
                 </div>
-            </form>
-        <div class="form-group">
+            </div>
         </div>
-
-</div>
-</div>
-
     </section>
         <!-- /.content -->
-      </div>
-<script>
-function checkSubmit() {
-    if (!confirm("确定修改？")) {
-        window.event.returnValue = false;
-    }
-}
-</script>
-<script>
-function get_token() {
-    $.post('/config/token/',{csrfmiddlewaretoken: '{{ csrf_token }}'},function(data){
-        document.getElementById("token").value = data;
-    });
-}
-</script>
-<script>
-function loading(){
-    var index = layer.load(1, {
-    shade: [0.5,'#f4f4f4'] //0.1透明度的白色背景
+</div>
 
-});
-}
-function test1(){
-            $.ajax({
-                type: "get",
-                url: ""
-            });
-    var index = layer.load(1, {
-    shade: [0.5,'#f4f4f4'] //0.1透明度的白色背景
-});
-    location.reload();
-}
+
+<script>
+    function saveSubmit() {
+        if (!confirm("确定修改？")) {
+            window.event.returnValue = false;
+        }
+    }
 </script>
+
 {% endblock %}

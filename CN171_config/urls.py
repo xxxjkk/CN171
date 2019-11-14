@@ -4,5 +4,5 @@ from CN171_config import views as configViews
 
 urlpatterns = [
 
-    url(r'^config_management/', configViews.configManagement, name='configManagement'),
+    url(r'^configmanagement/', configViews.configManagement, name='configManagement'),
 ]

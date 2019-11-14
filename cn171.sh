@@ -24,8 +24,10 @@ case $1 in
                 esac
                 ;;
         status)
+                echo "------------$starttime  CN171 Process------------"
                 ps -ef |grep "python3 manage.py runserver" |grep -v grep
-
                 ;;
-        *) echo "Command : sh cn171.sh start|stop|status" ;;
+        *)
+                echo "Command : sh cn171.sh start|stop|status"
+                ;;
 esac
