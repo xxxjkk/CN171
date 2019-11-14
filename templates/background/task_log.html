@@ -52,14 +52,15 @@
                   <table class="table table-striped table-bordered" id="dataform">
                       <thead>
                         <tr>
-                                    <th width="7%" style="text-align:center;">序号</th>
-                                    <th width="7%" style="text-align:center;">模块</th>
-                                    <th width="7%" style="text-align:center;">中心</th>
-                                    <th width="12%" style="text-align:center;">操作人员</th>
-                                    <th class="text-center" width="26%" style="text-align:center;">操作类型</th>
-                                    <th width="12%" style="text-align:center;">操作结果</th>
-                                    <th width="12%" style="text-align:center;">操作时间</th>
-                                    <th width="14%" style="text-align:center;">详细日志</th>
+                                    <th width="8%" style="text-align:center;">序号</th>
+                                    <th width="8%" style="text-align:center;">模块</th>
+                                    <th width="8%" style="text-align:center;">中心</th>
+                                    <th width="8%" style="text-align:center;">操作人员</th>
+                                    <th class="text-center" width="8%" style="text-align:center;">操作类型</th>
+                                    <th width="8%" style="text-align:center;">操作结果</th>
+                                    <th width="18%" style="text-align:center;">操作开始时间</th>
+                                    <th width="18%" style="text-align:center;">操作结束时间</th>
+                                    <th width="18%" style="text-align:center;">详细日志</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -70,8 +71,9 @@
                                         <td width="8%" style="text-align:center;">{{log_dict.bg_domain}}</td>
                                         <td width="8%" style="text-align:center;">{{log_dict.bg_operation_user}}</td>
                                         <td width="8%" style="text-align:center;">{{log_dict.bg_operation}}</td>
-                                        <td width="12%" style="text-align:center;">{{log_dict.bg_opr_result}}</td>
+                                        <td width="8%" style="text-align:center;">{{log_dict.bg_opr_result}}</td>
                                         <td width="18%" style="text-align:center;">{{log_dict.bg_operation_time}}</td>
+                                        <td width="18%" style="text-align:center;">{{log_dict.bg_operation_finish_time}}</td>
                                         <td width="18%" style="text-align:center;">
                                             <a href="#" style="list-style-type:none" onclick="return taskLogDetail({{log_dict.bg_log_id}})">详细日志</a>
                                         </td>

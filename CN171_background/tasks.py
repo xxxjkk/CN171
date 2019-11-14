@@ -69,49 +69,69 @@ def checkResult():
                     taskManagement.bg_status = "正常"
                     taskManagement.bg_lastopr_result = "失败"
                     i.bg_opr_result = "失败"
+                    i.bg_operation_finish_time = datetime.now()
+                elif i.bg_operation == "刷新":
+                    i.bg_opr_result = "成功"
+                    taskManagement.bg_status = "正常"
+                    i.bg_operation_finish_time = datetime.now()
                 else:
                     taskManagement.bg_status = "正常"
                     taskManagement.bg_lastopr_result = "成功"
                     i.bg_opr_result = "成功"
+                    i.bg_operation_finish_time = datetime.now()
+                remote_scp(log_dir, local_log_path)
             elif "中心总体状态：部分正常（满足最小集）" in log:
                 if i.bg_operation == "刷新":
-                    taskManagement.bg_status = "部分正常"
-                    taskManagement.bg_lastopr_result = "成功"
                     i.bg_opr_result = "成功"
+                    i.bg_operation_finish_time = datetime.now()
+                    taskManagement.bg_status = "部分正常"
                 else:
                     taskManagement.bg_status = "部分正常"
                     taskManagement.bg_lastopr_result = "成功"
                     i.bg_opr_result = "失败"
+                    i.bg_operation_finish_time = datetime.now()
+                remote_scp(log_dir, local_log_path)
             elif "中心总体状态：异常" in log:
                 if i.bg_operation == "刷新":
-                    taskManagement.bg_status = "异常"
-                    taskManagement.bg_lastopr_result = "成功"
                     i.bg_opr_result = "成功"
+                    taskManagement.bg_status = "异常"
+                    i.bg_operation_finish_time = datetime.now()
                 else:
                     taskManagement.bg_status = "异常"
                     taskManagement.bg_lastopr_result = "失败"
+                    i.bg_operation_finish_time = datetime.now()
                     i.bg_opr_result = "失败"
+                remote_scp(log_dir, local_log_path)
             elif "中心总体状态：停止" in log:
                 if i.bg_operation == "停止":
                     taskManagement.bg_status = "停止"
                     taskManagement.bg_lastopr_result = "成功"
+                    i.bg_operation_finish_time = datetime.now()
                     i.bg_opr_result = "成功"
                 elif i.bg_operation == "刷新":
-                    taskManagement.bg_status = "停止"
-                    taskManagement.bg_lastopr_result = "成功"
                     i.bg_opr_result = "成功"
+                    i.bg_operation_finish_time = datetime.now()
+                    taskManagement.bg_status = "停止"
                 else:
                     taskManagement.bg_status = "停止"
                     taskManagement.bg_lastopr_result = "失败"
                     i.bg_opr_result = "失败"
+                    i.bg_operation_finish_time = datetime.now()
+                remote_scp(log_dir, local_log_path)
             elif "对不起，操作失败！" in log:
-                print("因特殊原因，执行出错")
-                taskManagement.bg_status = old_status
-                taskManagement.bg_lastopr_result = "失败"
-                i.bg_opr_result = "失败"
+                if i.bg_operation == "刷新":
+                    i.bg_opr_result = "失败"
+                    taskManagement.bg_status = "异常"
+                    i.bg_operation_finish_time = datetime.now()
+                else:
+                    print("因特殊原因，执行出错")
+                    taskManagement.bg_status = "异常"
+                    taskManagement.bg_lastopr_result = "失败"
+                    i.bg_opr_result = "失败"
+                    i.bg_operation_finish_time = datetime.now()
+                remote_scp(log_dir, local_log_path)
             else:
                 print("下个定时任务循环读取...")
-            remote_scp(log_dir, local_log_path)
             i.save()
             taskManagement.save()
     else:
