@@ -36,7 +36,8 @@ class BgTaskLog(models.Model):
     bg_operation_user = models.CharField(u"操作人员", max_length=56,null=True, blank=True)
     bg_operation = models.CharField(u"操作类型", max_length=32,null=True, blank=True)
     bg_opr_result = models.CharField(u"操作结果", max_length=32,null=True, blank=True)
-    bg_operation_time = models.DateTimeField(u"操作时间")
+    bg_operation_time = models.DateTimeField(u"操作开始时间")
+    bg_operation_finish_time = models.DateTimeField(u"操作完成时间",null=True, blank=True)
     bg_log_dir = models.CharField(u"详细日志", max_length=256,null=True, blank=True)
 
     def __str__(self):
