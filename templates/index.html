@@ -63,14 +63,14 @@
                         <div class="flipper">
 							<div class="side front" align="center">
 								<dl>
-									<dt><img src="/static/images/flip-monitor.png" alt="监控管理"></dt>
+									<dt><img src="/static/images/flip-aiops.png" alt="智能运维"></dt>
 								</dl>
-                                <dd>监控管理</dd>
+                                <dd>智能运维</dd>
 							</div>
 							<div class="side back">
-                                <a href=#>网络拓扑</a>
-                                <p>主要针对……</p>
-                            </div>
+                                <a href="{% url 'capacity' %}">容量预测</a>
+                                <p>主要针对系统业务和容量进行周期性的统计分析，利用LSTM算法进行系统容量预测。</p>
+							</div>
 						</div>
                     </div>
                     <div class="flip-container " ontouchstart="this.classList.toggle('hover');">
@@ -95,14 +95,14 @@
                         <div class="flipper">
 							<div class="side front" align="center">
 								<dl>
-									<dt><img src="/static/images/flip-aiops.png" alt="智能运维"></dt>
+									<dt><img src="/static/images/flip-monitor.png" alt="监控管理"></dt>
 								</dl>
-                                <dd>智能运维</dd>
+                                <dd>监控管理</dd>
 							</div>
 							<div class="side back">
-                                <a href="{% url 'capacity' %}">容量预测</a>
-                                <p>主要针对系统业务和容量进行周期性的统计分析，利用LSTM算法进行系统容量预测。</p>
-							</div>
+                                <a href=#>网络拓扑</a>
+                                <p>主要针对……</p>
+                            </div>
 						</div>
                     </div>
             </div>
