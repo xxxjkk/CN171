@@ -15,33 +15,100 @@
         <div id="dialog">
             <div class="box">
                 <form class="form-horizontal" action="" method="POST">
-                    <div class="box-body">
-                        {% for section in sectionlist %}
-                            <span><b>{{section}}</b></span>
-                            {% for item in items %}
-                                <div class="form-group">
-                                    <label class="col-sm-2 control-label">{{item}}</label>
-                                </div>
-                            {% endfor %}
-<!--                            <div class="form-group">-->
-<!--                                <label for="ansible_path1" class="col-sm-2 control-label">Ansible路径:</label>-->
-<!--                                <div class="col-sm-10">-->
-<!--                                    <input type="text" value="/adf/asdf" id="ansible_path1" name="ansible_path" style="width:650px;">-->
-<!--                                </div>-->
-<!--                            </div>-->
-                        {% endfor %}
-                    </div>
-                    <!-- /.box-body -->
-
-                    <div class="box-footer">
+                    <div class="box-header" style="blocked">  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;
                         <div class="btn-group">
                             <a id="save" style="width: 150px" href="#" class="btn btn-info" onclick="saveSubmit()">保&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;存</a>
                         </div>  &nbsp;  &nbsp;  &nbsp;  &nbsp;
                         <div class="btn-group">
-                            <a id="restart" style="width: 150px" href="#" class="btn btn-warning" onclick="restart()">重&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;启（CN171）</a>
+                            <a id="restart" style="width: 150px" href="#" class="btn btn-warning" onclick="reStart()">重&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;启（CN171）</a>
                         </div>
                     </div>
-                    <!-- /.box-footer -->
+                    <!-- /.box-header -->
+
+                    <div class="box-body" id="sectionbody">
+                        {% for section in sectionlist %}
+                            <div id="divsection{{forloop.counter0}}">
+                                <span><b id="section{{forloop.counter0}}">{{section}}</b></span>
+                                {% if forloop.counter0 == 0 %}
+                                {% for key, value in itemlist3.0 %}
+                                    <div class="form-group">
+                                        <label for="key0-{{forloop.counter0}}" class="col-sm-3 control-label">{{key}}：</label>
+                                        <input type="text" value="{{value}}" id="key0-{{forloop.counter0}}" name="{{key}}" style="width:650px;">
+                                    </div>
+                                {% endfor %}
+                            {% elif forloop.counter0 == 1 %}
+                                {% for key, value in itemlist3.1 %}
+                                    <div class="form-group">
+                                        <label for="key1-{{forloop.counter0}}" class="col-sm-3 control-label">{{key}}：</label>
+                                        <input type="text" value="{{value}}" id="key1-{{forloop.counter0}}" name="{{key}}" style="width:650px;">
+                                    </div>
+                                {% endfor %}
+                            {% elif forloop.counter0 == 2 %}
+                                {% for key, value in itemlist3.2 %}
+                                    <div class="form-group">
+                                        <label for="key2-{{forloop.counter0}}" class="col-sm-3 control-label">{{key}}：</label>
+                                        <input type="text" value="{{value}}" id="key2-{{forloop.counter0}}" name="{{key}}" style="width:650px;">
+                                    </div>
+                                {% endfor %}
+                            {% elif forloop.counter0 == 3 %}
+                                {% for key, value in itemlist3.3 %}
+                                    <div class="form-group">
+                                        <label for="key3-{{forloop.counter0}}" class="col-sm-3 control-label">{{key}}：</label>
+                                        <input type="text" value="{{value}}" id="key3-{{forloop.counter0}}" name="{{key}}" style="width:650px;">
+                                    </div>
+                                {% endfor %}
+                            {% elif forloop.counter0 == 4 %}
+                                {% for key, value in itemlist3.4 %}
+                                    <div class="form-group">
+                                        <label for="key4-{{forloop.counter0}}" class="col-sm-3 control-label">{{key}}：</label>
+                                        <input type="text" value="{{value}}" id="key4-{{forloop.counter0}}" name="{{key}}" style="width:650px;">
+                                    </div>
+                                {% endfor %}
+                            {% elif forloop.counter0 == 5 %}
+                                {% for key, value in itemlist3.5 %}
+                                    <div class="form-group">
+                                        <label for="key5-{{forloop.counter0}}" class="col-sm-3 control-label">{{key}}：</label>
+                                        <input type="text" value="{{value}}" id="key5-{{forloop.counter0}}" name="{{key}}" style="width:650px;">
+                                    </div>
+                                {% endfor %}
+                            {% elif forloop.counter0 == 6 %}
+                                {% for key, value in itemlist3.6 %}
+                                    <div class="form-group">
+                                        <label for="key6-{{forloop.counter0}}" class="col-sm-3 control-label">{{key}}：</label>
+                                        <input type="text" value="{{value}}" id="key6-{{forloop.counter0}}" name="{{key}}" style="width:650px;">
+                                    </div>
+                                {% endfor %}
+                            {% elif forloop.counter0 == 7 %}
+                                {% for key, value in itemlist3.7 %}
+                                    <div class="form-group">
+                                        <label for="key7-{{forloop.counter0}}" class="col-sm-3 control-label">{{key}}：</label>
+                                        <input type="text" value="{{value}}" id="key7-{{forloop.counter0}}" name="{{key}}" style="width:650px;">
+                                    </div>
+                                {% endfor %}
+                            {% elif forloop.counter0 == 8 %}
+                                {% for key, value in itemlist3.8 %}
+                                    <div class="form-group">
+                                        <label for="key8-{{forloop.counter0}}" class="col-sm-3 control-label">{{key}}：</label>
+                                        <input type="text" value="{{value}}" id="key8-{{forloop.counter0}}" name="{{key}}" style="width:650px;">
+                                    </div>
+                                {% endfor %}
+                            {% elif forloop.counter0 == 9 %}
+                                {% for key, value in itemlist3.9 %}
+                                    <div class="form-group">
+                                        <label for="key9-{{forloop.counter0}}" class="col-sm-3 control-label">{{key}}：</label>
+                                        <input type="text" value="{{value}}" id="key9-{{forloop.counter0}}" name="{{key}}" style="width:650px;">
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                            </div>
+
+                            {% if not forloop.last %}
+                                <div style="border-top:3px silver dashed;"></div>
+                            {% endif %}
+                        <br/>
+                        {% endfor %}
+                    </div>
+                    <!-- /.box-body -->
                 </form>
                 <div class="form-group">
 
@@ -57,6 +124,86 @@
     function saveSubmit() {
         if (!confirm("确定修改？")) {
             window.event.returnValue = false;
+        }else{
+            <!--创建配置项数组（二维）-->
+            var list_key = new Array();
+            var list_value = new Array();
+            var list_section = new Array();
+
+            <!--获取section数量-->
+            var sectionnum = document.getElementById('sectionbody').getElementsByTagName('span').length;
+
+            for(var i = 0; i < sectionnum; i++){
+                <!--获取section名称-->
+                var span = document.getElementById("section"+i).innerText;
+                list_section[i] = span;
+
+                <!--获取section下配置项item的数量-->
+                var list_item = document.getElementById("divsection"+i).getElementsByTagName("div");
+
+                if(list_item.length > 0){
+                    <!--获取创建配置项item数组（一维）-->
+                    list_key[i] = new Array();
+                    list_value[i] = new Array();
+                    for(var j = 0; j < list_item.length; j++){
+                        <!--获取每个section下对应item的key和value-->
+                        list_key[i][j] = document.getElementById('key'+i+'-'+j).name;
+                        list_value[i][j] = document.getElementById('key'+i+'-'+j).value;
+                    }
+                }
+            }
+            <!--对list进行统一封装-->
+            var section_info = {
+                list_section,
+                list_key,
+                list_value,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            }
+
+            <!--将list传至后台-->
+            $.ajax({
+                    type: "post",
+                    data: section_info,
+                    traditional:true,
+                    url: "{% url 'configsave' %}",
+                    success: function (data) {
+                        if(data.executeflag == "成功"){
+                            alert("配置保存成功，需重启生效！");
+                            location.reload(true);
+                        }else{
+                            alert("配置保存失败，失败原因为：" + data.faildes);
+                        }
+                    },
+                    error:function () {
+                        alert("配置保存失败");
+                    }
+            });
+        }
+    }
+</script>
+
+<script>
+    function reStart() {
+        if (!confirm("确定重启CN171？  请谨慎操作！")) {
+            window.event.returnValue = false;
+        }else{
+            $.ajax({
+                    type: "post",
+                    data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
+                    traditional:true,
+                    url: "{% url 'restartcn171' %}",
+                    success: function (data) {
+                        if(data.executeflag == "成功"){
+                            alert("重启成功，请稍后刷新页面！");
+                            location.reload(true);
+                        }else{
+                            alert("重启失败，失败原因为：" + data.faildes);
+                        }
+                    },
+                    error:function () {
+                        alert("重启失败！");
+                    }
+            });
         }
     }
 </script>
