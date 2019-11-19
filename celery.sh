@@ -74,6 +74,7 @@ case $1 in
 				;;
 			status)
 				#查询worker
+				echo "------------$starttime  Celery Worker Process------------"
 				ps auxww|grep "celery worker"|grep -v grep
 				;;
 			*) 
@@ -139,6 +140,7 @@ case $1 in
 				;;
 			status)
 				#查询beat
+				echo "------------$starttime  Celery Beat Process------------"
 				ps auxww|grep "celery beat"|grep -v grep
 				;;
 			*) 

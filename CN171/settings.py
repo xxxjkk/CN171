@@ -33,7 +33,7 @@ SECRET_KEY = '42427w*ffn#8a&!@8bd*ia^j93&0$ufe#re*5dmt&&l^y-0jj5'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 #设置登陆超时时长（30分钟）
-SESSION_COOKIE_AGE = 60*30
+#SESSION_COOKIE_AGE = 60*30
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

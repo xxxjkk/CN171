@@ -309,7 +309,7 @@ function checkSubmit(status, bg_id, action) {
                 if (!confirm(msg)) {
                     window.event.returnValue = false;
                 }else{
-                    {# window.location = "{% url 'taskExecuteOne' %}?bg_id="+bg_id+"&bg_action=start";#}
+                    {# window.location = "{% url 'testAction' %}?bg_id="+bg_id+"&bg_action=start";#}
                     $.ajax({
                             url: '{% url 'taskExecuteOne' %}',
                             type: 'post',

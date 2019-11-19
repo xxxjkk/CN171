@@ -5,7 +5,7 @@
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h4>添加主机页面</h4>
+        <h4>添加应用页面</h4>
     </section>
 
     <!-- Main content -->
@@ -33,20 +33,13 @@ $(document).ready(function(){
        $('.c1').remove();
        var form_data = new FormData();
        form_data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-       form_data.append('bg', $('#id_bg').val());
-       form_data.append('cmdb_host_name', $('#id_cmdb_host_name').val());
-       form_data.append('cmdb_host_type', $('#id_cmdb_host_type').val());
-       form_data.append('cmdb_host_pod', $('#id_cmdb_host_pod').val());
-       form_data.append('cmdb_host_system', $('#id_cmdb_host_system').val());
-       form_data.append('cmdb_host_busip', $('#id_cmdb_host_busip').val());
-       form_data.append('cmdb_host_manip', $('#id_cmdb_host_manip').val());
-       form_data.append('cmdb_host_cpu', $('#id_cmdb_host_cpu').val());
-       form_data.append('cmdb_host_RAM', $('#id_cmdb_host_RAM').val());
-       form_data.append('cmdb_host_local_disc', $('#id_cmdb_host_local_disc').val());
-       form_data.append('cmdb_host_outlay_disc', $('#id_cmdb_host_outlay_disc').val());
-       form_data.append('cmdb_host_status', $('#id_cmdb_host_status').val());
+       form_data.append('cmdb_host', $('#id_cmdb_host').val());
+       form_data.append('appNetmode', $('#id_appNetmode').val());
+       form_data.append('cmdbAppCluster', $('#id_cmdbAppCluster').val());
+       form_data.append('app_name', $('#id_app_name').val());
+       form_data.append('app_status', $('#id_app_status').val());
        $.ajax({
-            url:'{% url 'hostAddPage' %}',
+            url:'{% url 'appAdd' %}',
             data:form_data,
             type: 'POST',
             dataType: 'json',
