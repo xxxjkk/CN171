@@ -13,7 +13,7 @@
                     <form action="{% url 'userEdit' acc_user_id %}" method="post" style="centre">
                         {% csrf_token %}
                          <div style="white-space:pre-line" align="left" class="box" >
-                        {{ accfrom.as_p }}
+                        {{ accform.as_p }}
                          </div>
                          <div align="center">
                              <input type="submit" class="btn btn-primary" style="width: 60pt" value="保存">

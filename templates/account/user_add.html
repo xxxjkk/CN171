@@ -12,9 +12,20 @@
                 <div class="box">
                     <form action="{% url 'userAdd' %}" method="post" style="centre">
                         {% csrf_token %}
-                         <div style="white-space:pre-line" align="left" class="box" >
-                        {{ accfrom.as_p }}
-                         </div>
+                        <div style="white-space:pre-line" align="left" class="box">
+                            <label for="id_acc_user_name">用户名:</label>
+                                <input type="text" name="acc_user_name" class="form-control" style="width:530px;" placeholder="必填项" maxlength="128" required="" id="id_acc_user_name">
+                            <label for="id_acc_user_password">密码:</label>
+                                <input type="text" name="acc_user_password" class="form-control" style="width:530px;" placeholder="必填项" maxlength="256" required="" id="id_acc_user_password">
+                            <label for="id_acc_user_CNname">用户中文名:</label>
+                                <input type="text" name="acc_user_CNname" class="form-control" style="width:530px;" placeholder="必填项" maxlength="128" required="" id="id_acc_user_CNname">
+                            <label for="id_acc_user_CNname">用户角色:</label>
+                                <input type="text" name="acc_role_name" class="form-control" style="width:530px;" placeholder="必填项,如 管理员，CMIOT运维，CMIOT运营，PBOSS运维，PBOSS运营" maxlength="128" required="" id="id_acc_role_name">
+                            <label for="id_acc_user_email">邮箱:</label>
+                                <input type="text" name="acc_user_email" class="form-control" style="width:530px;" placeholder="必填项" maxlength="254" id="id_acc_user_email">
+                            <label for="id_acc_user_status">用户状态:</label>
+                                <input type="text" name="acc_user_status" class="form-control" style="width:530px;" placeholder="必填项，如 启用，注销" maxlength="30" id="id_acc_user_status">
+                        </div>
                          <div align="center">
                              <input type="submit" class="btn btn-primary" style="width: 60pt" value="保存">
                          </div>
