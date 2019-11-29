@@ -54,7 +54,6 @@ INSTALLED_APPS = [
     'CN171_background',
     'CN171_cmdb',
     'CN171_config',
-    'CN171_login',
     'CN171_monitor',
     'CN171_order',
     'CN171_crontab',
@@ -69,6 +68,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'CN171_account.service.middlewares.PermissionMiddleWare'
 ]
 
 ROOT_URLCONF = 'CN171.urls'
@@ -189,5 +189,4 @@ CELERY_RESULT_SERIALIZER = config.get('Celery', 'celery_result_serializer')
 CELERY_TIMEZONE = config.get('Celery', 'celery_timezone')
 #设置beat数据库
 CELERYBEAT_SCHEDULER = config.get('Celery', 'celery_beat_scheduler')
-
 
