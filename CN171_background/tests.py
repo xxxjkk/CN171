@@ -13,7 +13,7 @@ HOST_STATUS = (
 )
 #元组的使用
 print(type(HOST_STATUS))
-print(HOST_STATUS[1][1])
+print(HOST_STATUS[2][1])
 print(len(HOST_STATUS))
 print('异常' in HOST_STATUS[1])
 print(max(HOST_STATUS))

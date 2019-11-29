@@ -16,6 +16,11 @@ CLUSTER_STATUS = (
     (str(4), u"停止"),
     )
 
+APP_STATUS = (
+    (str(1), u"正常"),
+    (str(2), u"停止"),
+    )
+
 class CmdbHost(models.Model):
     # ''' cmdb_host 表'''
     cmdb_host_id = models.AutoField(u"主机id", primary_key=True)
@@ -34,7 +39,7 @@ class CmdbHost(models.Model):
     cmdb_host_insert_time = models.DateTimeField(u"录入时间", auto_now_add=True)
 
     def __str__(self):
-        return self.cmdb_host_name
+        return "主机名："+self.cmdb_host_name+"  业务ip："+self.cmdb_host_busip
 
     class Meta:
         verbose_name = '主机'
@@ -49,10 +54,10 @@ class CmdbApp(models.Model):
     cmdb_host = models.ForeignKey("CmdbHost", on_delete=models.CASCADE ,verbose_name=u"主机id")
     appNetmode = models.ForeignKey('CmdbAppNetmode', on_delete=models.SET_DEFAULT,default=999, verbose_name=u'组网类型')
     app_name = models.CharField(u"网元名", max_length=128, unique=True)
-    app_status = models.CharField(u"状态", max_length=36, null=True, blank=True)
+    app_status = models.CharField(u"状态",choices=APP_STATUS ,max_length=36, null=True, blank=True)
     app_insert_time = models.DateTimeField(u"录入时间", auto_now_add=True)
     #集群id非空  默认不集群  默认值999
-    cluster_id = models.IntegerField(u'集群Id', default=999)
+    cmdbAppCluster = models.ForeignKey('CmdbAppCluster',related_name='cmdbApp_cmdbAppCluster', on_delete=models.SET_DEFAULT, default=999, verbose_name=u'集群类型')
 
     def __str__(self):
         return self.app_name
@@ -68,7 +73,7 @@ class CmdbAppCluster(models.Model):
     id = models.AutoField(u'集群id', primary_key=True)
     # 后台管理ID，主要是模块+中心，当后台管理项删除，集群（虚拟概念）默认存在为999，不删除
     bgTaskManagement = models.ForeignKey('CN171_background.BgTaskManagement', on_delete=models.SET_DEFAULT,default=999)
-    name=models.CharField(u'集群名称', max_length=56, null=True, blank=True)
+    name=models.CharField(u'集群名称', max_length=56, unique=True)
     cluster_status = models.CharField(u"状态",choices=CLUSTER_STATUS, max_length=36, null=True, blank=True)
 
     def __str__(self):
@@ -77,7 +82,7 @@ class CmdbAppCluster(models.Model):
     class Meta:
         verbose_name = '应用集群'
         verbose_name_plural = '集群'
-        ordering=['id']
+        ordering=['-id']
         db_table = 'cmdb_app_cluster'
 
 
@@ -88,11 +93,12 @@ class CmdbAppNetmode(models.Model):
     net_mode = models.CharField(u"组网类型", max_length=56, unique=True)
 
     def __str__(self):
-        return self.name
+        return self.net_mode
 
     class Meta:
         verbose_name = '组网'
         verbose_name_plural = '组网'
+        ordering=['net_id']
         db_table = "cmdb_app_netmode"
 
 
@@ -127,3 +133,5 @@ class HostPwdOprLog(models.Model):
         db_table ="cmdb_host_pwd_opr_log"
 
 
+class AppCluster(object):
+    pass

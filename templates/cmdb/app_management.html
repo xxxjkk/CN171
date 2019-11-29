@@ -21,20 +21,23 @@
             <div class="box">
                 <div class="box-header">
                     <div class="btn-group">
-						 <a id="taskstart" style="display: none" href="#" onclick="" class="btn btn-success">添加应用</a>
+						 <a id="appAdd" style="display: none" href="#" onclick="appAddPage()" class="btn btn-success">添加应用</a>
                     </div>
                     <div class="btn-group">
-                         <a id="taskstop" style="display: none" href="#" class="btn btn-success">删除应用</a>
+                         <a id="appDel" style="display: none" href="#" class="btn btn-success">删除应用</a>
                     </div>
                     <div class="btn-group">
-                         <a id="taskrestart" style="display: none" href="#" class="btn btn-success">刷新状态</a>
+                         <a id="appRefresh" style="display: none" href="#" class="btn btn-success">刷新状态</a>
                     </div>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <div class="btn-group">
-                        <a id="taskadd" class="btn btn-danger" style="display: none"  name="del_button">批量导入</a>
+                        <input type="file" id="appInfoId">
                     </div>
                     <div class="btn-group">
-                        <a id="taskdel" class="btn btn-danger" style="display: none"  name="del_button">批量导出</a>
+                        <a id="importAppInfo" class="btn btn-danger" style="display: none"  name="del_button">批量导入</a>
+                    </div>
+                    <div class="btn-group">
+                        <a id="exportAppInfo" class="btn btn-danger" style="display: none"  name="del_button">批量导出</a>
                     </div>
                     <div class="input-group inline-group col-md-3" style="float: right">
                         <input type="text" class="form-control" id="search_input" name="keyword" value="{{keyword}}" placeholder="Search">
@@ -81,7 +84,7 @@
                       <tbody>
                       {% for cluster in page_objects %}
                       <!--第一行-->
-                        <tr class="parent" id="row{{cluster.id}}">
+                        <tr class="parent gradeX" id="row{{cluster.id}}">
                           <td colspan="1" style="text-align:center;">
                               <input type="checkbox" id="id" class="i-checks" name="id" value="{{cluster.id}}"/>
                           </td>
@@ -158,9 +161,7 @@ $(document).ready(function () {
              success:function(ret){
                  if(ret.appCount>0){
                     trStr+="<tr class='child-"+trId+"'>"+
-                          "<th colspan='1' style='text-align:right;'>"+
-                              "<input type='checkbox' id='id1' class='i-checks' name='id' value='"+clusterId+"'/>"+
-                          "</th>"+
+                          "<td colspan='1' style='text-align:right;'>"+"-->"+"</td>"+
                           "<th colspan='2' style='text-align:center;'>网元名</th>"+
                           "<th colspan='2' style='text-align:center;'>业务IP</th>"+
                           "<th colspan='2' style='text-align:center;'>管理IP</th>"+
@@ -176,9 +177,7 @@ $(document).ready(function () {
                     "</tr>";
                     $.each(ret.app_list,function(n,app){
 		              trStr+="<tr class='child-"+ trId +"'>"+
-                          "<td colspan='1' style='text-align:right;'>"+
-                              "<input type='checkbox' id='id2' class='i-checks' name='id' value='"+app.app_id+"'/>"+
-                          "</td>"+
+                          "<td colspan='1' style='text-align:right;'>"+"-->"+"</td>"+
                           "<td colspan='2' style='text-align:center;'>"+app.app_name+"</td>"+
                           "<td colspan='2' style='text-align:center;'>"+app.cmdb_host_busip+"</td>"+
                           "<td colspan='2' style='text-align:center;'>"+app.cmdb_host_manip+"</td>"+
@@ -225,5 +224,63 @@ function clusterAppDetail1(clusterId){
         });
 }
 
+function appAddPage(){
+    window.location= "{% url 'appAdd' %}"
+}
+
+{#批量删除#}
+$('#appDel').click(function () {
+        var cluster_id_all = getIDall();
+        if (cluster_id_all == ''){
+            alert("请至少选择一行!");
+            return false;
+        }
+        if (confirm("确定删除?")) {
+            $.ajax({
+                type: "post",
+                data: {cluster_id_all: cluster_id_all,csrfmiddlewaretoken: '{{ csrf_token }}'},
+                url: "{% url 'appDel' %}?arg=batch",
+                success: function () {
+                    parent.location.reload();
+                }
+            });
+        }
+    });
+
+{#导出应用信息#}
+$('#exportAppInfo').click(function () {
+        var cluster_id_all = getIDall();
+        if (cluster_id_all == ''){
+            alert("请至少选择一行!");
+            return false;
+        }else{
+            window.location="{% url 'export_app_info' %}?cluster_id_all="+cluster_id_all;
+        }
+});
+
+
+{#导入应用信息#}
+$('#importAppInfo').click(function () {
+       var form_data = new FormData();
+       form_data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+       form_data.append('appInfoFile', $('#appInfoId')[0].files[0]);
+        $.ajax({
+            url:'{% url 'import_app_info' %}',
+            data:form_data,
+            type: 'POST',
+            dataType: 'json',
+            // 告诉jQuery不要去处理发送的数据, 发送对象。
+            processData : false,
+            // 告诉jQuery不要去设置Content-Type请求头
+            contentType : false,
+            // 获取POST所需的csrftoken
+            success:function (args) {
+                alert(args.msg);
+                if("上传成功" == args.msg){
+                    window.location="{% url 'appManagement' %}";
+                }
+            }
+        });
+});
 </script>
 {% endblock %}
