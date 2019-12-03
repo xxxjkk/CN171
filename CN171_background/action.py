@@ -32,7 +32,7 @@ def taskOneAction(bg_id,bg_action,opr_user,bg_log_id,bg_old_status):
     log_info = "执行情况\n"
     taskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
     file_name = taskManagement.bg_module + "_" + taskManagement.bg_domain + \
-                "_" + bg_action + "_" + datetime.now().strftime("%Y%m%d%H%I%S")
+                "_" + bg_action + "_" + datetime.now().strftime("%Y%m%d%H%M%S")
     conntarget = "Ansible"
     sshd = ssh_connect(conntarget)
     dir_cmd = "mkdir "+ file_name
@@ -83,7 +83,106 @@ def taskOneAction(bg_id,bg_action,opr_user,bg_log_id,bg_old_status):
     return returnmsg
 
 
-#def checkResultAction():
+def checkResultAction():
+    bg_opr_result = "执行中"
+    bgTaskLogList = BgTaskLog.objects.filter(bg_opr_result=bg_opr_result)
+    if bgTaskLogList:
+        for i in bgTaskLogList:
+            log_dir = i.bg_log_dir
+            # downfilename = re.findall(r"/(.+?).log", log_dir)
+            # log_dir_name = log_dir.split("/")
+            # 适配Linux环境，截取日志文件名
+            if '/' in log_dir:
+                log_dir_name = log_dir.split('/')[-1]
+            # 适配Windows环境，截取日志文件名
+            elif '\\' in log_dir:
+                log_dir_name = log_dir.split('\\')[-1]
+            else:
+                response = "Log file not exits!"
+                return response
+            # a = len(log_dir_name)
+            downfilename = log_dir_name
+            filename = str(downfilename)
+            local_path = config.get('TaskManagement', 'log_path')
+            local_log_path = local_path + filename
+            i.bg_log_dir = local_log_path
+            i.save()
+            bg_id = i.bg_id
+            taskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
+            old_status = taskManagement.bg_status
+            log = readFile(log_dir)
+            if "中心总体状态：正常" in log:
+                if i.bg_operation == "停止":
+                    taskManagement.bg_status = "正常"
+                    taskManagement.bg_lastopr_result = "失败"
+                    i.bg_opr_result = "失败"
+                    i.bg_operation_finish_time = datetime.now()
+                elif i.bg_operation == "刷新":
+                    i.bg_opr_result = "成功"
+                    taskManagement.bg_status = "正常"
+                    i.bg_operation_finish_time = datetime.now()
+                else:
+                    taskManagement.bg_status = "正常"
+                    taskManagement.bg_lastopr_result = "成功"
+                    i.bg_opr_result = "成功"
+                    i.bg_operation_finish_time = datetime.now()
+                remote_scp(log_dir, local_log_path)
+            elif "中心总体状态：部分正常（满足最小集）" in log:
+                if i.bg_operation == "刷新":
+                    i.bg_opr_result = "成功"
+                    i.bg_operation_finish_time = datetime.now()
+                    taskManagement.bg_status = "部分正常"
+                else:
+                    taskManagement.bg_status = "部分正常"
+                    taskManagement.bg_lastopr_result = "成功"
+                    i.bg_opr_result = "失败"
+                    i.bg_operation_finish_time = datetime.now()
+                remote_scp(log_dir, local_log_path)
+            elif "中心总体状态：异常" in log:
+                if i.bg_operation == "刷新":
+                    i.bg_opr_result = "成功"
+                    taskManagement.bg_status = "异常"
+                    i.bg_operation_finish_time = datetime.now()
+                else:
+                    taskManagement.bg_status = "异常"
+                    taskManagement.bg_lastopr_result = "失败"
+                    i.bg_operation_finish_time = datetime.now()
+                    i.bg_opr_result = "失败"
+                remote_scp(log_dir, local_log_path)
+            elif "中心总体状态：停止" in log:
+                if i.bg_operation == "停止":
+                    taskManagement.bg_status = "停止"
+                    taskManagement.bg_lastopr_result = "成功"
+                    i.bg_operation_finish_time = datetime.now()
+                    i.bg_opr_result = "成功"
+                elif i.bg_operation == "刷新":
+                    i.bg_opr_result = "成功"
+                    i.bg_operation_finish_time = datetime.now()
+                    taskManagement.bg_status = "停止"
+                else:
+                    taskManagement.bg_status = "停止"
+                    taskManagement.bg_lastopr_result = "失败"
+                    i.bg_opr_result = "失败"
+                    i.bg_operation_finish_time = datetime.now()
+                remote_scp(log_dir, local_log_path)
+            elif "对不起，操作失败！" in log:
+                if i.bg_operation == "刷新":
+                    i.bg_opr_result = "失败"
+                    taskManagement.bg_status = "异常"
+                    i.bg_operation_finish_time = datetime.now()
+                else:
+                    print("因特殊原因，执行出错")
+                    taskManagement.bg_status = "异常"
+                    taskManagement.bg_lastopr_result = "失败"
+                    i.bg_opr_result = "失败"
+                    i.bg_operation_finish_time = datetime.now()
+                remote_scp(log_dir, local_log_path)
+            else:
+                print("下个定时任务循环读取...")
+            i.save()
+            taskManagement.save()
+    else:
+        print("无可执行内容")
 
 
 #刷新状态定时任务

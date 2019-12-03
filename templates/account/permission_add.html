@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% include 'link_css.html' %}
+    {% include 'head_script.html' %}
+</head>
+<body>
+    <div class="content">
+        <section class="box">
+                <div class="box">
+                    <form action="{% url 'permissionAdd' %}" method="post" style="centre">
+                        {% csrf_token %}
+                        <div style="white-space:pre-line" align="left" class="box">
+                            <label for="id_title">权限名:</label>
+                                <input type="text" name="title" class="form-control" style="width:530px;" placeholder="必填项" maxlength="128" required="" id="id_title">
+                            <label for="id_url">路径:</label>
+                                <input type="text" name="url" class="form-control" style="width:530px;" placeholder="必填项" maxlength="256" required="" id="id_url">
+                            <label for="id_name">权限名:</label>
+                                <input type="text" name="name" class="form-control" style="width:530px;" placeholder="必填项" maxlength="128" required="" id="id_name">
+                            <label for="id_menu">所属一级菜单:</label>
+                                <input type="text" name="menu" class="form-control" style="width:530px;" placeholder="与父权限互斥（选填）,如 资产管理，后台管理，监控管理，订单管理，智能运维" maxlength="128"  id="id_menu">
+                            <label for="id_parent">父权限:</label>
+                                <input type="text" name="parent" class="form-control" style="width:530px;" placeholder="与所属一级菜单互斥（选填），权限列表已有权限" maxlength="30" id="id_parent">
+                        </div>
+                         <div align="center">
+                             <input type="submit" class="btn btn-primary" data-dismiss="modal" style="width: 60pt" value="保存">
+                         </div>
+                    </form>
+                </div>
+        </section>
+    </div>
+    {#回传参数至父层#}
+    <script type="text/javascript">
+            var index = parent.layer.getFrameIndex(window.name);
+            var success = {{ status }};
+            if ( success == '1' ) {
+                parent.$("#handle_status").val('1');
+                {#刷新父层页面#}
+                parent.location.reload();
+                parent.layer.close(index);
+            } else if( success == '2' ) {
+                parent.$("#handle_status").val('2');
+                parent.layer.close(index);
+            }
+    </script>
+</body>
+</html>

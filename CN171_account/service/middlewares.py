@@ -4,7 +4,7 @@ import re
 class PermissionMiddleWare(MiddlewareMixin):
     def process_request(self, request):
         # 设置白名单放行
-        for reg in ["/login/", "/admin/*","/logout/","/index/"]:
+        for reg in ["/login/", "/admin/*","/logout/","/index/","/editPassword/"]:
             ret = re.search(reg, request.path)
             if ret:
                 return None
