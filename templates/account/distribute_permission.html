@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load my_tags %}
-
+{% load staticfiles %}
+{% block self_head_css_js %}
+    <script src="{% static 'layer/layer.js' %}"></script>
+    <script src="{% static 'js/base.js' %}"></script>
+{% endblock %}
 {% block content %}
     <style>
             .user-area ul {
@@ -85,7 +89,7 @@
     <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <section class="content-header">
-            <h4>权限管理</h4>
+            <h4>角色权限管理</h4>
         </section>
 
         <section class="content" style="min-height:1200px">
@@ -109,7 +113,7 @@
                         </ul>
                     </div>
                 </div>
-                </div>
+            </div>
 
             <div class="col-md-3 role-area">
                 <form method="post">
@@ -124,8 +128,14 @@
                                         style="padding: 2px 8px;margin: -3px;">
                                     <i class="fa fa-save" aria-hidden="true"></i>
                                     保存
-                                </button>
+                                </button>&nbsp;&nbsp;
                             {% endif %}
+                            <div class="btn-group">
+                                <a id="roleAdd" style="padding: 2px 8px;margin: -3px;" href="#" onclick="roleAdd()" class="btn btn-success">添加</a>&nbsp;&nbsp;
+                            </div>
+                            <div class="btn-group">
+                                <a id="roleDel" style="padding: 2px 8px;margin: -3px;" href="#" onclick="roleDel('确定删除所选角色吗？')" class="btn btn-success">删除</a>&nbsp;&nbsp;
+                            </div>
                         </div>
                         <div class="panel-body" style="color: #d4d4d4;padding:10px  5px;">
                             提示：点击用户后才能为其分配角色
@@ -143,7 +153,6 @@
 
                                     <td><a href="?{% gen_role_url request role.id %}">{{ role.title }}</a></td>
                                     <td>
-
                                         <input type="checkbox" name="roles" value="{{ role.id }}"
                                                 {% if role.id in user_has_roles_dict %} checked  {% endif %} >
 
@@ -170,8 +179,14 @@
                                 <button class="right btn btn-success btn-xs" style="padding: 2px 8px;margin: -3px;">
                                     <i class="fa fa-save" aria-hidden="true"></i>
                                     保存
-                                </button>
+                                </button>&nbsp;&nbsp;
                             {% endif %}
+                            <div class="btn-group">
+                                <a id="permissionAdd" style="padding: 2px 8px;margin: -3px;" href="#" onclick="permissionAdd()" class="btn btn-success">添加</a>&nbsp;&nbsp;
+                            </div>
+                            <div class="btn-group">
+                                <a id="permissionDel" style="padding: 2px 8px;margin: -3px;" href="#" onclick="permissionDel('确定删除所选权限吗？')" class="btn btn-success">删除</a>
+                            </div>
                         </div>
                         <div class="panel-body" style="color: #d4d4d4;padding: 10px 5px;">
                             提示：点击角色后，才能为其分配权限。
@@ -218,7 +233,7 @@
             </div>
         </section>
     </div>
-    <script>
+<script>
             $(function () {
                 bindRootPermissionClick();
             });
@@ -236,5 +251,99 @@
                     }
                 })
             }
-    </script>
+function roleAdd(){
+    layer.open({
+    type: 2,
+    title: '新增角色',
+    closeBtn: 1,
+    area: ['700px', '550px'],
+    shadeClose: true, //点击遮罩关闭
+    content: ['/account/roleAdd/'],
+  });
+}
+function permissionAdd(){
+    layer.open({
+    type: 2,
+    title: '新增权限',
+    closeBtn: 1,
+    area: ['700px', '550px'],
+    shadeClose: true, //点击遮罩关闭
+    content: ['/account/permissionAdd/'],
+  });
+}
+function roleDel(a) {
+    if (!confirm(a)) {
+        window.event.returnValue = false;
+    }else{
+    //将所有复选框的默认值放入id数组中
+                var id = document.getElementsByName('roles');
+                var ids = [];
+                //将所有选中复选框的默认值写入到id数组中
+                for (var i = 0; i < id.length; i++) {
+                    if (id[i].checked){
+                        ids.push(id[i].value);
+                      }
+                }
+                console.log(ids);
+                //ajax开始运行
+                $.ajax({
+                    url: '{% url 'roleDel' %}',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        ids: ids,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    'traditional': true,
+                    success:function(msg){
+                           if(msg.ret=='true'){
+                               alert("删除成功！");
+                               location.reload(true);
+                           }
+                           else{
+                                alert("删除失败！");
+                           }
+                    }
+                });
+    }
+}
+
+function permissionDel(a) {
+    if (!confirm(a)) {
+        window.event.returnValue = false;
+    }else{
+    //将所有复选框的默认值放入id数组中
+                var id = document.getElementsByName('permissions');
+                var ids = [];
+                //将所有选中复选框的默认值写入到id数组中
+                for (var i = 0; i < id.length; i++) {
+                    if (id[i].checked){
+                        ids.push(id[i].value);
+                        alert(id[i].value);
+                      }
+                }
+                console.log(ids);
+                //ajax开始运行
+                $.ajax({
+                    url: '{% url 'permissionDel' %}',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        ids: ids,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    'traditional': true,
+                    success:function(msg){
+                           if(msg.ret=='true'){
+                               alert("删除成功！");
+                               location.reload(true);
+                           }
+                           else{
+                                alert("删除失败！");
+                           }
+                    }
+                });
+    }
+}
+</script>
 {% endblock %}

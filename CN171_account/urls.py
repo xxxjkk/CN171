@@ -11,5 +11,6 @@ urlpatterns = [
    url(r'^distribute_permissions/', userViews.distribute_permissions, name='distribute_permissions'),
    url(r'^roleAdd/', userViews.roleAdd, name='roleAdd'),
    url(r'^permissionAdd/', userViews.permissionAdd, name='permissionAdd'),
-
+   url(r'^roleDel/', userViews.roleDel, name='roleDel'),
+   url(r'^permissionDel/', userViews.permissionDel, name='permissionDel'),
 ]
