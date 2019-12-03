@@ -1,22 +1,21 @@
 from django.urls import path
 from django.conf.urls import include,url
 from django.contrib import admin
-from CN171_login import views as loginviews
 from django.views import static
 from django.conf import settings
-
+from CN171_account import views as userViews
 urlpatterns = [
     #Django的管理页面
     #path('admin/', admin.site.urls),
      url(r'^admin/', admin.site.urls),
 
     #登陆页面
-      url(r'^$', loginviews.login, name='login'),
-      url(r'^index/', loginviews.index, name='index'),
-      url(r'^logout/', loginviews.logout, name='logout'),
-      url(r'^login/', loginviews.login, name='login'),
-      url(r'^loginnotice/', loginviews.loginNotice, name='loginnotice'),
-
+      url(r'^$', userViews.login, name='login'),
+      url(r'^index/', userViews.index, name='index'),
+      url(r'^logout/', userViews.logout, name='logout'),
+      url(r'^login/', userViews.login, name='login'),
+      url(r'^loginnotice/', userViews.loginNotice, name='loginnotice'),
+      url(r'^editPassword/', userViews.editPassword, name='editPassword'),
 
      # url(r'^login/', include('CN171_login.urls')),
       url(r'^cmdb/', include('CN171_cmdb.urls')),

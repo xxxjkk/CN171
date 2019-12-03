@@ -51,6 +51,38 @@ def userManagement(request):
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(user_info_list, request)
     return render(request, "account/user_management.html", locals())
 
+#修改密码
+def editPassword(request):
+    if request.method == "POST":
+        acc_user_id = request.session['user_id']
+        user = models.User.objects.get(acc_user_id=acc_user_id)
+        old_acc_user_password = request.POST['acc_user_password']
+        if user.acc_user_password == old_acc_user_password :
+            acc_user_password = request.POST['new_acc_user_password']
+            user = models.User.objects.get(acc_user_id=acc_user_id)
+            user.acc_user_password = acc_user_password
+            try:
+                user.save()
+                returnmsg = "true"
+                status = 1
+                tips = u"新增成功！"
+                display_control = ""
+                request.session.flush()
+            except:
+                returnmsg = "false"
+                status = 2
+                tips = u"新增失败！"
+                display_control = ""
+        else:
+            returnmsg = "false"
+            status = 2
+            tips = u"新增失败！"
+            display_control = ""
+        return render(request, "login/login.html", locals())
+    else:
+        display_control = "none"
+        return render(request, "account/password_edit.html", locals())
+
 #添加用户
 def userAdd(request):
     if request.method == "POST":
@@ -70,6 +102,7 @@ def userAdd(request):
         user.save()
         user.roles.add(role_name)
         user.save()
+        status = 1
         return render(request, "account/user_add.html", locals())
     else:
         display_control = "none"
@@ -88,7 +121,6 @@ def userDel(request):
     return JsonResponse({'ret': returnmsg})
 
 #编辑用户
-
 
 def userEdit(request,acc_user_id):
     status = 0
@@ -133,8 +165,6 @@ def userSearch(request):
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(user_list, request)
     return render(request, "account/user_management.html", locals())
 
-
-
 def index(request):
     if request.session.get('is_login', None):
         temp_name = "navi-header.html"
@@ -173,7 +203,6 @@ def login(request):
 
     login_form = UserForm()
     return render(request, 'login/login.html', locals())
-
 
 def logout(request):
     if not request.session.get('is_login', None):
@@ -337,6 +366,64 @@ def distribute_permissions(request):
             'rid': rid
         }
     )
+
+
+#新增角色
+def roleAdd(request):
+    if request.method == "POST":
+        title = request.POST.get('title')
+        role = Role()
+        role.title = title
+        try:
+            role.save()
+            returnmsg = "true"
+            status = 1
+            tips = u"新增成功！"
+            display_control = ""
+        except:
+            returnmsg = "false"
+            status = 1
+            tips = u"新增失败！"
+            display_control = ""
+        return render(request, "account/role_add.html", locals())
+    else:
+        display_control = "none"
+        return render(request, "account/role_add.html", locals())
+
+
+def permissionAdd(request):
+    if request.method == "POST":
+        url = request.POST.get('url')
+        title = request.POST.get('title')
+        name = request.POST.get('name')
+        menu = request.POST.get('menu')
+        parent = request.POST.get('parent')
+        permission_parent = models.Permission.objects.get(title=parent)
+        permission = Permission()
+        permission.title = title
+        permission.url = url
+        permission.name = name
+        if menu:
+            permission_menu = models.Menu.objects.get(title=menu)
+            permission.menu = permission_menu
+        if parent:
+            permission.parent = permission_parent
+        try:
+            permission.save()
+            returnmsg = "true"
+            status = 1
+            tips = u"新增成功！"
+            display_control = ""
+        except:
+            returnmsg = "false"
+            status = 2
+            tips = u"新增失败！"
+            display_control = ""
+        return render(request, "account/permission_add.html", locals())
+    else:
+        display_control = "none"
+        return render(request, "account/permission_add.html", locals())
+
 
 
 # def register(request):

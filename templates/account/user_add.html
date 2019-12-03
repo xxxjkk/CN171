@@ -15,8 +15,10 @@
                         <div style="white-space:pre-line" align="left" class="box">
                             <label for="id_acc_user_name">用户名:</label>
                                 <input type="text" name="acc_user_name" class="form-control" style="width:530px;" placeholder="必填项" maxlength="128" required="" id="id_acc_user_name">
-                            <label for="id_acc_user_password">密码:</label>
-                                <input type="text" name="acc_user_password" class="form-control" style="width:530px;" placeholder="必填项" maxlength="256" required="" id="id_acc_user_password">
+                            <label for="id_acc_user_password">密码(8-20位含大写字母、小写字母、数字、特殊字符满足其中三种):<font id="passwordMSG"></font></label>
+                                <input type="password" name="acc_user_password" class="form-control" style="width:530px;" placeholder="必填项" maxlength="256"  id="id_acc_user_password" required onblur="checkPwd(this.value)">
+                            <label for="mm2">确认密码:<font id="mm2MSG"></font></label>
+                                <input type="password"  class="form-control" style="width:530px;" placeholder="必填项" maxlength="256"  id="mm2" required oninput="checkPwd2(this.value)">
                             <label for="id_acc_user_CNname">用户中文名:</label>
                                 <input type="text" name="acc_user_CNname" class="form-control" style="width:530px;" placeholder="必填项" maxlength="128" required="" id="id_acc_user_CNname">
                             <label for="id_acc_user_CNname">用户角色:</label>
@@ -27,7 +29,7 @@
                                 <input type="text" name="acc_user_status" class="form-control" style="width:530px;" placeholder="必填项，如 启用，注销" maxlength="30" id="id_acc_user_status">
                         </div>
                          <div align="center">
-                             <input type="submit" class="btn btn-primary" style="width: 60pt" value="保存">
+                             <input type="submit" class="btn btn-primary" data-dismiss="modal" style="width: 60pt" value="保存">
                          </div>
                     </form>
                 </div>
@@ -46,6 +48,58 @@
                 parent.$("#handle_status").val('2');
                 parent.layer.close(index);
             }
+    </script>
+    <script>
+
+    /*验证密码*/
+function checkPwd(password) {
+    /*获取提示框*/
+        var strength = 0;
+    var passwordMSG = document.getElementById("passwordMSG");
+        if (password.length > 7 && password.match(/[\da-zA-Z]+/)) {
+        if (password.match(/\d+/)) {
+            strength++;
+        }
+        if (password.match(/[a-z]+/)) {
+            strength++;
+        }
+        if (password.match(/[A-Z]+/)) {
+            strength++;
+        }
+        if (password.match(/[!@*$-_()+=&￥]+/)) {
+            strength++;
+        }
+    }
+    if (strength >= 3) {
+        passwordMSG.innerHTML = "<font color='green'><b>√</b></font>";
+    Flag4 = true;
+    }else{
+        passwordMSG.innerHTML = "<font color='red'>密码格式有误！</font>";
+      Flag4 = false;
+    }
+}
+
+/*验证重复密码*/
+    var timeoutID;
+    function checkPwd2(pwd2) {
+    /*获取提示框*/
+    var mm2MSG = document.getElementById("mm2MSG");
+    /*获取第一个框输入的密码*/
+    var pwd1 = document.getElementById("id_acc_user_password").value;
+    //对上次未完成的延时操作进行取消
+    clearTimeout(timeoutID);
+    //对于密码比对延迟500ms，避免频繁比对
+    timeoutID = setTimeout(function(){
+        /*进行比对*/
+        if(pwd1 != pwd2){
+            Flag5 = false;
+            mm2MSG.innerHTML = "<font color='red'>两次输入的密码不一致！</font>";
+        } else {
+            Flag5 = true;
+            mm2MSG.innerHTML = "<font color='green'><b>√</b></font>";
+        }
+    },500);
+}
     </script>
 </body>
 </html>
