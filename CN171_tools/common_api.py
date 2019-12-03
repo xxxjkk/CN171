@@ -1,4 +1,5 @@
 import datetime
+import string
 from os.path import *
 from django.http import HttpResponse
 
@@ -74,3 +75,15 @@ def get_tuple_key(tupleObj,tupleValue):
                 else:
                     return '3'
 
+#如果为null，则转换为--
+def isNullStr(str):
+    if str == None:
+        return "--"
+    return str
+
+#转换成int型
+def toInt(a):
+    if (type(a).__name__ == 'float'):
+        return int(a)
+    elif (type(a).__name__ == 'str'):
+        return int(a)

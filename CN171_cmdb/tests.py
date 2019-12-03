@@ -24,8 +24,6 @@ print(a)
 print(a.replace(",","\n"))
 
 
-from CN171_cmdb.tasks import test1
-print(test1())
 
 
 

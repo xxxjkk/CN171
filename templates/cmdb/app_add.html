@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block self_head_css_js %}{% endblock %}
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h4>添加应用页面</h4>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <form id="host_add_form" method="post" >
+        {% csrf_token %}
+            <div class="box" align="left">
+                <div class="box-header"></div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                 {{form.as_p}}
+               </div>
+                <input id="btn" class="btn btn-primary" style="width: 60pt" value="保存">&nbsp;&nbsp;
+                <input type="reset" name="reset1" class="btn btn-primary" style="width: 60pt" value="取消">
+                <br/><br/>
+            </div>
+        </form>
+    </section>
+<!-- /.content -->
+</div>
+
+<script>
+$(document).ready(function(){
+    $('#btn').click(function(e){
+       $('.c1').remove();
+       var form_data = new FormData();
+       form_data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+       form_data.append('cmdb_host', $('#id_cmdb_host').val());
+       form_data.append('appNetmode', $('#id_appNetmode').val());
+       form_data.append('cmdbAppCluster', $('#id_cmdbAppCluster').val());
+       form_data.append('app_name', $('#id_app_name').val());
+       form_data.append('app_status', $('#id_app_status').val());
+       $.ajax({
+            url:'{% url 'appAdd' %}',
+            data:form_data,
+            type: 'POST',
+            dataType: 'json',
+            // 告诉jQuery不要去处理发送的数据, 发送对象。
+            processData : false,
+            // 告诉jQuery不要去设置Content-Type请求头
+            contentType : false,
+            // 获取POST所需的csrftoken
+            success:function (args) {
+                //console.log(args);
+                if (args.status){
+                        var tag = document.createElement('span');
+                        tag.className='c1';
+                        tag.innerHTML = args.msg;
+                        $("#host_add_form").find('input[name="reset1"]').after(tag);
+                }else {
+                    if(args.form_status){
+                        var tag = document.createElement('span');
+                        tag.className='c1';
+                        tag.innerHTML = args.msg;
+                        $("#host_add_form").find('input[name="reset1"]').after(tag);
+                    }else{
+                        $.each(args.msg1,function (index,value) {
+                            var tag = document.createElement('span');
+                            tag.className='c1';
+                            tag.innerHTML = value[0];
+                            if(index=='bg')
+                                $("#host_add_form").find('input[name="'+ index +'"]').after(tag);
+                            $("#host_add_form").find('input[name="'+ index +'"]').after(tag);
+                    })
+                    }
+                }
+            }
+        })
+    })
+
+})
+
+</script>
+
+{% endblock %}

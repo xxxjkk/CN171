@@ -23,7 +23,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <body class="hold-transition skin-yellow-light sidebar-mini sidebar-collapse">
 <div class="loading"></div>
 <div class="wrapper">
-
   <!-- Main Header 主页头-->
 {% if temp_name %}
     {% include temp_name %}
@@ -34,8 +33,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
     $('.loading').animate({'width':'10%'},50);  //第一个进度节点
 </script>
   <!-- Left side column. contains the logo and sidebar 左侧菜单 -->
-  {% include 'main-sidebar.html' %}
-
+    {% load my_tags %}
+　  {% get_menu_styles request %}
 <script type="text/javascript">
     $('.loading').animate({'width':'25%'},50);  //第一个进度节点
 </script>

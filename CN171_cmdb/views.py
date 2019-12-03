@@ -7,11 +7,11 @@ from django.http import HttpResponse, JsonResponse
 from CN171_cmdb import models, forms, tasks
 from django.shortcuts import render, redirect
 
-from CN171_cmdb.exceloper import excel_export_host, excel_import_host
-from CN171_cmdb.models import CmdbHost, CmdbApp, HostPwdOprLog, CmdbAppCluster
-from CN171_cmdb.forms import DetailLogForm, HostPwdEditForm, NormalUserForm, CmdbHostForm
+from CN171_cmdb.exceloper import excel_export_host, excel_import_host, excel_import_app, excel_export_app
+from CN171_cmdb.models import CmdbHost, CmdbApp, HostPwdOprLog, CmdbAppCluster, APP_STATUS
+from CN171_cmdb.forms import DetailLogForm, HostPwdEditForm, NormalUserForm, CmdbHostForm, CmdbAppForm
 from CN171_background.api import pages, get_object
-from CN171_tools.common_api import export_download_txt, to_ints, write_txt
+from CN171_tools.common_api import export_download_txt, to_ints, write_txt, isNullStr, toInt
 from CN171_tools.connecttool import *
 from CN171_tools.sftputils import *
 from CN171_login.views import my_login_required
@@ -99,7 +99,8 @@ def appManagement(request):
 #查询集群下的应用列表
 def findAppsInCluster(request):
     clusterId = request.POST.get("clusterId")
-    appListInCluster = models.CmdbApp.objects.filter(cluster_id=clusterId)
+    appCluster = CmdbAppCluster.objects.get(id=clusterId)
+    appListInCluster=appCluster.cmdbApp_cmdbAppCluster.all()
     app_list = []
     for app in appListInCluster:
         app_dict = {}
@@ -109,7 +110,9 @@ def findAppsInCluster(request):
         app_dict["cmdb_host_manip"] = isNullStr(app.cmdb_host.cmdb_host_manip)
         app_dict["bg_module"] = app.cmdb_host.bg.bg_module
         app_dict["bg_domain"] = app.cmdb_host.bg.bg_domain
-        app_dict["app_status"] = isNullStr(app.app_status)
+        appStatus=app.app_status
+        a=int(appStatus)-1
+        app_dict["app_status"] = APP_STATUS[a][1]
         app_dict["cmdb_host_system"] = isNullStr(app.cmdb_host.cmdb_host_system)
         app_dict["cmdb_host_cpu"] = isNullStr(app.cmdb_host.cmdb_host_cpu)
         app_dict["cmdb_host_RAM"] = isNullStr(app.cmdb_host.cmdb_host_RAM)
@@ -133,6 +136,61 @@ def appDel(request):
                 bg_item = get_object(CmdbHost, cmdb_host_id=app_id)
                 bg_item.delete()
     return HttpResponse(u'删除成功')
+
+#添加应用
+class CmdbAPPForm(object):
+    pass
+
+#GET 跳转到应用增加页面
+#POST 应用添加功能
+def appAdd(request):
+    if request.method == 'GET':
+        form = CmdbAppForm()
+        return render(request, "cmdb/app_add.html", locals())
+    else:
+        ret = {'status': False, 'msg': '添加应用失败！', 'msg1': None}
+        appForm = CmdbAppForm(request.POST)
+        if appForm.is_valid():
+            appForm.save()
+            ret['status'] = True
+            ret['msg'] = "添加应用成功！"
+        else:
+            ret['msg1'] = appForm.errors  # 这是一个对象
+            print(appForm.errors)
+        v = json.dumps(ret)  # 转换为字典类型
+        return HttpResponse(v)
+
+#批量删除应用集群
+def appDel(request):
+    if request.method == 'POST':
+        app_batch = request.GET.get('arg', '')
+        cluster_id_all = str(request.POST.get('cluster_id_all', ''))
+
+        if app_batch:
+            for cluster_id in cluster_id_all.split(','):
+                bg_item = get_object(CmdbAppCluster, id=cluster_id)
+                bg_item.delete()
+    return HttpResponse(u'删除成功')
+
+#导出应用信息
+def export_app_info(request):
+    list_obj=[]
+    cluster_id_all = to_ints(request.GET.get('cluster_id_all'))
+    if cluster_id_all:
+        list_cluster_obj=CmdbAppCluster.objects.filter(id__in=cluster_id_all)
+    return excel_export_app(list_cluster_obj)
+
+#导入应用信息
+def import_app_info(request):
+    ret = {'msg': None}
+    file_obj = request.FILES.get('appInfoFile')
+    if file_obj:
+        ret['msg']= excel_import_app(file_obj)
+    else:
+        ret['msg'] = "请选择上传的文件！"
+    v = json.dumps(ret)  # 转换为字典类型
+    return HttpResponse(v)
+
 
 #集群下的APP详情
 def clusterAppDetail(request):
@@ -323,10 +381,7 @@ def import_host_info(request):
     v = json.dumps(ret)  # 转换为字典类型
     return HttpResponse(v)
 
-def isNullStr(str):
-    if str == None:
-        return "--"
-    return str
+
 
 
 
