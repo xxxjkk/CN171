@@ -5,13 +5,14 @@ import threading
 from django.http import HttpResponse, JsonResponse, FileResponse, HttpResponseRedirect
 from CN171_background import models
 #from CN171_background.action import taskOneAction, checkResultAction
+from CN171_background.action import taskOneAction, checkResultAction
 from CN171_background.api import pages,get_object
 from django.shortcuts import render
 
 from CN171_background.forms import BgForm
 from CN171_background.models import BgTaskManagement, BgTaskLog
 from CN171_cmdb.models import CmdbAppCluster
-from CN171_login.views import my_login_required
+from CN171_account.views import my_login_required
 from django.db.models import Q
 from datetime import datetime
 from CN171_background import tasks
@@ -391,8 +392,6 @@ def downloadTaskLog(request):
 
     response =FileResponse(file)
     response['Content-Type']='application/octet-stream'
-    #response['Content-Disposition']='attachment;filename="downfilename.log"'
-    #response['Content-Disposition'] = 'attachment;filename=' + downfilename
     response['Content-Disposition'] = 'attachment;filename="{}"'.format(downfilename)
     return response
 
