@@ -210,27 +210,6 @@ def logout(request):
     request.session.flush()
     return redirect('/login/')
 
-
-# def rolePermission(request):
-#     roleList = models.Role.objects.all()
-#     permission_list = []
-#     for i in roleList:
-#         role_id = i.id
-#         permission_info_list = []
-#         role_title = i.title
-#         permission_List = i.permissions.all()
-#         lenght = len(permission_List)
-#         for j in permission_List:
-#             permission_title = j.title
-#             permission_info = {"permission_title":permission_title}
-#             permission_info_list.append(permission_info)
-#         role_info_list = {"role_title":role_title,"permission_info_list":permission_info_list}
-#         permission_list.append(role_info_list)
-#     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(permission_list, request)
-#     return render(request, "account/role_permission_management.html", locals())
-
-
-
 def distribute_permissions(request):
     """
     分配权限
@@ -390,6 +369,19 @@ def roleAdd(request):
         display_control = "none"
         return render(request, "account/role_add.html", locals())
 
+def roleDel(request):
+    ids = request.POST.getlist('ids', [])
+    returnmsg = "true"
+    for id in ids:
+        role = models.Role.objects.get(id=id)
+        user = role.user_set.all()
+        if user:
+            returnmsg = "False"
+        else:
+            role.delete()
+            returnmsg = "true"
+    return JsonResponse({'ret': returnmsg})
+
 
 def permissionAdd(request):
     if request.method == "POST":
@@ -398,7 +390,7 @@ def permissionAdd(request):
         name = request.POST.get('name')
         menu = request.POST.get('menu')
         parent = request.POST.get('parent')
-        permission_parent = models.Permission.objects.get(title=parent)
+        permission_parent = models.Permission.objects.filter(title=parent)
         permission = Permission()
         permission.title = title
         permission.url = url
@@ -425,49 +417,16 @@ def permissionAdd(request):
         return render(request, "account/permission_add.html", locals())
 
 
-
-# def register(request):
-#     if request.session.get('is_login', None):
-#         # 登录状态不允许注册。你可以修改这条原则！
-#         return redirect("/index/")
-#     if request.method == "POST":
-#         register_form = RegisterForm(request.POST)
-#         message = "请检查填写的内容！"
-#         if register_form.is_valid():  # 获取数据
-#             username = register_form.cleaned_data['username']
-#             password1 = register_form.cleaned_data['password1']
-#             password2 = register_form.cleaned_data['password2']
-#             email = register_form.cleaned_data['email']
-#             sex = register_form.cleaned_data['sex']
-#             if password1 != password2:  # 判断两次密码是否相同
-#                 message = "两次输入的密码不同！"
-#                 return render(request, 'login/register.html', locals())
-#             else:
-#                 same_name_user = models.User.objects.filter(name=username)
-#                 if same_name_user:  # 用户名唯一
-#                     message = '用户已经存在，请重新选择用户名！'
-#                     return render(request, 'login/register.html', locals())
-#                 same_email_user = models.User.objects.filter(email=email)
-#                 if same_email_user:  # 邮箱地址唯一
-#                     message = '该邮箱地址已被注册，请使用别的邮箱！'
-#                     return render(request, 'login/register.html', locals())
-#
-#                 # 当一切都OK的情况下，创建新用户
-#
-#                 new_user = models.User.objects.create()
-#                 new_user.name = username
-#                 new_user.password = password1
-#                 new_user.email = email
-#                 new_user.sex = sex
-#                 new_user.save()
-#                 return redirect('/login/')  # 自动跳转到登录页面
-#     register_form = RegisterForm()
-#     return render(request, 'login/register.html', locals())
-
-
-#def hash_code(s, salt='mysite_login'):
-#    h = hashlib.sha256()
-#    s += salt
-#    h.update(s.encode())  # update方法只接收bytes类型
-#    return h.hexdigest()
-
+def permissionDel(request):
+    ids = request.POST.getlist('ids', [])
+    returnmsg = "true"
+    for id in ids:
+        permission = models.Permission.objects.get(id=id)
+        role = permission.role_set.all()
+        parent = models.Permission.objects.filter(parent = permission)
+        if role or parent:
+            returnmsg = "False"
+        else:
+            permission.delete()
+            returnmsg = "true"
+    return JsonResponse({'ret': returnmsg})

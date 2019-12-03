@@ -10,7 +10,9 @@
 {% block content %}
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header"></section>
+    <section class="content-header">
+        <h4>用户管理</h4>
+    </section>
 
     <!-- Main content -->
     <section class="content">
@@ -23,12 +25,6 @@
                     </div>
                     <div class="btn-group">
                          <a id="userDel" style="display: none" href="#" onclick="userDel('确定删除所选用户吗？')" class="btn btn-success">删除用户</a>
-                    </div>
-                    <div class="btn-group">
-                         <a id="roleAdd" style="display: none" href="#" onclick="roleAdd()" class="btn btn-success">添加角色</a>
-                    </div>
-                    <div class="btn-group">
-                         <a id="permissionAdd" style="display: none" href="#" onclick="permissionAdd()" class="btn btn-success">添加权限</a>
                     </div>
 
                     <div class="input-group inline-group col-md-3" style="float: right">
@@ -149,26 +145,6 @@ function useredit(acc_user_id){
     area: ['700px', '550px'],
     shadeClose: true, //点击遮罩关闭
     content: ['/account/userEdit/'+acc_user_id],
-  });
-}
-function roleAdd(){
-    layer.open({
-    type: 2,
-    title: '新增角色',
-    closeBtn: 1,
-    area: ['700px', '550px'],
-    shadeClose: true, //点击遮罩关闭
-    content: ['/account/roleAdd/'],
-  });
-}
-function permissionAdd(){
-    layer.open({
-    type: 2,
-    title: '新增权限',
-    closeBtn: 1,
-    area: ['700px', '550px'],
-    shadeClose: true, //点击遮罩关闭
-    content: ['/account/permissionAdd/'],
   });
 }
 </script>
