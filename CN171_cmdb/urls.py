@@ -26,5 +26,8 @@ urlpatterns = [
     url(r'^app_management/', cmdbviews.appManagement, name='appManagement'),
     url(r'^find_apps_in_cluster/', cmdbviews.findAppsInCluster, name='findAppsInCluster'),
     url(r'^cluster_app_detail/',cmdbviews.clusterAppDetail, name='clusterAppDetail'),
-
+    url(r'^app_add/',cmdbviews.appAdd, name='appAdd'),
+    url(r'^appDel/',cmdbviews.appDel, name='appDel'),
+    url(r'^export_app_info/', cmdbviews.export_app_info, name='export_app_info'),
+    url(r'^import_app_info/', cmdbviews.import_app_info, name='import_app_info'),
 ]

@@ -3,7 +3,7 @@ from django.forms import widgets, models
 from django.forms.widgets import *
 
 from CN171_background.models import BgTaskManagement
-from CN171_cmdb.models import HostPwdOprLog, CmdbHost
+from CN171_cmdb.models import HostPwdOprLog, CmdbHost, CmdbApp, CmdbAppCluster
 
 
 class DetailLogForm(forms.ModelForm):
@@ -14,6 +14,7 @@ class DetailLogForm(forms.ModelForm):
             'detail_log': Textarea(attrs={'name':'detailLog', 'style':'width:1000px; height:300px', 'row':'100','maxlength':'255', 'id':'detailLog', 'class':'form-control', 'cols':'40','readonly':'readonly'}),
         }
 
+#主机密码编辑页面
 class HostPwdEditForm(forms.Form):
     modified_host_list_file = forms.FileField(label=u'选择要变更的主机列表文件', error_messages={'required':'请选择要变更的主机列表文件'})  #改成True有问题
     modified_host_user= forms.CharField(label=u'变更用户', error_messages={'required':'请输入要变更的用户','style':'color:red;'},
@@ -43,7 +44,7 @@ class NormalUserForm(forms.Form):
     username = forms.CharField()
     headImg = forms.FileField()
 
-
+#主机表单页面
 class CmdbHostForm(forms.ModelForm):
     class Meta:
         model= CmdbHost
@@ -64,3 +65,16 @@ class CmdbHostForm(forms.ModelForm):
             'cmdb_host_status': Select(attrs={'class': 'form-control', 'style': 'width:530px;'}),
         }
 
+#应用页面
+class CmdbAppForm(forms.ModelForm):
+    class Meta:
+        model= CmdbApp
+        fields=('cmdb_host','appNetmode','cmdbAppCluster','app_name','app_status')
+
+        widgets = {
+            'cmdb_host': Select( attrs={'class': 'form-control', 'style': 'width:530px;'}),
+            'appNetmode': Select( attrs={'class': 'form-control', 'style': 'width:530px;'}),
+            'cmdbAppCluster': Select(attrs={'class': 'form-control', 'style': 'width:530px;'}),
+            'app_name': TextInput(attrs={'class': 'form-control', 'style': 'width:530px;', 'placeholder': u'必填项'}),
+            'app_status': Select(attrs={'class': 'form-control', 'style': 'width:530px;'}),
+        }
