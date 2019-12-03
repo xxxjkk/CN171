@@ -14,7 +14,7 @@ from CN171_background.api import pages, get_object
 from CN171_tools.common_api import export_download_txt, to_ints, write_txt
 from CN171_tools.connecttool import *
 from CN171_tools.sftputils import *
-from CN171_login.views import my_login_required
+from CN171_account.views import my_login_required
 import json
 
 # Create your views here.

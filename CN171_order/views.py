@@ -5,7 +5,7 @@ from CN171_order.models import PbossOrderStatus,PbossOrderRecord,PbossOrderNode,
 from CN171_background.api import pages
 from CN171_tools.mailutils import pbossOrderMakebyMail
 from datetime import datetime
-from CN171_login.views import my_login_required
+from CN171_account.views import my_login_required
 
 # Create your views here.
 

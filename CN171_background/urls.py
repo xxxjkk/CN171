@@ -20,5 +20,6 @@ urlpatterns = [
     url(r'^taskLogDetail/', backgroundviews.taskLogDetail, name='taskLogDetail'),
     url(r'^downloadTaskLog/', backgroundviews.downloadTaskLog, name='downloadTaskLog'),
     url(r'^appDetailByMoDo/', backgroundviews.appDetailByMoDo, name='appDetailByMoDo'),
+    # url(r'^testAction/', backgroundviews.testAction, name='testAction'),
 
 ]
