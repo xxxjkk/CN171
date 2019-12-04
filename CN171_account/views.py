@@ -33,7 +33,7 @@ def my_login_required(func):
             return HttpResponseRedirect('/loginnotice')
     return check_login_status
 
-@my_login_required
+#用户信息管理列表
 def userManagement(request):
     user_List = models.User.objects.all()
     user_info_list = []
@@ -51,7 +51,7 @@ def userManagement(request):
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(user_info_list, request)
     return render(request, "account/user_management.html", locals())
 
-#修改密码
+#修改用户密码
 def editPassword(request):
     if request.method == "POST":
         acc_user_id = request.session['user_id']
@@ -78,6 +78,7 @@ def editPassword(request):
             status = 2
             tips = u"新增失败！"
             display_control = ""
+        login_form = UserForm()
         return render(request, "login/login.html", locals())
     else:
         display_control = "none"
@@ -109,7 +110,7 @@ def userAdd(request):
         return render(request, "account/user_add.html", locals())
 
 
-#添加用户
+#删除用户
 def userDel(request):
     acc_user_ids = request.POST.getlist('ids', [])
     returnmsg = "True"
@@ -120,8 +121,7 @@ def userDel(request):
             returnmsg = "False"
     return JsonResponse({'ret': returnmsg})
 
-#编辑用户
-
+#编辑用户信息
 def userEdit(request,acc_user_id):
     status = 0
     obj = get_object(models.User, acc_user_id = acc_user_id)
@@ -137,8 +137,7 @@ def userEdit(request,acc_user_id):
         accform = accFrom(instance=obj)
     return render(request, 'account/user_edit.html', locals())
 
-# 启用用户
-
+# 用户状态修改
 def userStatusEdit(request):
     acc_user_id = request.POST.get('acc_user_id')
     nextStatus = request.POST.get('nextStatus')
@@ -155,7 +154,7 @@ def userStatusEdit(request):
     user.save()
     return JsonResponse({'ret': returnmsg})
 
-# 启用用户
+# 用户信息搜索
 def userSearch(request):
     acc_user_name = request.GET.get('acc_user_name')
     if acc_user_name == '':
@@ -174,10 +173,12 @@ def index(request):
         #提示未登陆，5秒后返回
         return render(request, "login/login_notice.html", locals())
 
+#用户登录提示
 def loginNotice(request):
     # 提示未登陆，5秒后返回
     return render(request, "login/login_notice.html", locals())
 
+# 用户登录
 def login(request):
     if request.session.get('is_login', None):
         return redirect('/index')
@@ -204,12 +205,14 @@ def login(request):
     login_form = UserForm()
     return render(request, 'login/login.html', locals())
 
+# 用户注销登录
 def logout(request):
     if not request.session.get('is_login', None):
         return redirect('/login/')
     request.session.flush()
     return redirect('/login/')
 
+#用户角色权限管理
 def distribute_permissions(request):
     """
     分配权限
@@ -369,6 +372,7 @@ def roleAdd(request):
         display_control = "none"
         return render(request, "account/role_add.html", locals())
 
+# 删除角色
 def roleDel(request):
     ids = request.POST.getlist('ids', [])
     returnmsg = "true"
@@ -382,7 +386,7 @@ def roleDel(request):
             returnmsg = "true"
     return JsonResponse({'ret': returnmsg})
 
-
+#新增权限
 def permissionAdd(request):
     if request.method == "POST":
         url = request.POST.get('url')
@@ -416,7 +420,7 @@ def permissionAdd(request):
         display_control = "none"
         return render(request, "account/permission_add.html", locals())
 
-
+#删除权限
 def permissionDel(request):
     ids = request.POST.getlist('ids', [])
     returnmsg = "true"
