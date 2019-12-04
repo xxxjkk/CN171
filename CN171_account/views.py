@@ -65,18 +65,18 @@ def editPassword(request):
                 user.save()
                 returnmsg = "true"
                 status = 1
-                tips = u"新增成功！"
+                tips = u"修改成功！"
                 display_control = ""
                 request.session.flush()
             except:
                 returnmsg = "false"
                 status = 2
-                tips = u"新增失败！"
+                tips = u"修改失败！"
                 display_control = ""
         else:
             returnmsg = "false"
             status = 2
-            tips = u"新增失败！"
+            tips = u"修改失败！"
             display_control = ""
         login_form = UserForm()
         return render(request, "login/login.html", locals())
