@@ -394,7 +394,6 @@ def permissionAdd(request):
         name = request.POST.get('name')
         menu = request.POST.get('menu')
         parent = request.POST.get('parent')
-        permission_parent = models.Permission.objects.get(title=parent)
         permission = Permission()
         permission.title = title
         permission.url = url
@@ -403,6 +402,7 @@ def permissionAdd(request):
             permission_menu = models.Menu.objects.get(title=menu)
             permission.menu = permission_menu
         if parent:
+            permission_parent = models.Permission.objects.get(title=parent)
             permission.parent = permission_parent
         try:
             permission.save()

@@ -22,6 +22,7 @@ def initial_session(user_obj, request):
                                                     'permissions__icon',
                                                     'permissions__menu__title',
                                                     'permissions__menu__icon',
+                                                    'permissions__menu__weight',
                                                     'permissions__menu__classid',
                                                     'permissions__menu__url',
                                                     'permissions__menu__id').distinct()
@@ -41,6 +42,7 @@ def initial_session(user_obj, request):
                     "menu_title": item["permissions__menu__title"],
                     "menu_icon": item["permissions__menu__icon"],
                     'menu_classid':item['permissions__menu__classid'],
+                    'menu_weight': item['permissions__menu__weight'],
                     'menu_url':item['permissions__menu__url'],
                     "children": [
                         {
