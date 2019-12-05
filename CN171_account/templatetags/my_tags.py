@@ -21,7 +21,7 @@ def get_menu_styles(request):
     # sort 是应用在 list 上的方法，sorted 可以对所有可迭代的对象进行排序操作。
 
     order_dict = OrderedDict()
-    for i in sorted(permission_menu_dict, key=lambda x: permission_menu_dict[x]['menu_weight'], reverse=True):
+    for i in sorted(permission_menu_dict, key=lambda x: permission_menu_dict[x]['menu_weight'], reverse=False):
         # 复制到order_dict中
         order_dict[i] = permission_menu_dict[i]
         # 取一级菜单的信息
