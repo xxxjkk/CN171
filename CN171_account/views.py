@@ -8,9 +8,7 @@ from django.http import HttpResponse, JsonResponse, FileResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 
-from django.utils.deprecation import MiddlewareMixin
 from django.shortcuts import redirect, HttpResponse
-import re
 
 from CN171_account.models import Role, User, Permission, Menu
 from . import models
