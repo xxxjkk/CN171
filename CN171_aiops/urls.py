@@ -15,4 +15,5 @@ urlpatterns = [
     url(r'^capacityDetect/', aiopsviews.capacityDetect, name='capacityDetect'),
     url(r'^resultEcharts/(?P<id>\d+)/$', aiopsviews.resultEcharts, name='resultEcharts'),
     url(r'^warningpboss/', aiopsviews.warningPboss, name='warningpboss'),
+    url(r'^resultSearch/', aiopsviews.resultSearch, name='resultSearch'),
 ]
