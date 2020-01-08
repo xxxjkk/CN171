@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'CN171_account',
+    'CN171_aiops',
     'CN171_background',
     'CN171_cmdb',
     'CN171_config',
