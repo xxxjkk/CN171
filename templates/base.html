@@ -32,9 +32,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <script type="text/javascript">
     $('.loading').animate({'width':'10%'},50);  //第一个进度节点
 </script>
-  <!-- Left side column. contains the logo and sidebar 左侧菜单 -->
+
+<!-- Left side column. contains the logo and sidebar 左侧菜单 -->
+<div class="main-sidebar">
     {% load my_tags %}
 　  {% get_menu_styles request %}
+</div>
 <script type="text/javascript">
     $('.loading').animate({'width':'25%'},50);  //第一个进度节点
 </script>
