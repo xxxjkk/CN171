@@ -22,10 +22,10 @@ config.read(os.path.join(BASE_DIR, 'config/cn171.conf'),encoding='utf-8')
 
 # 连接构建服务器
 def ssh_connect(conntarget):
-    if conntarget == "Ansible":
-        hostname = config.get('Ansible', 'ansible_host')
-        username = config.get('Ansible', 'ansible_user')
-        password = config.get('Ansible', 'ansible_password')
+    if conntarget == "Ansible_bg":
+        hostname = config.get('Ansible', 'ansible_bg_host')
+        username = config.get('Ansible', 'ansible_bg_user')
+        password = config.get('Ansible', 'ansible_bg_password')
     elif conntarget == "PBOSS":
         hostname = config.get('PBOSS', 'pboss_order_host')
         username = config.get('PBOSS', 'pboss_order_user')
@@ -134,11 +134,11 @@ def pbossOrderMake(type):
     return "成功"
 
 def get_init_parameter(conntarget):
-    if conntarget == "Ansible":
-        hostname = config.get('Ansible', 'ansible_host')
-        port=config.get('Ansible','ansible_port')
-        username = config.get('Ansible', 'ansible_user')
-        password = config.get('Ansible', 'ansible_password')
+    if conntarget == "Ansible_bg":
+        hostname = config.get('Ansible', 'ansible_bg_host')
+        port=config.get('Ansible','ansible_bg_port')
+        username = config.get('Ansible', 'ansible_bg_user')
+        password = config.get('Ansible', 'ansible_bg_password')
     elif conntarget == "PBOSS":
         hostname = config.get('PBOSS', 'pboss_order_host')
         port=config.get('PBOSS','pboss_order_port')
@@ -189,7 +189,7 @@ def get_hostmgnt_init_parameter(conntarget):
 def readFile(file_path):
     exec_cmd = "cat "+ file_path
     log_msg = ""
-    sshd = ssh_connect("Ansible")
+    sshd = ssh_connect("Ansible_bg")
     stdin, stdout, stderr = ssh_exec_cmd(sshd, exec_cmd)
     err_list = stderr.readlines()
     if len(err_list) > 0:
@@ -204,7 +204,7 @@ def readFile(file_path):
 
 #远程下载文件
 def remote_scp(remote_path,local_path):
-    hostname, port, username, password = get_init_parameter("Ansible")
+    hostname, port, username, password = get_init_parameter("Ansible_bg")
     port = str2int(port)
     t = paramiko.Transport((hostname, port))
     t.connect(username=username, password=password)  # 登录远程服务器
@@ -227,7 +227,7 @@ def remote_scp(remote_path,local_path):
     try:
         sftp.get(src, des)
         t.close()
-        sshd = ssh_connect("Ansible")
+        sshd = ssh_connect("Ansible_bg")
         dir_del_name = dir_name.split('.')[0]
         cmd = "rm -rf " +dir_del_name
         ssh_exec_cmd(sshd, cmd)

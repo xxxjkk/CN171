@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% include 'link_css.html' %}
+    {% include 'head_script.html' %}
+    <script src="/static/layer/layer.js"></script>
+    <script src="/static/js/base.js"></script>
+</head>
+<body>
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+    </section>
+    <section class="content">
+        <div class="box">
+            <div class="box-body">
+                <table class="table table-striped table-bordered" id="warning_detail_table">
+                    <tbody>
+                        <tr class="even gradeX">
+                            <td width="20%" style="vertical-align:middle;">告警内容</td>
+                            <td>{{ warning_analysis_detail.warning_message|safe }}</td>
+                        </tr>
+                        <tr class="even gradeX">
+                            <td width="20%" style="vertical-align:middle;">数量</td>
+                            <td>{{ warning_analysis_detail.warning_number|safe }}</td>
+                        </tr>
+                        <tr class="even gradeX">
+                            <td width="20%" style="vertical-align:middle;">发生时间</td>
+                            <td>{{ warning_analysis_detail.warning_arisingtime|safe }}</td>
+                        </tr>
+                        <tr class="even gradeX">
+                            <td width="20%" style="vertical-align:middle;">告警状态</td>
+                            <td>{{ warning_analysis_detail.warning_status|safe }}</td>
+                        </tr>
+                        <tr class="even gradeX">
+                            <td width="20%" style="vertical-align:middle;">告警原因分析</td>
+                            <td>
+                                1.{{ warning_analysis_detail.warning_reason1|safe }}<br>
+                                2.{{ warning_analysis_detail.warning_reason2|safe }}<br>
+                                3.{{ warning_analysis_detail.warning_reason3|safe }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>
+

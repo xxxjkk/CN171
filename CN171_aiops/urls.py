@@ -12,5 +12,12 @@ urlpatterns = [
 
     #智能运维页面
     url(r'^capacity/', aiopsviews.capacity, name='capacity'),
-    url(r'^warningpboss/', aiopsviews.warningPboss, name='warningpboss'),
+    url(r'^capacityDetect/', aiopsviews.capacityDetect, name='capacityDetect'),
+    url(r'^resultEcharts/(?P<id>\d+)/$', aiopsviews.resultEcharts, name='resultEcharts'),
+    url(r'^warningpboss/', aiopsviews.warningPboss, name='warningPboss'),
+    url(r'^resultSearch/', aiopsviews.resultSearch, name='resultSearch'),
+    url(r'^warningPbossUpdateNum/', aiopsviews.warningPbossUpdateNum, name='warningPbossUpdateNum'),
+    url(r'^warningPbossUpdateKpi/', aiopsviews.warningPbossUpdateKpi, name='warningPbossUpdateKpi'),
+    url(r'^warningPbossUpdateAnalysis/', aiopsviews.warningPbossUpdateAnalysis, name='warningPbossUpdateAnalysis'),
+    url(r'^warningDetail/', aiopsviews.warningDetail, name='warningDetail'),
 ]
