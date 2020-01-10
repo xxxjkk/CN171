@@ -33,9 +33,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
     $('.loading').animate({'width':'10%'},50);  //第一个进度节点
 </script>
   <!-- Left side column. contains the logo and sidebar 左侧菜单 -->
-    {% load my_tags %}
+<div class="main-sidebar"  >
+　　　　{% load my_tags %}
 　  {% get_menu_styles request %}
-<script type="text/javascript">
+</div>
+<script type="text/javascript" >
     $('.loading').animate({'width':'25%'},50);  //第一个进度节点
 </script>
   <!-- Content Wrapper. Contains page content 主内容，用定义一个block块不实现，相当于占位符，主要实现在子页面中 -->
