@@ -17,7 +17,7 @@ except ImportError as e:
 
 #读取配置文件
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-config = cp.ConfigParser()
+config = cp.RawConfigParser()
 config.read(os.path.join(BASE_DIR, 'config/cn171.conf'),encoding='utf-8')
 
 #PBOSS文件路径和备份路径
@@ -28,7 +28,7 @@ pboss_localfilebakdir = config.get('PBOSS', 'pboss_order_local_filedirbak')
 
 
 #sFTP连接初始化
-def sftpconnect(type):
+def sftpconnect(type, **kwargs):
     if type == "PBOSS":
         # PBOSS主机配置
         pboss_host = config.get('PBOSS', 'pboss_order_host')
@@ -38,6 +38,7 @@ def sftpconnect(type):
 
         t = paramiko.Transport(sock=(pboss_host,int(pboss_port)))
         t.connect(username=pboss_user, password=pboss_password)
+
     elif type == "CMIOT":
         # CMIOT主机配置
         cmiot_host = config.get('Ansible', 'ansible_host')
@@ -47,8 +48,23 @@ def sftpconnect(type):
 
         t = paramiko.Transport(sock=(cmiot_host,int(cmiot_port)))
         t.connect(username=cmiot_user, password=cmiot_password)
+
+    elif type == "Finance_BDI":
+        #Finance_BDI主机配置
+        finance_host = kwargs['host']
+        finance_port = kwargs['port']
+        finance_user = kwargs['user']
+        finance_password = kwargs['passwd']
+
+        t = paramiko.Transport(sock=(finance_host,int(finance_port)))
+        t.connect(username=finance_user, password=finance_password)
+    else:
+        print(type + "not find!")
+        exit()
+
     sftp = paramiko.SFTPClient.from_transport(t)
-    return t, sftp
+
+    return sftp
 
 #连接关闭
 def sftpDisconnect(client):
@@ -84,6 +100,7 @@ def filedownload(sftp_file_path, sftp_filebak_path, dst_file_path):
                 #移动文件
                 sftp.rename(oldpath=sftp_file, newpath=sftp_filebak)
                 print("文件《" + file + "》下载完成！")
+
 
 #本地文件拷贝到远程
 #sftp 为sftp连接句柄，local 本地文件绝对路径（包含文件名），服务器端路径（不含文件名）
@@ -147,6 +164,7 @@ def _check_local(local):
             os.mkdir(local)
         except IOError as err:
             print(err)
+
 def get(sftp,remote,local):
     #检查远程文件是否存在
     try:

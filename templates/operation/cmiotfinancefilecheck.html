@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% include 'link_css.html' %}
+    {% include 'head_script.html' %}
+</head>
+<body>
+    <!-- Content Header (Page header) -->
+
+    <!-- Main content -->
+    <section class="content" >
+        <div class="box">
+        <form method="post" id="file_check_form" >
+        {% csrf_token %}
+                <!-- /.box-header -->
+                <div style="white-space:pre-line" align="left" class="box" >
+                 {{checkresult.opr_finance_checkdetail_desc}}
+                </div>
+            <div align="center">
+            <input id="cancel" type="button" class="btn btn-inverse" style="width: 60pt" value="返回"
+                                   onclick="parent.layer.closeAll()"/>
+            </div>
+        </form>
+        </div>
+    </section>
+<!-- /.content -->
+
+</body>
+</html>
