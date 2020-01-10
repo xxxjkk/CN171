@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="/static/incubator-echarts-4.4.0-dist/echarts.min.js"></script>
+<script src="/static/layer/layer.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% include 'link_css.html' %}
+    {% include 'head_script.html' %}
+</head>
+<body>
+    <div class="content">
+        <section class="box">
+		   <div class="box">
+                <div class="box-header">
+
+                </div>
+                <!-- /.box-header -->
+
+                <div class="box-body" align="center">
+                    <div class="div1" id="main1" style="width: 600px;height:400px;"></div>
+                    <div class="div2" id="main2" style="width: 600px;height:400px;"></div>
+               </div>
+            </div>
+        </section>
+    </div>
+	<style>
+.div1 {
+float: left;
+}
+.div2 {
+float: left;
+}
+</style>
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main1'));
+
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            text: '按时间预测结果'
+        },
+        tooltip: {},
+        legend: {
+            data:['预测线', '实际线']
+        },
+        xAxis: {
+            type: 'category',
+            data: []
+        },
+        yAxis: {
+            min: '5400',
+            type: 'value'
+        },
+        series: [
+            {
+                name: '预测线',
+                type: 'line',
+                data: []
+            },
+            {
+                name: '实际线',
+                type: 'line',
+                data: []
+            }
+        ]
+    };
+    {% for item in DetectResult_list %}
+            option['xAxis']['data'].push("{{ item.detect_time }}")
+            option['series'][0]['data'].push("{{ item.origin }}")
+            option['series'][1]['data'].push("{{ item.predict }}")
+    {% endfor %}
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main2'));
+
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            text: '按容量预测结果'
+        },
+        tooltip: {},
+        legend: {
+            data:['预测线']
+        },
+        xAxis: {
+            type: 'category',
+            data: []
+        },
+        yAxis: {
+            min: '5400',
+            type: 'value'
+        },
+        series: [{
+            name: '预测线',
+            type: 'line',
+            data: [],
+        }]
+    };
+    {% for item in DetectResult_list %}
+            option['xAxis']['data'].push("{{ item.origin }}")
+            option['series'][0]['data'].push("{{ item.predict }}")
+    {% endfor %}
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+</body>
+</html>
