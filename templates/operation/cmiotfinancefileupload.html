@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% include 'link_css.html' %}
+    {% include 'head_script.html' %}
+</head>
+<body>
+    <div class="content-wrapper">
+        <section class="content">
+            <div id="dialog">
+                <div class="box">
+                    <form action="{% url 'cFinanceMgntUpload' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ uploadform.as_p }}
+                        {% if result.flag %}
+                            <p style="color:red">{{ result.msg }}</p>
+                        {% endif %}
+                        <br><br>
+                        <div style="text-align:center">
+                            <input id="upload" type="submit" class="btn btn-warning" style="width: 60pt" value="上传"/>  &nbsp;  &nbsp;
+                            <input id="cancel" type="button" class="btn btn-inverse" style="width: 60pt" value="关闭"
+                                   onclick="parent.layer.closeAll()"/>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+
+</html>

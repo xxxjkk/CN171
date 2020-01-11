@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% include 'link_css.html' %}
+    {% include 'head_script.html' %}
+    <script src="{% static 'js/base.js' %}"></script>
+</head>
+<body>
+        <section class="content-header">
+            <h5>文件列表信息</h5>
+        </section>
+        <section class="content">
+            <form  method="post" id="file_detail_form">
+                {% csrf_token %}
+                <div class="box">
+                    <div class="box">
+                      <table class="table table-striped table-bordered" id="dataform">
+                          <thead id="thead">
+                            <tr>
+                                <!--垂直居中：vertical-align: middle;-->
+                                <th width="6%" style="text-align:center;">
+                                    <input id="checkall" type="checkbox" class="i-checks" name="checkall" value="checkall" data-editable='false' onclick="check_all('file_detail_form')">
+                                </th>
+                                <th width="25%" style="text-align:center;vertical-align: middle;">文件名</th>
+                                <th width="20%" style="text-align:center;vertical-align: middle;">上次更新时间</th>
+                                <th width="20%" style="text-align:center;vertical-align: middle;">本次更新时间</th>
+                                <th width="10%" style="text-align:center;vertical-align: middle;">校验结果</th>
+                                <th width="10%" style="text-align:center;vertical-align: middle;">更新次数</th>
+                            </tr>
+                          </thead>
+                          <tbody id="tbody">
+                            {% for file in file_list %}
+                            <tr class="even gradeX">
+                                <td width="6%" style="text-align:center;"><input type="checkbox" id="id" class="i-checks" name="id" value="{{file.opr_finance_filedetail_id}}"/></td>
+                                <td width="25%" style="text-align:center;vertical-align: middle;">{{file.opr_finance_filedetail_name}}</td>
+                                <td width="20%" style="text-align:center;vertical-align: middle;">{{file.opr_finance_filedetail_lasttime}}</td>
+                                <td width="20%" style="text-align:center;vertical-align: middle;">{{file.opr_finance_filedetail_thistime}}</td>
+                                <td width="10%" style="text-align:center;vertical-align: middle;">{{file.opr_finance_filedetail_check}}</td>
+                                <td width="10%" style="text-align:center;vertical-align: middle;">{{file.opr_finance_filedetail_num}}</td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                      </table>
+                   </div>
+                </div><br><br>
+                <div style="text-align:center">
+                    <input id="download" type="submit" class="btn btn-warning" style="width: 60pt" value="下载"/>  &nbsp;  &nbsp;
+                    <input id="cancel" type="button" class="btn btn-inverse" style="width: 60pt" value="关闭"
+                           onclick="parent.layer.closeAll()"/>
+                </div>
+            </form>
+        </section>
+</body>
+
+</html>
