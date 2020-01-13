@@ -16,7 +16,7 @@ except ImportError as e:
     import configparser as cp
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-config = cp.ConfigParser()
+config = cp.RawConfigParser()
 config.read(os.path.join(BASE_DIR, 'config/cn171.conf'),encoding='utf-8')
 
 
@@ -30,6 +30,16 @@ def ssh_connect(conntarget):
         hostname = config.get('PBOSS', 'pboss_order_host')
         username = config.get('PBOSS', 'pboss_order_user')
         password = config.get('PBOSS', 'pboss_order_password')
+    elif conntarget == "Finance_BDI":
+        config.read(os.path.join(BASE_DIR, 'config/operation.conf'), encoding='utf-8')
+        hostname = config.get('Finance', 'finance_bdihostip')
+        username = config.get('Finance', 'finance_bdihostuser')
+        password = config.get('Finance', r'finance_bdihostpasswd')
+    elif conntarget == "Finance_Reco":
+        config.read(os.path.join(BASE_DIR, 'config/operation.conf'), encoding='utf-8')
+        hostname = config.get('Finance', 'finance_financehostip')
+        username = config.get('Finance', 'finance_financehostuser')
+        password = config.get('Finance', r'finance_financehostpasswd')
     else:
         print(conntarget + "not find!")
         exit()

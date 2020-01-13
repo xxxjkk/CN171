@@ -33,7 +33,14 @@
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
-        <h4>容量预测</h4>
+        <h4>容量预测
+            <div class="input-group inline-group col-md-3" style="float: right">
+             <input type="text" class="form-control" id="tablespace_name" name="tablespace_name"  placeholder="表空间名">
+             <div class="input-group-btn">
+                  <button type="button" class="btn btn-primary "  onclick="resultSearch()">搜索</button>
+             </div>
+        </div>
+        </h4>
     </section>
 
     <!-- Main content -->
@@ -43,32 +50,33 @@
             <div class="box">
                 <div class="box-header">
                     <div class="form-group form-inline input-daterange">
-                          &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;&nbsp; &nbsp;  &nbsp; <label>数据库名:  &nbsp;</label>
+                          &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  <label>数据库名:  &nbsp;</label>
                         <input type="text" name="dbname" id="dbname">
                         <div id="auto_div"></div>
 
-                        &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;
+                         &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp; &nbsp;
 
                         <label>预测开始时间:  &nbsp;</label>
                         <input type="text" class="form-control" id="start-picker"  value="{{starttime}}"
                                    name="starttime" placeholder="YYYY-MM-DD hh:mm:ss" readonly>
 
-                          &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp; &nbsp;  &nbsp; <label>告警阈值:  &nbsp;</label>
+                          &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;   <label>告警阈值:  &nbsp;</label>
                         <input type="text"  name="alarm_threshold" id="alarm_threshold" >
                     </div>
                     <div class="form-group form-inline input-daterange">
-                          &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;  &nbsp;  <label>表空间名:  &nbsp;</label>
-                        <input type="text" name="tablespace" id="tablespace">&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;
+                          &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;    <label>表空间名:  &nbsp;</label>
+                        <input type="text" name="tablespace" id="tablespace">&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;
 
 
                         <label>预测结束时间:  &nbsp;</label>
                         <input type="text" class="form-control" id="end-picker"  value="{{endtime}}"
                                    name="endtime" placeholder="YYYY-MM-DD hh:mm:ss" readonly>
-                          &nbsp;  &nbsp;  &nbsp;     &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp; &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp; &nbsp;  &nbsp;
+                        &nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;
                         <div class="btn-group">
                             <a id="capacityDetect" style="display: none" href="#" class="btn btn-success" onclick="capacityDetect('确认生成此表空间容量预测？')">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;生 &nbsp;&nbsp;&nbsp;&nbsp;    &nbsp;&nbsp;  &nbsp; &nbsp;  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;成&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
                         </div>
                     </div>
+
                 </div>
                 <!-- /.box-header -->
 
@@ -278,17 +286,13 @@ function resultEcharts(id){
   });
 }
 
-function change_info(){
-   var args = $("#capacityForm").serialize();
-   dbname = document.getElementById('dbname').value;
-   tablespace = document.getElementById('tablespace').value;
-   alarm_threshold = document.getElementById('alarm_threshold').value;
-   starttime = document.getElementById('start-picker').value;
-   endtime = document.getElementById('end-picker').value;
-   if (dbname && tablespace&&alarm_threshold&&starttime&&endtime) {
-        window.location = "{% url 'taskLogSearch' %}?" + args
+function resultSearch(){
+   tablespace_name = document.getElementById('tablespace_name').value;
+   var args= "tablespace_name="+tablespace_name
+   if (tablespace_name) {
+        window.location ="{% url 'resultSearch' %}?" + args;
    }else{
-        window.location = "{% url 'taskLog' %}?" + args
+        alert("请输入表空间！")
    }
   }
 		</script>

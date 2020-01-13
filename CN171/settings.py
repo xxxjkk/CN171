@@ -51,13 +51,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'CN171_account',
-    'CN171_aiops',
     'CN171_background',
     'CN171_cmdb',
     'CN171_config',
     'CN171_monitor',
     'CN171_order',
     'CN171_crontab',
+    'CN171_operation',
+    'CN171_aiops',
     'djcelery',
 ]
 

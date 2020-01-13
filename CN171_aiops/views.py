@@ -67,7 +67,7 @@ def capacityDetect(request):
         aiopsDetectLog.save()
     id = aiopsDetectLog.id
     # aiopsDetectLog = AiopsDetectLog(ai_tablespacedict = tableSpaceDict)
-    taskAction(id,DB_Name,tablespace_name,start_time,end_time,alarm_threshold)
+    taskAction(id,DB_Name,tablespace_name,start_time,end_time,alarm_threshold,create_time)
     checkGenerate()
     return JsonResponse({'ret': "True"})
 
@@ -84,6 +84,34 @@ def resultEcharts(request,id):
     return render(request, "aiops/resultEcharts.html", locals())
 
 # 智能告警分析（PBOSS）主函数
+#容量预测结果搜索
+def resultSearch(request):
+    tablespace_name = request.GET.get('tablespace_name')
+    tableSpaceDict = models.TableSpaceDict.objects.filter(tablespace_name=tablespace_name)
+    aiopsDetectLog_list = []
+    for i in tableSpaceDict:
+        aiopsDetectLog = models.AiopsDetectLog.objects.filter(ai_tablespacedict=i)
+        tablespace_name = i.tablespace_name
+        DB_Name = i.DB_Name
+        for j in aiopsDetectLog:
+            create_time = j.create_time
+            capacity_total = j.capacity_total
+            alarm_threshold = j.alarm_threshold
+            start_time = j.start_time
+            end_time = j.end_time
+            result = j.result
+            status = j.status
+            id = j.id
+            aiopslog_info = {"id": id, "tablespace_name": tablespace_name, "DB_Name": DB_Name, "create_time": create_time,
+                             "capacity_total": capacity_total, "alarm_threshold": alarm_threshold,
+                             "start_time": start_time, "end_time": end_time, "result": result, "status": status}
+            aiopsDetectLog_list.append(aiopslog_info)
+    p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(aiopsDetectLog_list,request)
+    return render(request, "aiops/capacity.html", locals())
+
+
+
+#智能告警分析（PBOSS）主函数
 def warningPboss(request):
     # warning_analysis = PbossWarningAnalysis.objects.filter().order_by("warning_id")
     # p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(warning_analysis, request)
