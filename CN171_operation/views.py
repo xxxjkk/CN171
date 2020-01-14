@@ -4,7 +4,6 @@ from django.http import JsonResponse
 from django.db.models import Q, Count
 from django.template.loader import render_to_string
 
-import CN171_tools.myzipfile
 from CN171_operation.models import *
 from CN171_operation.forms import *
 from CN171_operation.action import *

@@ -35,7 +35,6 @@ config.read(os.path.join(BASE_DIR, 'config/cn171.conf'), encoding='utf-8')
 localfiledir = config.get('AIopsCapacity', 'AIopsCapacity_result_path')
 local_filedir = config.get('WARNING', 'pboss_warning_local_filedir')
 local_filebakdir = config.get('WARNING', 'pboss_warning_local_filedirbak')
-files = os.listdir(local_filedir)
 
 def resultExcelRead(filepath,filename):
     # 文件名分拆
