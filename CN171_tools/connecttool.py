@@ -186,6 +186,36 @@ def get_hostmgnt_init_parameter(conntarget):
         exit()
     return ansible_host_hostmgnt_busiip_path,ansible_host_hostmgnt_return_filepath,ansible_host_hostmgnt_scrideploy_path
 
+
+#应用管理刷新集群状态功能，得到初始化参数
+def get_appmgnt_cluster_init_parameter(conntarget):
+    if conntarget == "Ansible":
+        ansible_cmdb_appmgnt_appClusterlist_path = config.get('Ansible', 'ansible_cmdb_appmgnt_appClusterlist_path')
+        ansible_cmdb_appmgnt_clusterReturn_filepath = config.get('Ansible', 'ansible_cmdb_appmgnt_clusterReturn_filepath')
+    elif conntarget == "PBOSS":
+        ansible_cmdb_appmgnt_appClusterlist_path = config.get('Ansible', 'ansible_cmdb_appmgnt_appClusterlist_path')
+        ansible_cmdb_appmgnt_clusterReturn_filepath = config.get('Ansible', 'ansible_cmdb_appmgnt_clusterReturn_filepath')
+    else:
+        print(conntarget + "not find!")
+        exit()
+    return ansible_cmdb_appmgnt_appClusterlist_path,ansible_cmdb_appmgnt_clusterReturn_filepath
+
+#应用管理主机操作（启动、停止、重启、刷新），得到初始化参数
+def get_appmgnt_init_parameter(conntarget):
+    if conntarget == "Ansible":
+        ansible_host_appmgnt_applist_path = config.get('Ansible', 'ansible_host_appmgnt_applist_path')
+        ansible_host_appmgnt_return_filepath = config.get('Ansible', 'ansible_host_appmgnt_return_filepath')
+        #ansible_host_appmgnt_scrideploy_path = config.get('Ansible', 'ansible_host_appmgnt_scrideploy_path')
+    elif conntarget == "PBOSS":
+        ansible_host_appmgnt_applist_path = config.get('Ansible', 'ansible_host_appmgnt_applist_path')
+        ansible_host_appmgnt_return_filepath = config.get('Ansible', 'ansible_host_appmgnt_return_filepath')
+        #ansible_host_appmgnt_scrideploy_path = config.get('Ansible', 'ansible_host_appmgnt_scrideploy_path')
+    else:
+        print(conntarget + "not find!")
+        exit()
+    return ansible_host_appmgnt_applist_path,ansible_host_appmgnt_return_filepath
+
+
 def readFile(file_path):
     exec_cmd = "cat "+ file_path
     log_msg = ""

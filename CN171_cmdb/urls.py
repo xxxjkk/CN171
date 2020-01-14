@@ -28,6 +28,9 @@ urlpatterns = [
     url(r'^cluster_app_detail/',cmdbviews.clusterAppDetail, name='clusterAppDetail'),
     url(r'^app_add/',cmdbviews.appAdd, name='appAdd'),
     url(r'^appDel/',cmdbviews.appDel, name='appDel'),
+    url(r'^appDetail/',cmdbviews.appDetail, name='appDetail'),
     url(r'^export_app_info/', cmdbviews.export_app_info, name='export_app_info'),
     url(r'^import_app_info/', cmdbviews.import_app_info, name='import_app_info'),
+    url(r'^batch_refresh_cluster_status_info/', cmdbviews.batchRefreshClusterStatusInfo, name='batchRefreshClusterStatusInfo'),
+    url(r'^app_task_execute_one/', cmdbviews.appTaskExecuteOne, name='appTaskExecuteOne'),
 ]

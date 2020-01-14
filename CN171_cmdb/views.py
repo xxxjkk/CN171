@@ -11,7 +11,7 @@ from CN171_cmdb.exceloper import excel_export_host, excel_import_host, excel_imp
 from CN171_cmdb.models import CmdbHost, CmdbApp, HostPwdOprLog, CmdbAppCluster, APP_STATUS
 from CN171_cmdb.forms import DetailLogForm, HostPwdEditForm, NormalUserForm, CmdbHostForm, CmdbAppForm
 from CN171_background.api import pages, get_object
-from CN171_tools.common_api import export_download_txt, to_ints, write_txt, isNullStr, toInt
+from CN171_tools.common_api import export_download_txt, to_ints, write_txt,write_txt1, isNullStr, toInt
 from CN171_tools.connecttool import *
 from CN171_tools.sftputils import *
 from CN171_account.views import my_login_required
@@ -172,6 +172,46 @@ def appDel(request):
                 bg_item.delete()
     return HttpResponse(u'删除成功')
 
+#批量刷新集群下应用状态
+def batchRefreshClusterStatusInfo(request):
+    cluster_id_all = request.POST.get('cluster_id_all')
+    iscluster = request.POST.get('iscluster')
+    clusterIds=cluster_id_all.split(",")
+    appClusterId=""
+    content1=""
+    for clusterId in clusterIds:
+        appCluster = CmdbAppCluster.objects.get(id=clusterId)
+        appListInCluster = appCluster.cmdbApp_cmdbAppCluster.all()
+        for app in appListInCluster:
+           if iscluster==1:
+               appClusterId=clusterId
+           else:
+               appClusterId=app.app_id
+           content1=content1+app.cmdb_host.bg.bg_domain+" "+app.cmdb_host.bg.bg_module+" "+app.app_name+" "\
+                      +app.cmdb_host.cmdb_host_busip+" "+iscluster+" "+appClusterId+"\n"
+    nowDay = datetime.datetime.now().strftime("%Y%m%d")
+    user_name = request.session.get('user_name')
+    # 文件绝对路径
+    file_name = write_txt(content1, 'temp/cmdb/appmgnt/cluster/status/' + nowDay + "/",
+                          user_name + '_refresh_cluster_status_busip')
+    t, sftp = sftpconnect('CMIOT')
+    ansible_cmdb_appmgnt_appClusterlist_path,ansible_cmdb_appmgnt_clusterReturn_filepath = get_appmgnt_cluster_init_parameter('Ansible')
+    flag = put(sftp, file_name, ansible_cmdb_appmgnt_appClusterlist_path)
+    sftpDisconnect(t)
+    if flag:
+        tasks.batchRefreshClusterStatusTask.delay(ansible_cmdb_appmgnt_clusterReturn_filepath, user_name)
+        returnmsg = "True"
+    else:
+        returnmsg = "False"
+    return JsonResponse({'ret': returnmsg})
+
+#APP详情
+def appDetail(request):
+    appId=request.GET.get("appId")
+    app_detail = CmdbApp.objects.get( app_id=appId)
+    return render(request, "cmdb/app_detail.html", locals())
+
+
 #导出应用信息
 def export_app_info(request):
     list_obj=[]
@@ -199,6 +239,42 @@ def clusterAppDetail(request):
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(cluster_app_detail_list,
                                                                                                 request)
     return render(request, "cmdb/cluster_app_detail.html", locals())
+
+#启动/停止/重启/刷新 单个应用
+@my_login_required
+def appTaskExecuteOne(request):
+    app_id = request.POST.get('app_id')
+    app_action = request.POST.get('app_action')
+    opr_user = request.session['user_name']
+    cmdbApp = CmdbApp.objects.get(app_id=app_id)
+    if app_action == 'start':
+        cmdbApp.bg_lastopr_type = "启动"
+    elif app_action == 'restart':
+        cmdbApp.bg_lastopr_type = "重启"
+    elif app_action == 'stop':
+        cmdbApp.bg_lastopr_type = "停止"
+    else:
+        cmdbApp.bg_lastopr_type = "刷新"
+    cmdbApp.bg_lastopr_user = opr_user
+    cmdbApp.bg_lastopr_time = datetime.now()
+    cmdbApp.bg_lastopr_result = "执行中"
+    cmdbApp.save()
+    nowDay = datetime.datetime.now().strftime("%Y%m%d")
+    app_opr_content = cmdbApp.app_name + " " + cmdbApp.cmdb_host.cmdb_host_busip + " " + \
+                      cmdbApp.cmdb_host.bg.bg_module + " " + cmdbApp.cmdb_host.bg.bg_domain + " 0"
+    # 文件名
+    file_name = write_txt1(app_opr_content, 'temp/cmdb/appmgnt/oneopr/' + nowDay + "/",
+                          opr_user + '_app_oneopr_'+app_action+'_app')
+    t, sftp = sftpconnect('CMIOT')
+    ansible_host_appmgnt_applist_path, ansible_host_appmgnt_return_filepath = get_appmgnt_init_parameter('Ansible')
+    flag = put(sftp, file_name, ansible_host_appmgnt_applist_path)
+    sftpDisconnect(t)
+    if flag:
+        tasks.appTaskOne.delay(ansible_host_appmgnt_return_filepath,file_name, app_id, app_action,opr_user)
+        returnmsg = "True"
+    else:
+        returnmsg = "False"
+    return JsonResponse({'ret': returnmsg})
 
 #跳转到主机用户密码日志页面
 def hostPwdOprLogPage(request):
