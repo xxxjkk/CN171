@@ -18,7 +18,8 @@ CLUSTER_STATUS = (
 
 APP_STATUS = (
     (str(1), u"正常"),
-    (str(2), u"停止"),
+    (str(2), u"部分正常"),
+    (str(3), u"停止"),
     )
 
 class CmdbHost(models.Model):
@@ -56,6 +57,10 @@ class CmdbApp(models.Model):
     app_name = models.CharField(u"网元名", max_length=128, unique=True)
     app_status = models.CharField(u"状态",choices=APP_STATUS ,max_length=36, null=True, blank=True)
     app_insert_time = models.DateTimeField(u"录入时间", auto_now_add=True)
+    app_lastopr_user = models.CharField(u"最后一次操作人员", max_length=56, null=True, blank=True)
+    app_lastopr_type = models.CharField(u"最后一次操作类型", max_length=32, null=True, blank=True)
+    app_lastopr_time = models.DateTimeField(u"最后一次操作时间", null=True, blank=True)
+    app_lastopr_result = models.CharField(u"最后一次操作结果", max_length=32, null=True, blank=True)
     #集群id非空  默认不集群  默认值999
     cmdbAppCluster = models.ForeignKey('CmdbAppCluster',related_name='cmdbApp_cmdbAppCluster', on_delete=models.SET_DEFAULT, default=999, verbose_name=u'集群类型')
 
