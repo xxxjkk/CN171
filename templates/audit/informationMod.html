@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% include 'link_css.html' %}
+    {% include 'head_script.html' %}
+</head>
+<body>
+    <div class="content">
+        <section class="box">
+            <div class="box">
+                <form action="{% url 'informationMod' staff_id %}" method="post">
+                    {% csrf_token %}
+                    <div style="white-space: pre-line" align="left" class="box">
+                        <label for="name" style="margin-left: 120px">姓名：<span class="text-danger">*</span></label>
+                            <input type="text" name="staff_name" value={{staff.staff_name}} class="form-control" style="width: 400px; margin-left: 120px" placeholder="必填项" maxlength="32" id="name">
+                        <label for="4AAccount" style="margin-left: 120px">4A主账号：<span class="text-danger">*</span></label>
+                            <input type="text" name="staff_4AAccount" value={{staff.staff_4AAccount}} class="form-control" style="width: 400px; margin-left: 120px" placeholder="必填项" maxlength="64" id="4AAccount">
+                        <label for="account" style="margin-left: 120px">从账号：<span class="text-danger">*</span></label>
+                            <input type="text" name="staff_account" value={{staff.staff_account}} class="form-control" style="width: 400px; margin-left: 120px" placeholder="必填项" maxlength="64" id="account" >
+                        <label for="group" style="margin-left: 120px">所在组：<span class="text-danger">*</span></label>
+                            <select type="text" name="staff_group" class="form-control" style="width: 400px; margin-left: 120px" maxlength="64" id="group">
+                                <option selected>{{staff.staff_group}}</option>
+                                <option>物联网支撑组</option>
+                                <option>云能力支撑组</option>
+                                <option>BBOSS支撑组</option>
+                                <option>行业应用支撑组</option>
+                                <option>规划产品组</option>
+                                <option>运维开发组</option>
+                                <option>综合质控组</option>
+                                <option>厂商</option>
+                            </select>
+                        <label for="system" style="margin-left: 120px">系统：<span class="text-danger">*</span></label>
+                            <select type="text" name="staff_system" class="form-control" style="width: 400px; margin-left: 120px" maxlength="64" id="system">
+                                <option selected>{{staff.staff_system}}</option>
+                                <option>CMIOT</option>
+                                <option>PBOSS</option>
+                                <option>内容计费</option>
+                                <option>物漫</option>
+                                <option>内容计费+物漫</option>
+                                <option>两级系统</option>
+                                <option>物联网支撑系统</option>
+                                <option>BBOSS</option>
+                                <option>无</option>
+                            </select>
+                        <label for="post" style="margin-left: 120px">职责：<span class="text-danger">*</span></label>
+                            <select type="text" name="staff_post" class="form-control" style="width: 400px; margin-left: 120px" maxlength="32" id="post">
+                                <option selected>{{staff.staff_post}}</option>
+                                <option>运维</option>
+                                <option>运维（非骨干）</option>
+                                <option>运营</option>
+                                <option>服务</option>
+                            </select>
+                        <label for="status" style="margin-left: 120px">状态：<span class="text-danger">*</span></label>
+                            <select type="text" name="staff_status" class="form-control" style="width: 400px; margin-left: 120px" maxlength="32" id="status">
+                                <option selected>{{staff.staff_status}}</option>
+                                <option>在职</option>
+                                <option>离职</option>
+                            </select>
+                    </div>
+                    <div align="center">
+                        <input type="submit" class="btn btn-primary" data-dismiss="modal" style="width: 60pt" value="保存">
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="reset" name="reset" class="btn btn-primary" style="width: 60pt" value="重置">
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+    {#回传参数至父层#}
+    <script type="text/javascript">
+        var index = parent.layer.getFrameIndex(window.name);
+        var success = {{ status }};
+            if ( success == '1' ) {
+                parent.$("#handle_status").val('1');
+                {#刷新父层页面#}
+                parent.location.reload();
+                parent.layer.close(index);
+            } else if( success == '2' ) {
+                parent.$("#handle_status").val('2');
+                parent.layer.close(index);
+        }
+    </script>
+</body>
+</html>
