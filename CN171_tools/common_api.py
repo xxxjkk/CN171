@@ -51,12 +51,12 @@ def write_txt(content1, filePath, fileName):
 #返回文件名 host_busip_ip.txt 或者..txt
 def write_txt1(content1, filePath, fileName):
     path_not_exist_create(filePath)
-    file_name = filePath + fileName + '.txt'
-    file = open(file_name, 'w')
+    file_path = filePath + fileName + '.txt'
+    file = open(file_path, 'w')
     file.write(content1)
     file.close()
     # 返回文件名
-    return fileName
+    return file_path
 
 #导出并下载txt文件
 def export_download_txt(content1):
