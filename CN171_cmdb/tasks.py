@@ -18,10 +18,11 @@ from django.shortcuts import redirect
 import os
 
 from CN171_background.models import BgTaskManagement
-from CN171_cmdb.models import CmdbHost, CmdbApp, CmdbAppCluster, CLUSTER_STATUS, APP_STATUS
+from CN171_cmdb.action import appTaskTest, appOprResultCheck
+from CN171_cmdb.models import CmdbHost, CmdbApp, CmdbAppCluster, CLUSTER_STATUS, APP_STATUS, CmdbAppLog
 from CN171_tools.common_api import get_tuple_key
 from CN171_tools.connecttool import remote_scp, readFile, ssh_connect, ssh_exec_cmd, get_hostmgnt_init_parameter, \
-    get_appmgnt_cluster_init_parameter
+    get_appmgnt_cluster_init_parameter, get_appmgnt_init_parameter
 from CN171_tools.sftputils import remote_scp1
 
 #批量刷新主机状态任务
@@ -104,7 +105,7 @@ def checkHostStatusResult():
     else:
         print("无可执行内容")
 
-#异步查询主机状态结果
+#异步查询集群状态结果
 @shared_task
 def checkClusterStatusResult():
     #返回的日志文件名
@@ -136,28 +137,14 @@ def checkClusterStatusResult():
         print("无可执行内容")
 
 @shared_task
-def appTaskOne(ansible_host_appmgnt_return_filepath,file_name,app_id, app_action, opr_user):
-    cmdbApp = CmdbApp.objects.get(app_id=app_id)
-    file_path_return = ansible_host_appmgnt_return_filepath
-    file_name_return = opr_user + "_app_oneopr_return"
-    conntarget = "Ansible"
-    sshd = ssh_connect(conntarget)
-    dir_cmd = "mkdir " + file_path_return
-    ssh_exec_cmd(sshd, dir_cmd)
-    cmd = "aaa.sh "+file_name+" action=" +app_action+ " |tee -a " + file_path_return  + file_name_return + ".log"
-    stdin, stdout, stderr = ssh_exec_cmd(sshd, cmd)
-    err_list = stderr.readlines()
-    if len(err_list) > 0:
-        print('Start failed:' + err_list[0])
-        returnmsg = "False"
-        if app_action != 'status':
-            cmdbApp.bg_lastopr_result = "失败"
-            cmdbApp.save()
-    else:
-        print('Start success.')
-        returnmsg = "True"
-    sshd.close()
-    return returnmsg
+def appTaskOne(ansible_host_appmgnt_return_filepath,file_name,app_id, app_action, opr_user,applog_id):
+    appTaskTest(ansible_host_appmgnt_return_filepath,file_name,app_id, app_action, opr_user,applog_id)
+
+#检查应用启停结果
+@shared_task()
+def appOprResult():
+    appOprResultCheck()
+
 
 
 #逻辑处理，每行数据的处理，task调用 主机状态

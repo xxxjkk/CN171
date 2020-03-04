@@ -1,10 +1,14 @@
 from django.test import TestCase
+
+from CN171_cmdb.models import CmdbApp, CmdbAppLog
 from CN171_cmdb.tasks import refreshHostStatus
 # Create your tests here.
 from os.path import *
 import os,sys
 
 # 获取当前目录绝对路径
+from CN171_tools.connecttool import ssh_connect, ssh_exec_cmd
+
 dir_path = dirname(abspath(__file__))
 print('当前目录绝对路径:', dir_path)
 
@@ -22,8 +26,4 @@ a='12,12,23,45,34,23'
 print(type(a))
 print(a)
 print(a.replace(",","\n"))
-
-
-
-
 

@@ -20,6 +20,7 @@ APP_STATUS = (
     (str(1), u"正常"),
     (str(2), u"部分正常"),
     (str(3), u"停止"),
+    (str(4), u"变更中"),
     )
 
 class CmdbHost(models.Model):
@@ -61,6 +62,7 @@ class CmdbApp(models.Model):
     app_lastopr_type = models.CharField(u"最后一次操作类型", max_length=32, null=True, blank=True)
     app_lastopr_time = models.DateTimeField(u"最后一次操作时间", null=True, blank=True)
     app_lastopr_result = models.CharField(u"最后一次操作结果", max_length=32, null=True, blank=True)
+
     #集群id非空  默认不集群  默认值999
     cmdbAppCluster = models.ForeignKey('CmdbAppCluster',related_name='cmdbApp_cmdbAppCluster', on_delete=models.SET_DEFAULT, default=999, verbose_name=u'集群类型')
 
@@ -72,6 +74,30 @@ class CmdbApp(models.Model):
         verbose_name_plural = '应用'
         ordering=['-app_insert_time']
         db_table = "cmdb_app"
+
+class CmdbAppLog(models.Model):
+    # '''后台管理日志表'''
+    id = models.AutoField(u"日志id", primary_key=True)
+    app_id = models.IntegerField(u"后台id" )
+    app_operation_user = models.CharField(u"操作人员", max_length=56,null=True, blank=True)
+    app_operation = models.CharField(u"操作类型", max_length=32,null=True, blank=True)
+    app_opr_result = models.CharField(u"操作结果", max_length=32,null=True, blank=True)
+    app_operation_time = models.DateTimeField(u"操作开始时间")
+    app_operation_finish_time = models.DateTimeField(u"操作完成时间",null=True, blank=True)
+    app_log_dir = models.CharField(u"详细日志", max_length=256,null=True, blank=True)
+
+
+    def __str__(self):
+        return "{},{},{}".format(self.app_id,
+                                 self.app_operation,
+                                 self.app_opr_result)
+
+    class Meta:
+        verbose_name = u'应用管理日志表'
+        verbose_name_plural = verbose_name
+        db_table = "cmdb_app_log"
+
+
 
 class CmdbAppCluster(models.Model):
     #集群表

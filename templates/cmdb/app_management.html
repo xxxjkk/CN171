@@ -174,9 +174,9 @@ $(document).ready(function () {
                           "<td colspan='4' style='text-align:center;'>"+app.cmdb_host_busip+"</td>"+
 						  "<td colspan='4' style='text-align:center;'>"+
 						  "<a href='#' onclick='checkSubmit(\""+ app.app_status +"\","+ app.app_id +",\"start\")' style='list-style-type:none'>启动</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;"+
-                          "<a href='#' onclick='"+ app.app_status +","+ app.app_id +",'stop'' style='list-style-type:none'>停止</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;"+
-                          "<a href='#' onclick='"+ app.app_status +","+ app.app_id +",'restart'' style='list-style-type:none'>重启</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;"+
-                          "<a href='#' onclick='"+ app.app_status +","+ app.app_id +",'status'' style='list-style-type:none'>刷新</a></td>"+
+                          "<a href='#' onclick='checkSubmit(\""+ app.app_status +"\","+ app.app_id +",\"stop\")' style='list-style-type:none'>停止</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;"+
+                          "<a href='#' onclick='checkSubmit(\""+ app.app_status +"\","+ app.app_id +",\"restart\")' style='list-style-type:none'>重启</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;"+
+                          "<a href='#' onclick='checkSubmit(\""+ app.app_status +"\","+ app.app_id +",\"status\")' style='list-style-type:none'>刷新</a></td>"+
                           "<td colspan='5' style='text-align:center;'>"+app.app_status+"</td>"+
                         "</tr>";
                     });
@@ -311,6 +311,111 @@ $('#importAppInfo').click(function () {
             }
         });
 });
+
+function checkSubmit(status, app_id, action) {
+    var id = document.getElementsByName('id');
+    switch(action)
+    {
+        case "start":
+            if (status == "停止" || status == "None"){
+                msg = "确定启动？";
+                if (!confirm(msg)) {
+                    window.event.returnValue = false;
+                }else{
+                    {# window.location = "{% url 'testAction' %}?app_id="+app_id+"&bg_action=start";#}
+                    $.ajax({
+                            url: '{% url 'appTaskExecuteOne' %}',
+                            type: 'post',
+                            dataType: 'json',
+                            data: {
+                                app_id: app_id,
+                                app_action: action,
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            'traditional': true,
+                            success:function(msg){
+                                   if(msg.ret=='True'){
+                                       alert("指令发送成功，执行中！");
+                                       location.reload(true);
+                                   }
+                                   else{
+                                        alert("操作失败,请核查后重试！");
+                                        location.reload(true);
+                                   }
+                            }
+                    });
+                }
+             }else{
+                msg = "中心非“停止”状态！"
+                alert(msg);
+             }
+        break;
+        case "stop":
+            if (status != "停止"){
+                msg = "确定停止？";
+                if (!confirm(msg)) {
+                    window.event.returnValue = false;
+                }else{
+                    $.ajax({
+                            url: '{% url 'appTaskExecuteOne' %}',
+                            type: 'post',
+                            dataType: 'json',
+                            data: {
+                                app_id: app_id,
+                                app_action: action,
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            'traditional': true,
+                            success:function(msg){
+                                   if(msg.ret=='True'){
+                                       alert("指令发送成功，执行中！");
+                                       location.reload(true);
+                                   }
+                                   else{
+                                        alert("操作失败,请核查后重试！");
+                                   }
+                            }
+                    });
+                }
+             }else{
+                msg = "中心已处于“停止”状态！"
+                alert(msg);
+             }
+        break;
+        case "restart":
+            if (status != "停止"){
+                msg = "确定重启？";
+                if (!confirm(msg)) {
+                    window.event.returnValue = false;
+                }else{
+                    $.ajax({
+                            url: '{% url 'appTaskExecuteOne' %}',
+                            type: 'post',
+                            dataType: 'json',
+                            data: {
+                                app_id: app_id,
+                                app_action: action,
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            'traditional': true,
+                            success:function(msg){
+                                   if(msg.ret=='True'){
+                                       alert("指令发送成功，执行中！");
+                                       location.reload(true);
+                                   }
+                                   else{
+                                        alert("操作失败,请核查后重试！");
+                                   }
+                            }
+                    });
+                }
+             }else{
+                msg = "中心处于“停止”状态，请先启动！"
+                alert(msg);
+             }
+        break;
+    }
+}
 
 </script>
 {% endblock %}

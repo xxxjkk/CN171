@@ -64,7 +64,7 @@ def sftpconnect(type, **kwargs):
 
     sftp = paramiko.SFTPClient.from_transport(t)
 
-    return sftp
+    return t,sftp
 
 #连接关闭
 def sftpDisconnect(client):
