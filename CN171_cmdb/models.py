@@ -55,7 +55,7 @@ class CmdbApp(models.Model):
     app_id = models.AutoField(u"应用id", primary_key=True)
     cmdb_host = models.ForeignKey("CmdbHost", on_delete=models.CASCADE ,verbose_name=u"主机id")
     appNetmode = models.ForeignKey('CmdbAppNetmode', on_delete=models.SET_DEFAULT,default=999, verbose_name=u'组网类型')
-    app_name = models.CharField(u"网元名", max_length=128, unique=True)
+    app_name = models.CharField(u"网元名", max_length=128)
     app_status = models.CharField(u"状态",choices=APP_STATUS ,max_length=36, null=True, blank=True)
     app_insert_time = models.DateTimeField(u"录入时间", auto_now_add=True)
     app_lastopr_user = models.CharField(u"最后一次操作人员", max_length=56, null=True, blank=True)

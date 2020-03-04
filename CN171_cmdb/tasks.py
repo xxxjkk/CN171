@@ -171,27 +171,27 @@ def refreshClusterStatus(line):
     if line:
         arrayLines = line.split(" ")
         appClusterStatus=arrayLines[len(arrayLines)-2]
-        appClusterId=arrayLines[len(arrayLines)-1]
+        appOrClusterName=arrayLines[len(arrayLines)-1]
         #appClusterStatus 为1 为集群 appClusterId为集群id
         #appClusterStatus 为0 为集群 appClusterId为应用id
         if "Falied" in line:
             if appClusterStatus==1:
-                cmdbAppCluster=CmdbAppCluster.objects.get(id=appClusterId)
+                cmdbAppCluster=CmdbAppCluster.objects.get(name=appOrClusterName)
                 cmdbAppCluster.cluster_status="3"
                 cmdbAppCluster.save()
             # 否则是0，为应用
             else:
-                cmdbApp = CmdbApp.objects.get(app_id=appClusterId)
+                cmdbApp = CmdbApp.objects.get(app_name=appOrClusterName)
                 cmdbApp.app_status="3"
                 cmdbApp.save()
         else:
             if appClusterStatus==1:
-                cmdbAppCluster=CmdbAppCluster.objects.get(id=appClusterId)
+                cmdbAppCluster=CmdbAppCluster.objects.get(name=appOrClusterName)
                 cmdbAppCluster.cluster_status=get_tuple_key(CLUSTER_STATUS,arrayLines[3])
                 cmdbAppCluster.save()
             # 否则是0，为应用
             else:
-                cmdbApp = CmdbApp.objects.get(app_id=appClusterId)
+                cmdbApp = CmdbApp.objects.get(app_name=appOrClusterName)
                 cmdbApp.app_status=get_tuple_key(APP_STATUS,arrayLines[2])
                 cmdbApp.save()
     else:
