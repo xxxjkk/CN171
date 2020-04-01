@@ -26,7 +26,7 @@ from CN171_tools.connecttool import ssh_close, ssh_connect, ssh_exec_cmd
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 config = cp.ConfigParser()
 config.read(os.path.join(BASE_DIR, 'config/cn171.conf'),encoding='utf-8')
-conntarget = "Ansible"
+conntarget = "Ansible_bg"
 
 #模块中心下的应用集群
 def appDetailByMoDo(request):

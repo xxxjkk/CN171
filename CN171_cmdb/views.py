@@ -7,8 +7,9 @@ from django.http import HttpResponse, JsonResponse
 from CN171_cmdb import models, forms, tasks
 from django.shortcuts import render, redirect
 
+from CN171_cmdb.action import appTaskTest, appOprResultCheck
 from CN171_cmdb.exceloper import excel_export_host, excel_import_host, excel_import_app, excel_export_app
-from CN171_cmdb.models import CmdbHost, CmdbApp, HostPwdOprLog, CmdbAppCluster, APP_STATUS
+from CN171_cmdb.models import CmdbHost, CmdbApp, HostPwdOprLog, CmdbAppCluster, APP_STATUS, CmdbAppLog
 from CN171_cmdb.forms import DetailLogForm, HostPwdEditForm, NormalUserForm, CmdbHostForm, CmdbAppForm
 from CN171_background.api import pages, get_object
 from CN171_tools.common_api import export_download_txt, to_ints, write_txt,write_txt1, isNullStr, toInt
@@ -241,36 +242,50 @@ def clusterAppDetail(request):
     return render(request, "cmdb/cluster_app_detail.html", locals())
 
 #启动/停止/重启/刷新 单个应用
-@my_login_required
 def appTaskExecuteOne(request):
     app_id = request.POST.get('app_id')
     app_action = request.POST.get('app_action')
     opr_user = request.session['user_name']
     cmdbApp = CmdbApp.objects.get(app_id=app_id)
-    if app_action == 'start':
-        cmdbApp.bg_lastopr_type = "启动"
-    elif app_action == 'restart':
-        cmdbApp.bg_lastopr_type = "重启"
-    elif app_action == 'stop':
-        cmdbApp.bg_lastopr_type = "停止"
+    applog = CmdbAppLog()
+    applog.app_id = app_id
+    applog.app_operation_user = opr_user
+    applog.app_operation_time = datetime.datetime.now()
+    if app_action == 'start' and cmdbApp.app_status == "3" and cmdbApp.app_lastopr_result !="进行中":
+        cmdbApp.app_lastopr_type = "启动"
+        applog.app_operation = "start"
+    elif app_action == 'restart' and cmdbApp.app_status=="1" and cmdbApp.app_lastopr_result !="进行中":
+        cmdbApp.app_lastopr_type = "重启"
+        applog.app_operation = "restart"
+    elif app_action == 'stop' and (cmdbApp.app_status=="1" or cmdbApp.app_status=="2") and cmdbApp.app_lastopr_result !="进行中":
+        cmdbApp.app_lastopr_type = "停止"
+        applog.app_operation = "stop"
     else:
-        cmdbApp.bg_lastopr_type = "刷新"
-    cmdbApp.bg_lastopr_user = opr_user
-    cmdbApp.bg_lastopr_time = datetime.now()
-    cmdbApp.bg_lastopr_result = "执行中"
+        cmdbApp.app_lastopr_type = "刷新"
+        applog.app_operation = "status"
+    cmdbApp.app_lastopr_user = opr_user
+    cmdbApp.app_lastopr_time = datetime.datetime.now()
+    cmdbApp.app_lastopr_result = "进行中"
+    applog.app_opr_result = "进行中"
+    applog.save()
     cmdbApp.save()
     nowDay = datetime.datetime.now().strftime("%Y%m%d")
-    app_opr_content = cmdbApp.app_name + " " + cmdbApp.cmdb_host.cmdb_host_busip + " " + \
-                      cmdbApp.cmdb_host.bg.bg_module + " " + cmdbApp.cmdb_host.bg.bg_domain + " 0"
+    nowTime = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    app_opr_content = cmdbApp.cmdb_host.bg.bg_domain + " " + cmdbApp.cmdb_host.bg.bg_module + " " + cmdbApp.app_name + " " \
+    + cmdbApp.cmdb_host.cmdb_host_busip + " " + "0" + " " + cmdbApp.app_id + "\n"
     # 文件名
-    file_name = write_txt1(app_opr_content, 'temp/cmdb/appmgnt/oneopr/' + nowDay + "/",
-                          opr_user + '_app_oneopr_'+app_action+'_app')
+    file_name = write_txt1(app_opr_content, 'D:/temp/cmdb/appmgnt/oneopr/' + nowDay + "/",
+                          opr_user + '_app_oneopr_'+app_action+'_app_'+nowTime)
     t, sftp = sftpconnect('CMIOT')
     ansible_host_appmgnt_applist_path, ansible_host_appmgnt_return_filepath = get_appmgnt_init_parameter('Ansible')
     flag = put(sftp, file_name, ansible_host_appmgnt_applist_path)
     sftpDisconnect(t)
+    applog_id = applog.id
     if flag:
-        tasks.appTaskOne.delay(ansible_host_appmgnt_return_filepath,file_name, app_id, app_action,opr_user)
+        tasks.appTaskOne.delay(ansible_host_appmgnt_return_filepath,file_name, app_id, app_action,opr_user,applog_id)
+
+        #appTaskTest(ansible_host_appmgnt_return_filepath, file_name, app_id, app_action, opr_user, applog_id)
+        #appOprResultCheck()
         returnmsg = "True"
     else:
         returnmsg = "False"
