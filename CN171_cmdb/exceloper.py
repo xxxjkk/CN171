@@ -95,7 +95,10 @@ def excel_import_host(file_obj):
                     row_value = table.row_values(i)  # 一行的数据
                     # 添加多对多字段
                     # 主要这里不能使用get，否则报错
-                    bgTaskManagement_obj = BgTaskManagement.objects.get(bg_module=row_value[5],bg_domain=row_value[6])
+                    bg_module = row_value[5]
+                    bg_domain = str(row_value[6])
+                    bgTaskManagement = BgTaskManagement.objects.filter(bg_module=bg_module,bg_domain=bg_domain)
+                    bgTaskManagement_obj = bgTaskManagement[0]
                     # 生成主机对象，添加
                     cmdbHost_obj = CmdbHost.objects.create(
                         cmdb_host_name=row_value[0],
@@ -153,7 +156,7 @@ def excel_opr_cluster(table,nrows):
         row_value = table.row_values(i)  # 一行的数据
         # 添加多对多字段
         # 主要这里不能使用get，否则报错
-        bgTaskManagement_obj = BgTaskManagement.objects.get(bg_module=row_value[1], bg_domain=toInt(row_value[2]))
+        bgTaskManagement_obj = BgTaskManagement.objects.get(bg_module=row_value[1], bg_domain=str(row_value[2]))
         # 生成主机对象，添加
         cmdbApp_obj = CmdbAppCluster.objects.create(
             name=row_value[0],

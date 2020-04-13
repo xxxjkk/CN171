@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    {% include 'link_css.html' %}
+    {% include 'head_script.html' %}
+</head>
+<body>
+    <div class="content">
+        <section class="box">
+            <div class="box">
+                <form action="{% url 'systemAdd' %}" method="post">
+                    {% csrf_token %}
+                    <div style="white-space: pre-line" align="left" class="box">
+                        <label for="name" style="margin-left: 120px">系统：<span class="text-danger">*</span></label>
+                            <input type="text" name="system_name" class="form-control" style="width: 400px; margin-left: 120px" placeholder="必填项" maxlength="64" id="name">
+                    </div>
+                    <div align="center">
+                        <input type="submit" class="btn btn-primary" data-dismiss="modal" style="width: 60pt" value="保存">
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="reset" name="reset" class="btn btn-primary" style="width: 60pt" value="重置">
+                    </div>
+                    <br>
+                </form>
+            </div>
+        </section>
+    </div>
+    {#回传参数至父层#}
+    <script type="text/javascript">
+        var index = parent.layer.getFrameIndex(window.name);
+        var success = {{ status }};
+        if ( success == '1' ) {
+            parent.$("#handle_status").val('1');
+            {#刷新父层页面#}
+            parent.location.reload();
+            parent.layer.close(index);
+        } else if( success == '2' ) {
+            parent.$("#handle_status").val('2');
+            parent.layer.close(index);
+        }
+    </script>
+</body>
+</html>

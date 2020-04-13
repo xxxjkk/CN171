@@ -147,8 +147,8 @@ def put(sftp,local,remote):
         print("'"+local+"': No such file or directory in local")
         return False
     #检查remote的父目录
-    #remote_parent =  os.path.dirname(os.path.normpath(remote))
-    if not _is_exists(remote, function=sftp.chdir):
+    remote_parent =  os.path.dirname(os.path.normpath(remote))
+    if not _is_exists(remote_parent,function=sftp.chdir):
         print("'"+remote+"': No such file or directory in remote")
         return False
     #拷贝文件

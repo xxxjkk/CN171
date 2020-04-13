@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^crontab/', include('CN171_crontab.urls')),
     url(r'^aiops/', include('CN171_aiops.urls')),
     url(r'^operation/', include('CN171_operation.urls')),
+    url(r'^audit/', include('CN171_audit.urls')),
 
     url(r'^static/(?P<path>.*)$', static.serve,
         {'document_root': settings.STATIC_ROOT}, name='static')

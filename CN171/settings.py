@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'CN171_crontab',
     'CN171_operation',
     'CN171_aiops',
+    'CN171_audit',
     'djcelery',
 ]
 

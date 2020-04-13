@@ -45,6 +45,19 @@ def write_txt(content1, filePath, fileName):
     abspath_file_name= dir_path + "\\"+ file_name
     return abspath_file_name
 
+#写入txt文档
+#在该filePath下将content1写入文件名为fileName的txt文档，
+#filePath文件所在目录 例如：temp/cmdb/hostmgnt/status/20191108，fileName 例如：文件名 root_host_busip_ip.txt
+#返回文件名 host_busip_ip.txt 或者..txt
+def write_txt1(content1, filePath, fileName):
+    path_not_exist_create(filePath)
+    file_path = filePath + fileName + '.txt'
+    file = open(file_path, 'w')
+    file.write(content1)
+    file.close()
+    # 返回文件名
+    return file_path
+
 #导出并下载txt文件
 def export_download_txt(content1):
         response = HttpResponse(content_type='text/plain')
@@ -66,14 +79,12 @@ def to_ints(all_ids):
             all_id_ints.append(int(cmdb_id))
     return all_id_ints
 
-#访问二维元组，通过value获得key值 状态不对，默认停机
+#访问二维元组，通过value获得key值 状态不对，默认停机 HOST_STATUS CLUSTER_STATUS APP_STATUS
 def get_tuple_key(tupleObj,tupleValue):
-        for i in range(len(tupleObj)):
-            for j in range(len(tupleObj[i])):
-                if(tupleObj[i][1]==tupleValue):
-                    return tupleObj[i][0]
-                else:
-                    return '3'
+    for i in range(len(tupleObj)):
+       if(tupleObj[i][1]==tupleValue):
+          return tupleObj[i][0]
+    return '3'
 
 #如果为null，则转换为--
 def isNullStr(str):

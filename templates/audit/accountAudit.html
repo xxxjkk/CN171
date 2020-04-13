@@ -1,0 +1,795 @@
+{% extends 'base.html' %}
+{% block self_head_css_js %}
+    <script src="/static/layer/layer.js"></script>
+    <script src="/static/js/base.js"></script>
+    <script src="/static/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="/static/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="/static/plugins/datatables/dataTables.bootstrap.css"></script>
+
+    <script src="/static/incubator-echarts-4.4.0-dist/echarts.min.js"></script>
+    <script type="text/javascript" src="/static/bootstrap-datetimepicker-2.4.4/js/bootstrap-datetimepicker.min.js"></script>
+    <script type="text/javascript" src="/static/bootstrap-datetimepicker-2.4.4/js/locales/bootstrap-datetimepicker.zh-CN.js"></script>
+    <link href="/static/bootstrap-datetimepicker-2.4.4/css/bootstrap-datetimepicker.min.css" rel="stylesheet">
+    <script src="/static/js/timelist.js" type="text/javascript"></script>
+{% endblock %}
+{% block content %}
+
+<style>
+    .choose {
+        position: relative;
+    }
+
+    .choose .radio {
+        position: relative;
+        display: inline-block;
+        font-weight: 600;
+        color: #0c4757;
+        padding-left: 25px;
+        cursor: pointer;
+    }
+
+    .choose .radio input {
+        display: none;
+    }
+
+    .choose .radio i {
+        display: block;
+        position: absolute;
+        top: 2px;
+        left: 0;
+        width: 16px;
+        height: 16px;
+        outline: 0;
+        border: 2px solid #e4e4e4;
+        background: white;
+        border-radius: 50%;
+        transition: border-color .3s;
+        -webkit-transition: border-color .3s;
+    }
+
+    .choose .radio input + i:after {
+        position: absolute;
+        content: '';
+        top: 2px;
+        left: 2px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #31b0d5;
+        opacity: 0;
+        transition: opacity .1s;
+        -webkit-transition: opacity .1s;
+    }
+
+    .choose .radio input:checked + i:after {
+        opacity: 1;
+    }
+
+    .product-container1 {
+        width: 400px;
+        height: 400px
+        margin: 0 auto;
+        border-radius: 30px;
+        /*border: 3px solid rgba(54, 162, 235, 1);*/
+        background: white;
+        display: inline-block;
+    }
+    .product-container2 {
+        width: 460px;
+        height: 400px
+        margin: 0 auto;
+        border-radius: 30px;
+        /*border: 3px solid rgba(54, 162, 235, 1);*/
+        background: white;
+        display: inline-block;
+    }
+</style>
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h4>账号审计</h4>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <form action="" method="post" id="account_audit_form" enctype="multipart/form-data">
+        {% csrf_token %}
+            <div class="box">
+                <div class="box-header">
+                    <div class="choose">
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        {% for system in system_list %}
+                        <label class="radio">{{system}}<input type="radio" name="system" value="{{system}}" onclick="save()"><i></i></label>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        {% endfor %}
+                        <a class="btn btn-info" style="line-height: 10px;" onclick="add()"><strong>&plus;</strong></a>
+                        <a class="btn btn-info" style="line-height: 10px;" onclick="sub()"><strong>&minus;</strong></a>
+                    </div>
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="btn-group">
+                        <input type="button" value="选择文件" onclick="upFile1.click()" style="line-height: 25px; float: left">
+                        <input type="text" size="25" name="file1" id="ufile1" readonly="readonly" style="line-height: 25px;" placeholder="  请选择文件···">
+                        <input type="file" id="upFile1" name="upFile1" style="display: none" onchange="file1.value=this.value">
+                    </div>
+                    <div class="btn-group">
+                        <a id="upload1" class="btn btn-danger" style="display: none" onclick="upload('1')">上传</a>
+                    </div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="btn-group">
+                        <input type="button" value="选择文件" onclick="upFile2.click()" style="line-height: 25px; float: left">
+                        <input type="text" size="25" name="file2" id="ufile2" readonly="readonly" style="line-height: 25px;" placeholder="  请选择文件···">
+                        <input type="file" id="upFile2" name="upFile2" style="display: none" onchange="file2.value=this.value">
+                    </div>
+                    <div class="btn-group">
+                        <a id="upload2" class="btn btn-danger" style="display: none" onclick="upload('2')">上传</a>
+                    </div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="btn-group">
+                        <input type="button" value="选择文件" onclick="upFile3.click()" style="line-height: 25px; float: left">
+                        <input type="text" size="25" name="file3" id="ufile3" readonly="readonly" style="line-height: 25px;" placeholder="  请选择文件···">
+                        <input type="file" id="upFile3" name="upFile3" style="display: none" onchange="file3.value=this.value">
+                    </div>
+                    <div class="btn-group">
+                        <a id="upload3" class="btn btn-danger" style="display: none" onclick="upload('3')">上传</a>
+                    </div>
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <u><a href="{% url 'download' file_id=1 %}" download="开户+变更+销户记录模板.xlsx">开户+变更+销户记录模板下载</a></u>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <u><a href="{% url 'download' file_id=2 %}" download="4A主账号与从账号对应清单模板.xlsx">4A主账号与从账号对应清单模板下载</a></u>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <u><a href="{% url 'download' file_id=3 %}" download="资源侧主机从账号信息模板.txt">资源侧主机从账号信息模板下载</a></u>
+                    <br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="btn-group">
+                        <input type="button" value="选择文件" onclick="upFile4.click()" style="line-height: 25px; float: left">
+                        <input type="text" size="25" name="file4" id="ufile4" readonly="readonly" style="line-height: 25px;" placeholder="  请选择文件···">
+                        <input type="file" id="upFile4" name="upFile4" style="display: none" onchange="file4.value=this.value" multiple="multiple">
+                    </div>
+                    <div class="btn-group">
+                        <a id="upload4" class="btn btn-danger" style="display: none" onclick="upload('4')">上传</a>
+                    </div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="btn-group">
+                        <input type="button" value="选择文件" onclick="upFile5.click()" style="line-height: 25px; float: left">
+                        <input type="text" size="25" name="file5" id="ufile5" readonly="readonly" style="line-height: 25px;" placeholder="  请选择文件···">
+                        <input type="file" id="upFile5" name="upFile5" style="display: none" onchange="file5.value=this.value" multiple="multiple">
+                    </div>
+                    <div class="btn-group">
+                        <a id="upload5" class="btn btn-danger" style="display: none" onclick="upload('5')">上传</a>
+                    </div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="btn-group">
+                        <input type="button" value="选择文件" onclick="upFile6.click()" style="line-height: 25px; float: left">
+                        <input type="text" size="25" name="file6" id="ufile6" readonly="readonly" style="line-height: 25px;" placeholder="  请选择文件···">
+                        <input type="file" id="upFile6" name="upFile6" style="display: none" onchange="file6.value=this.value">
+                    </div>
+                    <div class="btn-group">
+                        <a id="upload6" class="btn btn-danger" style="display: none" onclick="upload('6')">上传</a>
+                    </div>
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <u><a href="{% url 'download' file_id=4 %}" download="特权+程序账号备案记录模板.xlsx">特权+程序账号备案记录模板下载</a></u>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <u><a href="{% url 'download' file_id=5 %}" download="操作日志模板（北京）.csv">操作日志模板下载（北京）</a></u>
+                    <u><a href="{% url 'download' file_id=6 %}" download="操作日志模板（深圳）.csv">操作日志模板下载（深圳）</a></u>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <u><a href="{% url 'download' file_id=7 %}" download="资源侧数据库从账号信息模板.txt">资源侧数据库从账号信息模板下载</a></u>
+                </div>
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn-group">
+                    <a id="accountAudit" style="display: none" href="#" class="btn btn-primary" onclick="accountAudit()">开始审计</a>
+                </div>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <div class="btn-group">
+                    <a id="exportResult" style="display: none" class="btn btn-primary">导出明细</a>
+                </div>
+                <!-- /.box-header -->
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </div>
+        </form>
+        <div class="box product-container1">
+            <div class="box-body product-container1">
+                <div class="col-md-6">
+                    <div class="row">
+                        <h2>
+                            <span style="color: rgba(201, 48, 44, 1)">&nbsp;&nbsp;●</span>
+                            <span>&nbsp;{{pass_percent1}}%</span>
+                        </h2>
+                        <strong class="text-muted" style="font-size: 18px">&nbsp;&nbsp;主从账号关系配置</strong><hr>
+                        <!--<div style="width:100%; height:2px; border-top:1px solid #999; clear:both;"></div>-->
+                        <p class="text-muted small">&nbsp;&nbsp;&nbsp;&nbsp;1.孤立/公共账号有{{isolated_public_num}}个；</p>
+                        <p class="text-muted small">&nbsp;&nbsp;&nbsp;&nbsp;2.两侧不一致账号有{{inconsistent_account_num}}个。</p>
+                    </div>
+                </div>
+                <div class="col-md-6" id="main1" style="width: 190px; height: 190px; float: right"></div>
+            </div>
+        </div>
+        <div class="box product-container2">
+            <div class="box-body product-container2">
+                <div class="col-md-6" id="main5" style="width: 400px; height: 190px;"></div>
+            </div>
+        </div>
+        <div class="box product-container1">
+            <div class="box-body product-container1">
+                <div class="col-md-6">
+                    <div class="row">
+                        <h2>
+                            <span style="color: rgba(49, 176, 213, 1)">&nbsp;&nbsp;●</span>
+                            <span>&nbsp;{{pass_percent2}}%</span>
+                        </h2>
+                        <strong class="text-muted" style="font-size: 18px">&nbsp;&nbsp;账号角色权限配置</strong><hr>
+                        <!--<div style="width:100%; height:2px; border-top:1px solid #999; clear:both;"></div>-->
+                        <p class="text-muted small">&nbsp;&nbsp;&nbsp;&nbsp;1.主组/角色不合规有{{change_authority_num}}个；</p>
+                        <p class="text-muted small">&nbsp;&nbsp;&nbsp;&nbsp;2.账号属性不合规有{{change_account_type_num}}个。</p>
+                    </div>
+                </div>
+                <div class="col-md-6" id="main2" style="width: 190px; height: 190px; float: right"></div>
+            </div>
+        </div>
+        <div class="box product-container1">
+            <div class="box-body product-container1">
+                <div class="col-md-6">
+                    <div class="row">
+                        <h2>
+                            <span style="color: rgba(40, 96, 144, 1)">&nbsp;&nbsp;●</span>
+                            <span>&nbsp;{{pass_percent3}}%</span>
+                        </h2>
+                        <strong class="text-muted" style="font-size: 18px">&nbsp;&nbsp;开通/变更/注销流程</strong><hr>
+                        <!--<div style="width:100%; height:2px; border-top:1px solid #999; clear:both;"></div>-->
+                        <p class="text-muted small">&nbsp;&nbsp;&nbsp;&nbsp;1.未按时注销账号有{{account_to_delete_num}}个；</p>
+                        <p class="text-muted small">&nbsp;&nbsp;&nbsp;&nbsp;2.未开户新增账号有{{new_without_application_num}}个。</p>
+                    </div>
+                </div>
+                <div class="col-md-6" id="main3" style="width: 190px; height: 190px; float: right"></div>
+            </div>
+        </div>
+        <div class="box product-container2">
+            <div class="box-body product-container2">
+                <div class="col-md-6" id="main6" style="width: 400px; height: 190px;"></div>
+            </div>
+        </div>
+        <div class="box product-container1">
+            <div class="box-body product-container1">
+                <div class="col-md-6">
+                    <div class="row">
+                        <h2>
+                            <span style="color: rgba(68, 157, 68, 1)">&nbsp;&nbsp;●</span>
+                            <span>&nbsp;{{pass_percent4}}%</span>
+                        </h2>
+                        <strong class="text-muted" style="font-size: 18px">&nbsp;&nbsp;关键操作备案流程</strong><hr>
+                        <!--<div style="width:100%; height:2px; border-top:1px solid #999; clear:both;"></div>-->
+                        <p class="text-muted small">&nbsp;&nbsp;&nbsp;&nbsp;1.使用特权/程序账号（绕行）未</p>
+                        <p class="text-muted small">&nbsp;&nbsp;&nbsp;&nbsp;备案有{{log_num_without_application}}个。</p>
+                    </div>
+                </div>
+                <div class="col-md-6" id="main4" style="width: 190px; height: 190px; float: right"></div>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</div>
+
+<script>
+    {# 跳转至新增页面 #}
+    function add(){
+        layer.open({
+            type: 2,
+            title: '新增系统',
+            closeBtn: 1,
+            area: ['700px', '300px'],
+            shadeClose: true, //点击遮罩关闭
+            content: ['/audit/systemAdd/'],
+        });
+    }
+    {# 删除 #}
+    function sub() {
+        var system = $("input[name='system']:checked").val();
+        if (!confirm("确定删除所选系统吗？")) {
+            window.event.returnValue = false;
+        }else{
+            //ajax开始运行
+            $.ajax({
+                url: '{% url 'systemDel' %}',
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    system: system,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                'traditional': true,
+                success: function(msg){
+                    if (msg.ret == "True"){
+                        alert("删除成功！");
+                        location.reload(true);
+                    } else{
+                        alert("操作失败，请核查后重试！");
+                    }
+                }
+            });
+        }
+    }
+    {# 上传 #}
+    function upload(id) {
+        var form_data = new FormData();
+        var system = $("input[name='system']:checked").val();
+        form_data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        for(i = 0; i < $('#upFile' + id)[0].files.length; i++) {
+            form_data.append('accountFile[' + i + ']', $('#upFile' + id)[0].files[i]);
+        }
+        form_data.append('fileNum', $('#upFile' + id)[0].files.length);
+        form_data.append('system', system);
+        file_id = id;
+        var url = "{% url 'upload' file_id=0 %}";
+        url = url.replace(/0/, file_id);
+        $.ajax({
+            url: url,
+            data: form_data,
+            type: 'post',
+            dataType: 'json',
+            //告诉jQuery不要去处理发送的数据, 发送对象
+            processData: false,
+            //告诉jQuery不要去设置Content-Type请求头
+            contentType: false,
+            //获取POST所需的csrftoken
+            success: function (args) {
+                alert(args.msg);
+            }
+        });
+    }
+    {# 开始审计 #}
+    function accountAudit() {
+        var system = $("input[name='system']:checked").val();
+        if (!confirm("确定选择" + system + "？")) {
+            window.event.returnValue = false;
+        }else{
+            $.ajax({
+                url: '{% url 'accountAuditing' %}',
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    system: system,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                'traditional': true,
+                success: function (args) {
+                    alert(args.msg);
+                    var args = $("#account_audit_form").serialize();
+                    window.location = "{% url 'accountAudit' %}?" + args
+                }
+            });
+        }
+    }
+    {# 导出审计结果 #}
+    $('#exportResult').click(function () {
+        window.location = "{% url 'exportAccountAuditResult' %}"
+    });
+</script>
+<script language="javascript" type="text/javascript">
+    function save() {
+        radios = document.getElementsByName("system");
+        for (i = 0; i < radios.length; i++) {
+            if (radios[i].checked) document.cookie = 'radioindex =' + i;
+        }
+    }
+    window.onload = function () {
+        var cooki = document.cookie;
+        if (cooki != "") {
+            cooki = "{\"" + cooki + "\"}";
+            cooki = cooki.replace(/\s*/g, "").replace(/=/g, '":"').replace(/;/g, '","');
+            var json = eval("(" + cooki + ")"); //将coolies转成json对象
+            document.getElementsByName("system")[json.radioindex].checked = true;
+        }
+        else
+            save();
+    }
+</script>
+<script type="text/javascript">
+    $(function(){
+        $("#avatsel1").click(function(){
+            $("input[type='file']").trigger('click');
+        });
+        $("#avatval").click(function(){
+            $("input[type='file']").trigger('click');
+        });
+        $("input[type='file']").change(function(){
+            $("#avatval").val($(this).val());
+        });
+    });
+    $(function(){
+        $(".system").find('input').click(function(){
+            $(this).parent('label').siblings('label').find('input').removeAttr('checked') && $(this).attr('checked', 'checked');
+            console.log($('input[type="radio"]:checked').val());
+        })
+    })
+</script>
+
+<script type="text/javascript">
+    $(function () {
+        var myChart1 = echarts.init(document.getElementById('main1'));
+        var myChart2 = echarts.init(document.getElementById('main2'));
+        var myChart3 = echarts.init(document.getElementById('main3'));
+        var myChart4 = echarts.init(document.getElementById('main4'));
+        var myChart5 = echarts.init(document.getElementById('main5'));
+        var myChart6 = echarts.init(document.getElementById('main6'));
+        myChart1.clear();
+        myChart2.clear();
+        myChart3.clear();
+        myChart4.clear();
+        myChart5.clear();
+        myChart6.clear();
+	    window.addEventListener('resize', function () {
+		    myChart1.resize();
+		    myChart2.resize();
+		    myChart3.resize();
+		    myChart4.resize();
+		    myChart5.resize();
+		    myChart6.resize();
+	    });
+
+
+	    colors1 = ["rgba(201, 48, 44, 1)", "rgba(49, 176, 213, 1)", "rgba(40, 96, 144, 1)", "rgba(68, 157, 68, 1)"];
+	    colors2 = ["rgba(201, 48, 44, 0.3)", "rgba(49, 176, 213, 0.3)", "rgba(40, 96, 144, 0.3)", "rgba(68, 157, 68, 0.3)"];
+	    colors3 = ["rgba(201, 48, 44, 0.7)", "rgba(49, 176, 213, 0.7)", "rgba(40, 96, 144, 0.7)", "rgba(68, 157, 68, 0.7)"];
+
+	    var data_com = [{{pass_num1}}, {{pass_num2}}, {{pass_num3}}, {{pass_num4}}];
+	    var data_sum = [{{account_num}}, {{account_num}}, {{account_num}}, {{log_num_sum}}];
+	    option=[]
+	    for (i = 0; i < 4; i++) {
+	        option.push({
+                title: {
+                    text: data_sum[i].toString()+"/"+(data_sum[i]-data_com[i]).toString(),
+                    subtext: '总数/不合格数',
+                    x: 'center',
+                    y: 'center',
+                    textStyle: {
+                        fontSize: 15,
+                        fontWeight: 'normal'
+                    },
+                subtextStyle: {
+                    fontSize: 13,
+                    fontWeight: 'normal'
+                }
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            calculable: true,
+            series: [
+                {
+                    name: '主从账号关系配置',
+                    type: 'pie',
+                    radius: [50, 65],
+                    center: ['50%', '50%'],
+                    hoverAnimation: false,
+                    data: [
+                        {
+                            value: data_com[i],
+                            name: '合格数',
+                            itemStyle: {
+                                color: colors1[i]
+                            },
+                            label: {
+                                show: false
+                            },
+                            labelLine: {
+                                show: false
+                            }
+                        },
+                        {
+                            value: data_sum[i]-data_com[i],
+                            name: '不合格数',
+                            itemStyle: {
+                                color: "transparent"
+                            },
+                            label: {
+                                show: false
+                            },
+                            labelLine: {
+                                show: false
+                            }
+                        }
+                    ]
+                },
+                {
+                    name: '主从账号关系配置',
+                    type: 'pie',
+                    radius: [55, 60],
+                    center: ['50%', '50%'],
+                    hoverAnimation: false,
+                    data: [
+                        {
+                            value: data_com[i],
+                            name: '合格数',
+                            itemStyle: {
+                                color: "transparent"
+                            },
+                            label: {
+                                show: false
+                            },
+                            labelLine: {
+                                show: false
+                            }
+                        },
+                        {
+                            value: data_sum[i]-data_com[i],
+                            name: '不合格数',
+                            itemStyle: {
+                                color: colors2[i]
+                            },
+                            label: {
+                                show: false
+                            },
+                            labelLine: {
+                                show: false
+                            }
+                        }
+                    ]
+                },
+                {
+                    name: '',
+                    type: 'pie',
+                    radius: ['95%', '95%'],
+                    hoverAnimation: false,
+                    tooltip: {
+                        show: false
+                    },
+                    data: [{
+                        value: data_com[i],
+                        name: "",
+                        itemStyle: {
+                            borderWidth: 5,
+                            borderColor: colors3[i]
+                        },
+                        label: {
+                            show: false
+                        },
+                        labelLine: {
+                            show: false
+                        }
+                    },
+                    {
+                        value: data_sum[i]-data_com[i],
+                        name: '',
+                        itemStyle: {
+                            color: 'rgba(0, 0, 0, 0)',
+                            borderColor: 'rgba(0, 0, 0, 0)',
+                            borderWidth: 0
+                        },
+                        label: {
+                            show: false
+                        },
+                        labelLine: {
+                            show: false
+                        }
+                    }]
+                }
+            ]
+        });
+        }
+
+	    series_data5 = [{
+	        name: '合格',
+            type: 'bar',
+            stack: 'audit',
+            barWidth: '35%',
+            xAxisIndex: 1,
+            itemStyle: {
+                normal: {color: function(params) {
+                    var colorList = ['rgba(201, 48, 44, 1)', 'rgba(201, 48, 44, 1)', 'rgba(201, 48, 44, 1)',
+                                     'rgba(49, 176, 213, 1)', 'rgba(49, 176, 213, 1)', 'rgba(49, 176, 213, 1)'];
+                    return colorList[params.dataIndex];
+                }},
+                emphasis: {
+                    opacity: 1
+                }
+            },
+            data: [{{account_num}}-{{isolated_account_num}}, {{account_num}}-{{public_account_num}}, {{account_num}}-{{inconsistent_account_num}},
+                   {{account_num}}-{{change_host_group_num}}, {{account_num}}-{{change_database_role_num}}, {{account_num}}-{{change_authority_num}}]
+        },
+        {
+            name: '不合格',
+            type: 'bar',
+            stack: 'audit',
+            barWidth: '35%',
+            xAxisIndex: 1,
+            itemStyle: {
+                normal: {color: function(params) {
+                    var colorList = ['rgba(201, 48, 44, 0.3)', 'rgba(201, 48, 44, 0.3)', 'rgba(201, 48, 44, 0.3)',
+                                     'rgba(49, 176, 213, 0.3)', 'rgba(49, 176, 213, 0.3)', 'rgba(49, 176, 213, 0.3)'];
+                    return colorList[params.dataIndex]
+                }},
+                emphasis: {
+                    opacity: 1
+                }
+            },
+            data: [{{isolated_account_num}}, {{public_account_num}}, {{inconsistent_account_num}},
+                   {{change_host_group_num}}, {{change_database_role_num}}, {{change_authority_num}}]
+        }];
+        option5 = {
+            tooltip: {
+                trigger: 'axis'
+            },
+            grid: {
+                top: '10%',
+                left: '5%',
+                right: '0%',
+                bottom: '-30%',
+                containLabel: true
+            },
+            xAxis: [{
+                type: 'category',
+                data: ['孤立账号', '公共账号', '两侧账号不一致', '变更主机主组', '变更数据库角色', '变更账号属性'],
+                axisLabel:{
+                    interval: 0,
+                    rotate: 30,
+                    textStyle: {
+                        color: '#808080',
+                        fontSize: 10,
+                        fontWeight: 'lighter'
+                    }
+                },
+                boundaryGap: true,
+            },
+            {
+                type: 'category',
+                position: "bottom",
+                data: ['孤立账号', '公共账号', '两侧账号不一致', '变更主机主组', '变更数据库角色', '变更账号属性'],
+                axisLabel:{
+                    interval: 0,
+                    rotate: 30,
+                    textStyle: {
+                        color: '#808080',
+                        fontSize: 10,
+                        fontWeight: 'lighter'
+                    }
+                },
+                boundaryGap: true,
+                splitLine: {
+                    show: false
+                },
+                axisTick: {
+                    show: false
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#000'
+                    }
+                },
+            }],
+            yAxis:{
+                type: "value",
+                splitLine: {
+                    lineStyle: {
+                        color: 'rgba(0, 0, 0, 0.2)'
+                    }
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#000'
+                    }
+                },
+                splitArea: {show: false},
+            },
+            series: series_data5,
+            animation: false,
+        }
+
+	    series_data6 = [{
+	        name: '合格',
+            type: 'bar',
+            stack: 'audit',
+            barWidth: '25%',
+            xAxisIndex: 1,
+            itemStyle: {
+                normal: {color: function(params) {
+                    var colorList = ['rgba(40, 96, 144, 1)', 'rgba(40, 96, 144, 1)',
+                                     'rgba(40, 96, 144, 1)', 'rgba(68, 157, 68, 1)'];
+                    return colorList[params.dataIndex];
+                }},
+                emphasis: {
+                    opacity: 1
+                }
+            },
+            data: [{{account_num}}-{{miss_delete_account_num}}, {{account_num}}-{{account_to_cancel_num}},
+                   {{account_num}}-{{new_without_application_num}}, {{log_num_sum}}-{{log_num_without_application}}]
+        },
+        {
+            name: '不合格',
+            type: 'bar',
+            stack: 'audit',
+            barWidth: '25%',
+            xAxisIndex: 1,
+            itemStyle: {
+                normal: {color: function(params) {
+                    var colorList = ['rgba(40, 96, 144, 0.3)', 'rgba(40, 96, 144, 0.3)',
+                                     'rgba(40, 96, 144, 0.3)', 'rgba(68, 157, 68, 0.3)'];
+                    return colorList[params.dataIndex]
+                }},
+                emphasis: {
+                    opacity: 1
+                }
+            },
+            data: [{{miss_delete_account_num}}, {{account_to_cancel_num}},
+                   {{new_without_application_num}}, {{log_num_without_application}}]
+        }];
+        option6 = {
+            tooltip: {
+                trigger: 'axis'
+            },
+            grid: {
+                top: '10%',
+                left: '5%',
+                right: '0%',
+                bottom: '-35%',
+                containLabel: true
+            },
+            xAxis: [{
+                type: 'category',
+                data: ['漏删账号', '提单销户', '补提开户单', '特权/程序账号备案'],
+                axisLabel:{
+                    interval: 0,
+                    rotate: 30,
+                    textStyle: {
+                        color: '#808080',
+                        fontSize: 10,
+                        fontWeight: 'lighter'
+                    }
+                },
+                boundaryGap: true,
+            },
+            {
+                type: 'category',
+                position: "bottom",
+                data: ['漏删账号', '提单销户', '补提开户单', '特权/程序账号备案'],
+                axisLabel:{
+                    interval: 0,
+                    rotate: 30,
+                    textStyle: {
+                        color: '#808080',
+                        fontSize: 10,
+                        fontWeight: 'lighter'
+                    }
+                },
+                boundaryGap: true,
+                splitLine: {
+                    show: false
+                },
+                axisTick: {
+                    show: false
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#000'
+                    }
+                },
+            }],
+            yAxis:{
+                type: "value",
+                splitLine: {
+                    lineStyle: {
+                        color: 'rgba(0, 0, 0, 0.2)'
+                    }
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#000'
+                    }
+                },
+                splitArea: {show: false},
+            },
+            series: series_data6,
+            animation: false,
+        }
+        myChart1.setOption(option[0]);
+        myChart2.setOption(option[1]);
+        myChart3.setOption(option[2]);
+        myChart4.setOption(option[3]);
+        myChart5.setOption(option5);
+        myChart6.setOption(option6);
+
+    });
+</script>
+
+
+{% endblock %}

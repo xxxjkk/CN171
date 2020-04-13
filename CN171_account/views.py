@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.shortcuts import render
 
 from CN171_account.forms import accFrom
@@ -186,9 +188,12 @@ def login(request):
         if login_form.is_valid():
             username = login_form.cleaned_data['username']
             password = login_form.cleaned_data['password']
+            userList = models.User.objects.filter(acc_user_name=username)
+            user = userList[0]
+            user.acc_last_log_time = datetime.now()
             try:
-                user = models.User.objects.get(acc_user_name=username)
                 if user.acc_user_password == password and user.acc_user_status == "启用":
+                    user.save()
                     initial_session(user,request)
                     request.session['is_login'] = True
                     request.session['user_id'] = user.acc_user_id
@@ -198,6 +203,7 @@ def login(request):
                     message = "密码不正确！"
             except:
                 message = "用户不存在！"
+            user.save()
         return render(request, 'login/login.html', locals())
 
     login_form = UserForm()

@@ -23,13 +23,17 @@ config.read(os.path.join(BASE_DIR, 'config/cn171.conf'),encoding='utf-8')
 # 连接构建服务器
 def ssh_connect(conntarget):
     if conntarget == "Ansible_bg":
-        hostname = config.get('Ansible', 'ansible_bg_host')
-        username = config.get('Ansible', 'ansible_bg_user')
-        password = config.get('Ansible', 'ansible_bg_password')
+        hostname = config.get('Ansible_bg', 'ansible_bg_host')
+        username = config.get('Ansible_bg', 'ansible_bg_user')
+        password = config.get('Ansible_bg', 'ansible_bg_password')
     elif conntarget == "PBOSS":
         hostname = config.get('PBOSS', 'pboss_order_host')
         username = config.get('PBOSS', 'pboss_order_user')
         password = config.get('PBOSS', 'pboss_order_password')
+    elif conntarget == "Ansible":
+        hostname = config.get('Ansible', 'ansible_host')
+        username = config.get('Ansible', 'ansible_user')
+        password = config.get('Ansible', 'ansible_password')
     elif conntarget == "Finance_BDI":
         config.read(os.path.join(BASE_DIR, 'config/operation.conf'), encoding='utf-8')
         hostname = config.get('Finance', 'finance_bdihostip')
@@ -191,10 +195,57 @@ def get_hostmgnt_init_parameter(conntarget):
         exit()
     return ansible_host_hostmgnt_busiip_path,ansible_host_hostmgnt_return_filepath,ansible_host_hostmgnt_scrideploy_path
 
+
+#应用管理刷新集群状态功能，得到初始化参数
+def get_appmgnt_cluster_init_parameter(conntarget):
+    if conntarget == "Ansible":
+        ansible_cmdb_appmgnt_appClusterlist_path = config.get('Ansible', 'ansible_cmdb_appmgnt_appClusterlist_path')
+        ansible_cmdb_appmgnt_clusterReturn_filepath = config.get('Ansible', 'ansible_cmdb_appmgnt_clusterReturn_filepath')
+    elif conntarget == "PBOSS":
+        ansible_cmdb_appmgnt_appClusterlist_path = config.get('Ansible', 'ansible_cmdb_appmgnt_appClusterlist_path')
+        ansible_cmdb_appmgnt_clusterReturn_filepath = config.get('Ansible', 'ansible_cmdb_appmgnt_clusterReturn_filepath')
+    else:
+        print(conntarget + "not find!")
+        exit()
+    return ansible_cmdb_appmgnt_appClusterlist_path,ansible_cmdb_appmgnt_clusterReturn_filepath
+
+#应用管理主机操作（启动、停止、重启、刷新），得到初始化参数
+def get_appmgnt_init_parameter(conntarget):
+    if conntarget == "Ansible":
+        ansible_host_appmgnt_applist_path = config.get('Ansible', 'ansible_host_appmgnt_applist_path')
+        ansible_host_appmgnt_return_filepath = config.get('Ansible', 'ansible_host_appmgnt_return_filepath')
+        #ansible_host_appmgnt_scrideploy_path = config.get('Ansible', 'ansible_host_appmgnt_scrideploy_path')
+    elif conntarget == "PBOSS":
+        ansible_host_appmgnt_applist_path = config.get('Ansible', 'ansible_host_appmgnt_applist_path')
+        ansible_host_appmgnt_return_filepath = config.get('Ansible', 'ansible_host_appmgnt_return_filepath')
+        #ansible_host_appmgnt_scrideploy_path = config.get('Ansible', 'ansible_host_appmgnt_scrideploy_path')
+    else:
+        print(conntarget + "not find!")
+        exit()
+    return ansible_host_appmgnt_applist_path,ansible_host_appmgnt_return_filepath
+
+
 def readFile(file_path):
     exec_cmd = "cat "+ file_path
     log_msg = ""
     sshd = ssh_connect("Ansible_bg")
+    stdin, stdout, stderr = ssh_exec_cmd(sshd, exec_cmd)
+    err_list = stderr.readlines()
+    if len(err_list) > 0:
+        print('Read failed:' + err_list[0])
+        sys.exit(0)
+    else:
+        print('Start success.')
+        for item in stdout.readlines():
+            log_msg = log_msg + item
+        return log_msg
+    ssh_close(sshd)
+
+#读取app操作结果日志
+def readAppLogFile(file_path):
+    exec_cmd = "cat "+ file_path
+    log_msg = ""
+    sshd = ssh_connect("Ansible")
     stdin, stdout, stderr = ssh_exec_cmd(sshd, exec_cmd)
     err_list = stderr.readlines()
     if len(err_list) > 0:
@@ -240,7 +291,34 @@ def remote_scp(remote_path,local_path):
     except IOError:
         print("not exist")
 
-
+#远程下载文件不删除
+def sftpScp(remote_path,local_path):
+    hostname, port, username, password = get_init_parameter("Ansible")
+    port = str2int(port)
+    t = paramiko.Transport((hostname, port))
+    t.connect(username=username, password=password)  # 登录远程服务器
+    sftp = paramiko.SFTPClient.from_transport(t)  # sftp传输协议
+    src = remote_path
+    des = local_path
+    #log_dir_name = src.split("/")
+    # 适配Linux环境，截取日志文件名
+    if '/' in src:
+        log_dir_name = src.split('/')[-1]
+    # 适配Windows环境，截取日志文件名
+    elif '\\' in src:
+        log_dir_name = src.split('\\')[-1]
+    else:
+        response = "Log file not exits!"
+        return response
+    #a = len(log_dir_name)
+    downfilename = log_dir_name
+    dir_name = str(downfilename)
+    try:
+        flag = sftp.get(src, des)
+        t.close()
+    except IOError:
+        print("not exist")
+    return flag
 
 def str2int(s):
     def fn(x,y):

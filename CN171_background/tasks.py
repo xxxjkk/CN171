@@ -29,7 +29,7 @@ from CN171_tools.connecttool import ssh_close, ssh_connect, ssh_exec_cmd
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 config = cp.ConfigParser()
 config.read(os.path.join(BASE_DIR, 'config/cn171.conf'),encoding='utf-8')
-conntarget = "Ansible"
+conntarget = "Ansible_bg"
 
 @shared_task
 def taskOne(bg_id,bg_action,opr_user,bg_log_id,bg_old_status):
@@ -56,7 +56,7 @@ def checkResult():
             #a = len(log_dir_name)
             downfilename = log_dir_name
             filename = str(downfilename)
-            local_path = config.get('TaskManagement', 'log_path')
+            local_path = config.get('TaskManagement', 'TaskManagement_log_path')
             local_log_path = local_path + filename
             i.bg_log_dir = local_log_path
             i.save()

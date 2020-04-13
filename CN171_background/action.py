@@ -26,14 +26,14 @@ from CN171_tools.connecttool import ssh_close, ssh_connect, ssh_exec_cmd
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 config = cp.ConfigParser()
 config.read(os.path.join(BASE_DIR, 'config/cn171.conf'),encoding='utf-8')
-conntarget = "Ansible"
+conntarget = "Ansible_bg"
 
 def taskOneAction(bg_id,bg_action,opr_user,bg_log_id,bg_old_status):
     log_info = "执行情况\n"
     taskManagement = BgTaskManagement.objects.get(bg_id=bg_id)
     file_name = taskManagement.bg_module + "_" + taskManagement.bg_domain + \
                 "_" + bg_action + "_" + datetime.now().strftime("%Y%m%d%H%M%S")
-    conntarget = "Ansible"
+    conntarget = "Ansible_bg"
     sshd = ssh_connect(conntarget)
     dir_cmd = "mkdir "+ file_name
     ssh_exec_cmd(sshd, dir_cmd)
@@ -48,6 +48,9 @@ def taskOneAction(bg_id,bg_action,opr_user,bg_log_id,bg_old_status):
     else:
         return redirect("taskManagement")
     stdin, stdout, stderr = ssh_exec_cmd(sshd, cmd)
+    bg_log = BgTaskLog.objects.get(bg_log_id=bg_log_id)
+    bg_log.bg_opr_result = "执行中"
+    bg_log.save()
     err_list = stderr.readlines()
     if len(err_list) > 0:
         print('Start failed:' + err_list[0])
@@ -56,13 +59,12 @@ def taskOneAction(bg_id,bg_action,opr_user,bg_log_id,bg_old_status):
             taskManagement.bg_lastopr_result = "失败"
             taskManagement.bg_status = bg_old_status
             taskManagement.save()
-        bg_log = BgTaskLog.objects.get(bg_log_id=bg_log_id)
 
         bg_log.bg_opr_result = "失败"
         # 写入日志文件
         bg_log_msg = str(bg_log.bg_operation_time) + ":" + \
                      bg_log.bg_operation_user + bg_log.bg_operation + bg_log.bg_opr_result + "\n执行情况：\n" + err_list[0]
-        path = config.get('TaskManagement', 'log_path') + file_name + '.log'
+        path = config.get('TaskManagement', 'TaskManagement_log_path') + file_name + '.log'
         bg_log.bg_log_dir = path
         file = open(path, 'a+')
         file.write(bg_log_msg)
@@ -70,11 +72,9 @@ def taskOneAction(bg_id,bg_action,opr_user,bg_log_id,bg_old_status):
         bg_log.save()
     else:
         print('Start success.')
-        bg_log = BgTaskLog.objects.get(bg_log_id=bg_log_id)
         bg_log.bg_opr_result = "执行中"
         bg_log_msg = str(bg_log.bg_operation_time) + ":" + \
                      bg_log.bg_operation_user + bg_log.bg_operation + '\n' + log_info
-        # path = config.get('TaskManagement','log_path') + file_name + '.log'
         path = file_name + "/" + file_name + ".log"
         bg_log.bg_log_dir = path
         bg_log.save()
@@ -103,7 +103,7 @@ def checkResultAction():
             # a = len(log_dir_name)
             downfilename = log_dir_name
             filename = str(downfilename)
-            local_path = config.get('TaskManagement', 'log_path')
+            local_path = config.get('TaskManagement', 'TaskManagement_log_path')
             local_log_path = local_path + filename
             i.bg_log_dir = local_log_path
             i.save()

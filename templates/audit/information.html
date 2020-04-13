@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+
+{% block self_head_css_js %}
+    <script src="/static/layer/layer.js"></script>
+    <script src="/static/js/base.js"></script>
+    <script src="/static/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="/static/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="/static/plugins/datatables/dataTables.bootstrap.css"></script>
+{% endblock %}
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <h4>信息管理</h4>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <form action="" method="post" id="info_management_form" enctype="multipart/form-data">
+        {% csrf_token %}
+            <div class="box">
+                <div class="box-header">
+                    <div class="btn-group">
+                        <a id="staffAdd" style="display: none" href="#" onclick="staffAdd()" class="btn btn-success">&nbsp;&nbsp;新增&nbsp;&nbsp;</a>
+                    </div>
+                    <div class="btn-group">
+                        <a id="staffMod" style="display: none" href="#" onclick="staffMod()" class="btn btn-success">&nbsp;&nbsp;变更&nbsp;&nbsp;</a>
+                    </div>
+                    <div class="btn-group">
+                        <a id="staffDel" style="display: none" onclick="staffDel('确定删除所选用户吗？')" class="btn btn-success">&nbsp;&nbsp;删除&nbsp;&nbsp;</a>
+                    </div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="btn-group">
+                        <input type="text" size="25" name="file" id="ufile" readonly="readonly" style="line-height: 25px; float: left" placeholder="  请选择文件···">
+                        <input type="button" value="浏览" onclick="upFile.click()" style="line-height: 25px;">
+                        <input type="file" id="upFile" name="upFile" style="display: none" onchange="file.value=this.value">
+                    </div>
+                    <div class="btn-group">
+                        <a id="importStaffInfo" class="btn btn-danger" style="display: none">批量导入</a>
+                    </div>
+                    <div class="btn-group">
+                        <a id="exportStaffInfo" class="btn btn-danger" style="display: none">批量导出</a>
+                    </div>
+                    <div class="btn-group">
+                        <span id="mesId"></span>
+                    </div>
+                    <div class="input-group inline-group col-md-3" style="float: right">
+                        <input type="text" class="form-control" id="staff_search" name="staff_search" value="{{staff_search}}" placeholder="姓名/所在组/系统">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-primary" onclick="search()">搜索</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <table class="table table-striped table-bordered" id="dataform">
+                        <thead>
+                            <tr>
+                                <th width="5%" style="text-align: center;">
+                                    <input id="checkall" type="checkbox" class="i-checks" name="checkall" value="checkall" data-editable='false' onclick="check_all('info_management_form')">
+                                </th>
+                                <th width="15%" style="text-align: center;">姓名</th>
+                                <th width="15%" style="text-align: center;">4A主账号</th>
+                                <th width="15%" style="text-align: center;">从账号</th>
+                                <th width="15%" style="text-align: center;">所在组</th>
+                                <th width="15%" style="text-align: center;">系统</th>
+                                <th width="10%" style="text-align: center;">职责</th>
+                                <th width="10%" style="text-align: center;">状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for staff in page_objects %}
+                            <tr class="even gradeX">
+                                <td width="5%" style="text-align: center;">
+                                    <input type="checkbox" id="id" class="i-checks" name="id" value="{{staff.staff_id}}"/>
+                                </td>
+                                <td width="15%" style="text-align: center;">{{staff.staff_name}}</td>
+                                <td width="15%" style="text-align: center;">{{staff.staff_4AAccount}}</td>
+                                <td width="15%" style="text-align: center;">{{staff.staff_account}}</td>
+                                <td width="15%" style="text-align: center;">{{staff.staff_group}}</td>
+                                <td width="15%" style="text-align: center;">{{staff.staff_system}}</td>
+                                <td width="10%" style="text-align: center;">{{staff.staff_post}}</td>
+                                <td width="10%" style="text-align: center;">{{staff.staff_status}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="row" style="width: auto">
+                        {% include 'paginator.html' %}
+                        <ul style="margin-top: 0;">
+                            <label for="page_len">
+                                <select name="page_len" id="page_len" class="form-control m-b input-sm-33" onchange="change_info()">
+                                    {% ifequal page_len '10' %}
+                                        <option value="10" selected>10</option>
+                                    {% else %}
+                                        <option value="10">10</option>
+                                    {% endifequal %}
+                                    {% ifequal page_len '20' %}
+                                        <option value="20" selected>20</option>
+                                    {% else %}
+                                        <option value="20">20</option>
+                                    {% endifequal %}
+                                    {% ifequal page_len '50' %}
+                                        <option value="50" selected>50</option>
+                                    {% else %}
+                                        <option value="50">50</option>
+                                    {% endifequal %}
+                                </select>
+                            </label>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </section>
+    <!-- /.content -->
+    {#用于接收asset_edit.html中layui子层的传值#}
+    <input id="handle_status" value="" hidden="hidden">
+</div>
+
+<script>
+    $(function () {
+        $("#example1").DataTable();
+        $('#dataform').DataTable({
+            "paging": false,
+            "lengthChange": false,
+            "searching": false,
+            "ordering": true,
+            "info": false,
+            "bAutoWidth": false,
+            "bStateSave": true
+        });
+    });
+    function change_info(){
+        var args = $("#info_management_form").serialize();
+        window.location = "{% url 'information' %}?" + args
+    }
+    {# 跳转至新增页面 #}
+    function staffAdd(){
+        layer.open({
+            type: 2,
+            title: '新增人员信息',
+            closeBtn: 1,
+            area: ['700px', '550px'],
+            shadeClose: true, //点击遮罩关闭
+            content: ['/audit/informationAdd/'],
+        });
+    }
+    {# 跳转至变更页面 #}
+    function staffMod(){
+        var id = document.getElementsByName('id');
+        var staff_id = [];
+        for (var i = 0; i < id.length; i++) {
+            if (id[i].checked) {
+                staff_id.push(id[i].value);
+            }
+        }
+        if (staff_id == "" || staff_id.length > 1) {
+            alert("请选择一行进行变更！");
+        } else {
+            layer.open({
+                type: 2,
+                title: '变更人员信息',
+                closeBtn: 1,
+                area: ['700px', '550px'],
+                shadeClose: true, //点击遮罩关闭
+                content: ['/audit/informationMod/' + staff_id],
+            });
+        }
+    }
+    {# 删除 #}
+    function staffDel(a) {
+        if (!confirm(a)) {
+            window.event.returnValue = false;
+        }else{
+            //将所有复选框的默认值放入id数组中
+            var id = document.getElementsByName('id');
+            var ids = [];
+            //将所有选中复选框的默认值写入到id数组中
+            for (var i = 0; i < id.length; i++) {
+                if (id[i].checked){
+                    ids.push(id[i].value);
+                }
+            }
+            if (ids == "") {
+                alert("请至少选择一行!");
+            } else {
+                console.log(ids);
+                //ajax开始运行
+                $.ajax({
+                    url: '{% url 'informationDel' %}',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        ids: ids,
+                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                    },
+                    'traditional': true,
+                    success: function(msg){
+                        if (msg.ret == "True"){
+                            alert("删除成功！");
+                            location.reload(true);
+                        } else{
+                            alert("操作失败，请核查后重试！");
+                        }
+                    }
+                });
+            }
+        }
+    }
+    {# 导入人员信息 #}
+    $('#importStaffInfo').click(function() {
+       var form_data = new FormData();
+       form_data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+       form_data.append('staffInfoFile', $('#upFile')[0].files[0]);
+        $.ajax({
+            url: '{% url 'importStaffInfo' %}',
+            data: form_data,
+            type: 'post',
+            dataType: 'json',
+            //告诉jQuery不要去处理发送的数据, 发送对象
+            processData: false,
+            //告诉jQuery不要去设置Content-Type请求头
+            contentType: false,
+            //获取POST所需的csrftoken
+            success: function (args) {
+                alert(args.msg);
+                if("上传成功！" == args.msg){
+                    window.location = "{% url 'information' %}";
+                }
+            }
+        });
+    });
+    {# 导出人员信息 #}
+    $('#exportStaffInfo').click(function () {
+        var checkall = document.getElementsByName('checkall');
+        var staff_search = document.getElementsByName('staff_search')[0].value;
+        //将所有复选框的默认值放入id数组中
+        var ids = getIDall();
+        if (checkall[0].checked) {
+            ids = -1;
+            window.location = "{% url 'exportStaffInfo' %}?ids=" + ids + "&staff_search=" + staff_search;
+        } else {
+            if (ids == "") {
+                alert("请至少选择一行!");
+            } else {
+                window.location = "{% url 'exportStaffInfo' %}?ids=" + ids;
+            }
+        }
+    });
+    function search(){
+        var args = $("#info_management_form").serialize();
+        window.location = "{% url 'staffSearch' %}?" + args
+    }
+</script>
+<script type="text/javascript">
+    $(function(){
+        $("#avatsel1").click(function(){
+            $("input[type='file']").trigger('click');
+        });
+        $("#avatval").click(function(){
+            $("input[type='file']").trigger('click');
+        });
+        $("input[type='file']").change(function(){
+            $("#avatval").val($(this).val());
+        });
+    });
+</script>
+
+{% endblock %}
