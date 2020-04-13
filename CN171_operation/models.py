@@ -13,7 +13,7 @@ class OprFinance(models.Model):
     opr_ar_apply_detail = models.IntegerField(u"销账", null=True, blank=True, default=0)
     opr_cm_acct_balance = models.IntegerField(u"余额", null=True, blank=True, default=0)
     opr_bb_bill_charge_bonus = models.IntegerField(u"赠费", null=True, blank=True, default=0)
-    opr_ar_invoice_detail = models.IntegerField(u"账单", null=True, blank=True, default=0)
+    opr_ar_invoice_detail_all = models.IntegerField(u"账单", null=True, blank=True, default=0)
     opr_bc_acct = models.IntegerField(u"账户", null=True, blank=True, default=0)
     opr_ar_writeoff = models.IntegerField(u"呆坏账", null=True, blank=True, default=0)
     opr_ar_hunglog = models.IntegerField(u"解挂账", null=True, blank=True, default=0)
@@ -21,7 +21,7 @@ class OprFinance(models.Model):
     opr_ar_invoice_prorate = models.IntegerField(u"分摊", null=True, blank=True, default=0)
     opr_unifypayment = models.IntegerField(u"个人代付", null=True, blank=True, default=0)
     opr_check_result = models.CharField(u"校验结果", max_length=8)
-    opr_reco_time = models.DateTimeField(u"最后稽核操作时间", null=True, blank=True)
+    opr_file_iscomplete = models.CharField(u"文档是否齐全", max_length=8 ,null=True, blank=True, default='-')
 
     def __unicode__(self):
         return self.opr_finance_id
@@ -89,6 +89,7 @@ class OprFinanceReco(models.Model):
     opr_finance_reco_id = models.AutoField(u"稽核记录id", primary_key=True)
     opr_finance = models.ForeignKey(to="OprFinance", on_delete=models.CASCADE, null=True, related_name='reco')
     opr_finance_reco_result = models.CharField(u"稽核结果", max_length=8)
+    opr_finance_opruser = models.CharField(u"稽核操作人员", max_length=56,null=True, blank=True, default='-')
     opr_finance_reco_time = models.DateTimeField(u"稽核操作时间", null=True, blank=True)
     opr_finance_reco_file = models.CharField(u"稽核结果文件", max_length=32)
     opr_finance_reco_filedir = models.CharField(u"稽核结果文件存储地址", max_length=256, null=True, blank=True)

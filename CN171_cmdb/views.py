@@ -172,6 +172,47 @@ def appDel(request):
                 bg_item.delete()
     return HttpResponse(u'删除成功')
 
+#批量刷新集群下应用状态
+def batchRefreshClusterStatusInfo(request):
+    cluster_id_all = request.POST.get('cluster_id_all')
+    iscluster = request.POST.get('iscluster')
+    clusterIds=cluster_id_all.split(",")
+    appClusterId=""
+    content1=""
+    for clusterId in clusterIds:
+        appCluster = CmdbAppCluster.objects.get(id=clusterId)
+        appListInCluster = appCluster.cmdbApp_cmdbAppCluster.all()
+        for app in appListInCluster:
+           if iscluster==1:
+               appClusterId=clusterId
+           else:
+               appClusterId=app.app_id
+           content1=content1+app.cmdb_host.bg.bg_domain+" "+app.cmdb_host.bg.bg_module+" "+app.app_name+" "\
+                      +app.cmdb_host.cmdb_host_busip+" "+iscluster+" "+appClusterId+"\n"
+    nowDay = datetime.datetime.now().strftime("%Y%m%d")
+    user_name = request.session.get('user_name')
+    # 文件绝对路径
+    file_name = write_txt(content1, 'temp/cmdb/appmgnt/cluster/status/' + nowDay + "/",
+                          user_name + '_refresh_cluster_status_busip')
+    t, sftp = sftpconnect('CMIOT')
+    ansible_cmdb_appmgnt_appClusterlist_path,ansible_cmdb_appmgnt_clusterReturn_filepath = get_appmgnt_cluster_init_parameter('Ansible')
+    flag = put(sftp, file_name, ansible_cmdb_appmgnt_appClusterlist_path)
+    sftpDisconnect(t)
+    if flag:
+        tasks.batchRefreshClusterStatusTask.delay(ansible_cmdb_appmgnt_clusterReturn_filepath, user_name)
+        returnmsg = "True"
+    else:
+        returnmsg = "False"
+    return JsonResponse({'ret': returnmsg})
+
+#APP详情
+def appDetail(request):
+    appId=request.GET.get("appId")
+    app_detail = CmdbApp.objects.get( app_id=appId)
+    return render(request, "cmdb/app_detail.html", locals())
+
+
+
 #导出应用信息
 def export_app_info(request):
     list_obj=[]
@@ -199,6 +240,42 @@ def clusterAppDetail(request):
     p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(cluster_app_detail_list,
                                                                                                 request)
     return render(request, "cmdb/cluster_app_detail.html", locals())
+
+#启动/停止/重启/刷新 单个应用
+@my_login_required
+def appTaskExecuteOne(request):
+    app_id = request.POST.get('app_id')
+    app_action = request.POST.get('app_action')
+    opr_user = request.session['user_name']
+    cmdbApp = CmdbApp.objects.get(app_id=app_id)
+    if app_action == 'start':
+        cmdbApp.bg_lastopr_type = "启动"
+    elif app_action == 'restart':
+        cmdbApp.bg_lastopr_type = "重启"
+    elif app_action == 'stop':
+        cmdbApp.bg_lastopr_type = "停止"
+    else:
+        cmdbApp.bg_lastopr_type = "刷新"
+    cmdbApp.bg_lastopr_user = opr_user
+    cmdbApp.bg_lastopr_time = datetime.now()
+    cmdbApp.bg_lastopr_result = "执行中"
+    cmdbApp.save()
+    nowDay = datetime.datetime.now().strftime("%Y%m%d")
+    app_opr_content = cmdbApp.app_name + " " + cmdbApp.cmdb_host.cmdb_host_busip + " " + \
+                      cmdbApp.cmdb_host.bg.bg_module + " " + cmdbApp.cmdb_host.bg.bg_domain + " 0"
+    # 文件名
+    file_name = write_txt1(app_opr_content, 'temp/cmdb/appmgnt/oneopr/' + nowDay + "/",
+                          opr_user + '_app_oneopr_'+app_action+'_app')
+    t, sftp = sftpconnect('CMIOT')
+    ansible_host_appmgnt_applist_path, ansible_host_appmgnt_return_filepath = get_appmgnt_init_parameter('Ansible')
+    flag = put(sftp, file_name, ansible_host_appmgnt_applist_path)
+    sftpDisconnect(t)
+    if flag:
+        tasks.appTaskOne.delay(ansible_host_appmgnt_return_filepath,file_name, app_id, app_action,opr_user)
+        returnmsg = "True"
+    else:
+        returnmsg = "False"
+    return JsonResponse({'ret': returnmsg})
 
 #跳转到主机用户密码日志页面
 def hostPwdOprLogPage(request):
@@ -252,27 +329,34 @@ def editHostPwd(request):
         file_obj = request.FILES.get('modified_host_list_file')
         modified_host_user =request.POST.get("modified_host_user")
         old_password = request.POST.get("old_password")
+        new_password = request.POST.get("new_password1")
         username = request.session['user_name']
         file_path = os.path.join(BASE_DIR, "temp")
         path_not_exist_create(file_path)
         file_name_path=os.path.join(file_path,file_obj.name)
         try:
             #将文件从客户机浏览器写入到服务器
-            f = open(file_name_path, 'wb')
+            fwrite = open(file_name_path, 'wb')
             # chunks表示一块块的
             for line in file_obj.chunks():
-                f.write(line)
-            f.close()
+                fwrite.write(line)
+            fwrite.close()
+
+            fread = open(file_name_path, 'rU', encoding='utf-8')
+            linelen = len(fread.readlines())
+            print('保存主机列表文件到临时目录：%s' %file_name_path)
             #将服务器文件sftp到Ansible主机
             client, sftp=sftpconnect("CMIOT")
+            #获取Ansible主机存放操作列表的目录
             ansible_host_pwmgnt_ipfile_path=get_init_parameter2('Ansible')
+            #生成操作列表全路径
+            ansible_host_pwmgnt_ipfile = ansible_host_pwmgnt_ipfile_path + file_obj.name
             flag=put(sftp,file_name_path, ansible_host_pwmgnt_ipfile_path)
+            print('上传主机列表文件到Ansible主机目录：%s' %ansible_host_pwmgnt_ipfile_path)
             sftpDisconnect(client)
             #执行命令
-            #后期添加的这一句
-            ansible_host_pwmgnt_ipfile=ansible_host_pwmgnt_ipfile_path+file_obj.name
             if(flag):
-                detail_log_info, retStr = excute_edit_commond(ansible_host_pwmgnt_ipfile, modified_host_user, old_password)
+                detail_log_info, retStr = excute_edit_commond(ansible_host_pwmgnt_ipfile, modified_host_user, new_password, linelen)
                 if retStr:
                     ret['status'] = True
                     ret['msg'] = "修改成功！"
@@ -294,40 +378,36 @@ def editHostPwd(request):
 
 
 #登录到相应的主机执行修改命令
-def excute_edit_commond(ansible_host_pwmgnt_ipfile, modified_host_user, old_password):
+def excute_edit_commond(ansible_host_pwmgnt_ipfile, modified_host_user, new_password, linelen):
     retStr = False
     #修改主机密码的命令
-    cmd = "ansible -i %s all -u ansbmk -k -b -K -f 500 -m shell -a 'echo %s:%s|chpasswd'\r" \
-          % (ansible_host_pwmgnt_ipfile, modified_host_user, old_password)
+    cmd = "ansible -i %s all -u ansbmk -k -b -K -f 500 -m shell -a \"echo %s:%s|chpasswd\"\r" \
+          % (ansible_host_pwmgnt_ipfile, modified_host_user, new_password)
     #ansible普通用户密码
     ansible_host_pwmgnt_login_pwd,ansible_host_pwmgnt_root_pwd = get_init_parameter1("Ansible")
     cmd1 = "%s" % (ansible_host_pwmgnt_login_pwd+"\r")
     #ansibile root用户密码
     cmd2 = "%s" % (ansible_host_pwmgnt_root_pwd+"\r")
     trans, channel = build_shell_channel("Ansible")
-    # 发送要执行的命令
+    #发送要执行的命令
+    print('执行命令： ansible -i %s all -u ansbmk -k -b -K -f 500 -m shell -a \"echo %s:******|chpasswd\"'
+          %(ansible_host_pwmgnt_ipfile, modified_host_user))
+    detail_log_tmp = ''
     channel.send(cmd)
     while True:
         time.sleep(0.2)
-        rst = channel.recv(1024)
-        rst = rst.decode('utf-8')
-        print(rst)
+        receive = channel.recv(1024).decode('utf-8', 'ignore')
+        detail_log_tmp = detail_log_tmp + receive
         # 通过命令执行提示符来判断命令是否执行完成
-        if 'SSH password' in rst:
+        if 'SSH password' in receive:
             channel.send(cmd1)  # SSH password  普通用户密码
-            time.sleep(0.5)
-            ret = channel.recv(1024)
-            ret = ret.decode('utf-8')
-            print(ret)
-            if "SUDO password" in ret:
-                channel.send(cmd2)  # ansibile主机 root用户密码
-                time.sleep(0.5)
-                detail_log = channel.recv(1024)
-                detail_log = detail_log.decode('utf-8')
-                print(detail_log)
-                if "FAILED" not in detail_log and "SUCCESS" in detail_log:
-                    retStr = True
-                break
+        if "SUDO password" in receive:
+            channel.send(cmd2)  # ansibile主机 root用户密码
+        if detail_log_tmp.count('rc=') == linelen:
+            if detail_log_tmp.count('rc=1') == 0:
+                retStr = True
+            detail_log = detail_log_tmp.replace(new_password, '******')
+            break
     close_shell_channel(trans, channel)
     return detail_log, retStr
 

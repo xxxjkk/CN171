@@ -144,6 +144,11 @@ def get_init_parameter(conntarget):
         port=config.get('PBOSS','pboss_order_port')
         username = config.get('PBOSS', 'pboss_order_user')
         password = config.get('PBOSS', 'pboss_order_password')
+    elif conntarget == "Ansible":
+        hostname = config.get('Ansible', 'ansible_host_host')
+        port = config.get('Ansible', 'ansible_host_port')
+        username = config.get('Ansible', 'ansible_host_user')
+        password = config.get('Ansible', 'ansible_host_password')
     else:
         print(conntarget + "not find!")
         exit()

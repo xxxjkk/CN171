@@ -11,6 +11,7 @@ import sys
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db.models import Count
+from django.core.cache import cache
 
 from CN171_operation.sftputils import *
 from CN171_operation.models import *
@@ -40,8 +41,12 @@ def cFinanceFileDownload():
 
     #获取本地存放路径
     localfiledirtmp = config.get('Finance', 'finance_localfiledirtmp')
+    if not os.path.exists(localfiledirtmp):
+        print(u'目录%s不存在，新建目录！' % localfiledirtmp)
+        os.makedirs(localfiledirtmp)
     #获取远端存放路径
     bdifiledir = config.get('Finance', 'finance_bdifiledir')
+
     #获取近6个月的账务周期
     #cycle = (datetime.datetime.now()-relativedelta(months=1)).strftime("%Y-%m")
     cycle_list = []
@@ -76,7 +81,7 @@ def cFinanceFileDownload():
     #根据主机列表进行文件下载
     for host in hostip_list:
         print(u'-------------主机：%s-------------' %host)
-        sftp = sftpconnect("Finance_BDI", host=host, port=port, user=user, passwd=passwd)
+        client, sftp = sftpconnect("Finance_BDI", host=host, port=port, user=user, passwd=passwd)
         file_list, filemtime_list = getFilesListInRemoteHost(sftp, bdifiledir)
 
         #需要下载的文件列表、文件时间列表、是否新文件标识列表、文件类型列表
@@ -129,7 +134,7 @@ def cFinanceFileDownload():
             if not result:
                 #文件是否更新标识为已更新
                 isupdate = 'true'
-
+        sftpDisconnect(client)
         print(u'--------------------------------------------')
 
     print('所有主机的账务文件下载结束！')
@@ -141,7 +146,7 @@ def cFinanceMgntClassify():
     print('开始整理账务文件..................')
     #获取本地存放路径
     localfiledirtmp = config.get('Finance', 'finance_localfiledirtmp')
-    localfiledir = config.get('Finance', 'finance_localfiledir')
+    localfiledir = os.path.join(config.get('Finance', 'finance_localfiledir'), '原始文件')
 
     #进行账务文件整理
     filelist = filesClassify(localfiledirtmp, localfiledir)
@@ -167,7 +172,7 @@ def cFinanceFileSftp(filelist):
     financefiledir = config.get('Finance', 'finance_financefiledir')
 
     print(u'-------------主机：%s-------------' % host)
-    sftp = sftpconnect("Finance_BDI", host=host, port=port, user=user, passwd=passwd)
+    client, sftp = sftpconnect("Finance_BDI", host=host, port=port, user=user, passwd=passwd)
     sshd = ssh_connect("Finance_Reco")
     file_fail_list = sftpPutRemoteHostDir(sftp=sftp, sshd=sshd, localdir='', remotedir=financefiledir,
                                   type='Finance_BDI', filelist=filelist)
@@ -179,11 +184,15 @@ def cFinanceFileSftp(filelist):
 
 
 
+
+
+
 #测试用
 def cFinanceTest():
 
-    ctime = os.stat('file\cmiot_finance_temp\测试.zip').st_ctime
+    localfiledir = config.get('Finance', 'finance_localfiledir')
+    print(localfiledir)
 
-    print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(ctime)))
+    print(os.path.join(localfiledir, '原始文件'))
 
     return

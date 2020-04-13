@@ -423,6 +423,7 @@ def permissionDel(request):
     ids = request.POST.getlist('ids', [])
     returnmsg = "true"
     for id in ids:
+        print("删除的id :", id)
         permission = models.Permission.objects.get(id=id)
         role = permission.role_set.all()
         parent = models.Permission.objects.filter(parent = permission)

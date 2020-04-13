@@ -41,10 +41,10 @@ def sftpconnect(type, **kwargs):
 
     elif type == "CMIOT":
         # CMIOT主机配置
-        cmiot_host = config.get('Ansible', 'ansible_host')
-        cmiot_port = config.get('Ansible', 'ansible_port')
-        cmiot_user = config.get('Ansible', 'ansible_user')
-        cmiot_password = config.get('Ansible', 'ansible_password')
+        cmiot_host = config.get('Ansible', 'ansible_host_host')
+        cmiot_port = config.get('Ansible', 'ansible_host_port')
+        cmiot_user = config.get('Ansible', 'ansible_host_user')
+        cmiot_password = config.get('Ansible', 'ansible_host_password')
 
         t = paramiko.Transport(sock=(cmiot_host,int(cmiot_port)))
         t.connect(username=cmiot_user, password=cmiot_password)
@@ -64,7 +64,7 @@ def sftpconnect(type, **kwargs):
 
     sftp = paramiko.SFTPClient.from_transport(t)
 
-    return sftp
+    return t, sftp
 
 #连接关闭
 def sftpDisconnect(client):
@@ -147,8 +147,8 @@ def put(sftp,local,remote):
         print("'"+local+"': No such file or directory in local")
         return False
     #检查remote的父目录
-    remote_parent =  os.path.dirname(os.path.normpath(remote))
-    if not _is_exists(remote_parent,function=sftp.chdir):
+    #remote_parent =  os.path.dirname(os.path.normpath(remote))
+    if not _is_exists(remote, function=sftp.chdir):
         print("'"+remote+"': No such file or directory in remote")
         return False
     #拷贝文件

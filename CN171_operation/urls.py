@@ -23,9 +23,16 @@ urlpatterns = [
     #CMIOT账务文件管理页面--校验结果
     url(r'^cmiotFinanceFileCheck/', oprviews.cFinanceFileCheckDetail, name='cFinanceFileCheckDetail'),
     # CMIOT账务文件管理页面--下载跳转
-    url(r'^cFinanceMgntDownloadGoto/', oprviews.cFinanceMgntDownloadGoto, name='cFinanceMgntDownloadGoto'),
-
+    url(r'^cmiotFinanceMgntDownloadGoto/', oprviews.cFinanceMgntDownloadGoto, name='cFinanceMgntDownloadGoto'),
+    # CMIOT账务文件管理页面--下载跳转
+    url(r'^cmiotFinanceMgntDownload/', oprviews.cFinanceMgntDownload, name='cFinanceMgntDownload'),
 
     #CMIOT账务文件稽核页面
     url(r'^cmiotFinanceReco/', oprviews.cFinanceReco, name='cFinanceReco'),
+    #CMIOT账务文件稽核页面--查询
+    url(r'^cmiotFinanceRecoSearch/', oprviews.cFinanceRecoSearch, name='cFinanceRecoSearch'),
+    # CMIOT账务文件稽核页面--下载跳转
+    url(r'^cmiotFinanceRecoDownload/', oprviews.cFinanceRecoDownload, name='cFinanceRecoDownload'),
+    # CMIOT账务文件稽核页面--稽核操作
+    url(r'^cmiotFinanceRecoAction/', oprviews.cFinanceRecoAction, name='cFinanceRecoAction'),
 ]
