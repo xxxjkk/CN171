@@ -11,7 +11,9 @@
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header">信息管理</section>
+    <section class="content-header">
+        <h4>信息管理</h4>
+    </section>
 
     <!-- Main content -->
     <section class="content">
@@ -26,11 +28,11 @@
                         <a id="staffMod" style="display: none" href="#" onclick="staffMod()" class="btn btn-success">&nbsp;&nbsp;变更&nbsp;&nbsp;</a>
                     </div>
                     <div class="btn-group">
-                        <a id="staffDel" style="display: none" onclick="staffDel('确定删除所选用户吗')" class="btn btn-success">&nbsp;&nbsp;删除&nbsp;&nbsp;</a>
+                        <a id="staffDel" style="display: none" onclick="staffDel('确定删除所选用户吗？')" class="btn btn-success">&nbsp;&nbsp;删除&nbsp;&nbsp;</a>
                     </div>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <div class="btn-group">
-                        <input type="text" size="25" name="file" id="ufile" readonly="readonly" style="line-height: 25px; float: left" placeholder="请选择文件···">
+                        <input type="text" size="25" name="file" id="ufile" readonly="readonly" style="line-height: 25px; float: left" placeholder="  请选择文件···">
                         <input type="button" value="浏览" onclick="upFile.click()" style="line-height: 25px;">
                         <input type="file" id="upFile" name="upFile" style="display: none" onchange="file.value=this.value">
                     </div>
@@ -44,7 +46,7 @@
                         <span id="mesId"></span>
                     </div>
                     <div class="input-group inline-group col-md-3" style="float: right">
-                        <input type="text" class="form-control" id="staff_name_search" name="staff_name_search" placeholder="姓名">
+                        <input type="text" class="form-control" id="staff_search" name="staff_search" value="{{staff_search}}" placeholder="姓名/所在组/系统">
                         <div class="input-group-btn">
                             <button type="button" class="btn btn-primary" onclick="search()">搜索</button>
                         </div>
@@ -88,7 +90,7 @@
                         {% include 'paginator.html' %}
                         <ul style="margin-top: 0;">
                             <label for="page_len">
-                                <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
+                                <select name="page_len" id="page_len" class="form-control m-b input-sm-33" onchange="change_info()">
                                     {% ifequal page_len '10' %}
                                         <option value="10" selected>10</option>
                                     {% else %}
@@ -148,14 +150,13 @@
     {# 跳转至变更页面 #}
     function staffMod(){
         var id = document.getElementsByName('id');
-        var staff_id = -1;
+        var staff_id = [];
         for (var i = 0; i < id.length; i++) {
             if (id[i].checked) {
-                staff_id = id[i].value;
-                break;
+                staff_id.push(id[i].value);
             }
         }
-        if (staff_id == -1) {
+        if (staff_id == "" || staff_id.length > 1) {
             alert("请选择一行进行变更！");
         } else {
             layer.open({
@@ -226,25 +227,25 @@
             success: function (args) {
                 alert(args.msg);
                 if("上传成功！" == args.msg){
-                    window.location="{% url 'information' %}";
+                    window.location = "{% url 'information' %}";
                 }
             }
         });
     });
     {# 导出人员信息 #}
     $('#exportStaffInfo').click(function () {
-        var all = document.getElementsByName('checkall');
+        var checkall = document.getElementsByName('checkall');
+        var staff_search = document.getElementsByName('staff_search')[0].value;
         //将所有复选框的默认值放入id数组中
         var ids = getIDall();
-        if (all[0].checked) {
+        if (checkall[0].checked) {
             ids = -1;
-            window.location="{% url 'exportStaffInfo' %}?ids=" + ids;
+            window.location = "{% url 'exportStaffInfo' %}?ids=" + ids + "&staff_search=" + staff_search;
         } else {
             if (ids == "") {
                 alert("请至少选择一行!");
             } else {
-                console.log(ids);
-                window.location="{% url 'exportStaffInfo' %}?ids=" + ids;
+                window.location = "{% url 'exportStaffInfo' %}?ids=" + ids;
             }
         }
     });
