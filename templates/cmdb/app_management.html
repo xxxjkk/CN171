@@ -260,7 +260,7 @@ $('#clusterRefresh').click(function () {
              data: {
                   csrfmiddlewaretoken: '{{ csrf_token }}',
                   cluster_id_all:cluster_id_all,
-                  iscluster:1
+                  iscluster:0
              },
              traditional: true,
              success:function(msg){
@@ -348,6 +348,34 @@ function checkSubmit(status, app_id, action) {
              }else{
                 msg = "中心非“停止”状态！"
                 alert(msg);
+             }
+        break;
+        case "status":
+             msg = "确定刷新？";
+             if (!confirm(msg)) {
+                window.event.returnValue = false;
+             }else{
+                    $.ajax({
+                            url: '{% url 'appTaskExecuteOne' %}',
+                            type: 'post',
+                            dataType: 'json',
+                            data: {
+                                app_id: app_id,
+                                app_action: action,
+                                csrfmiddlewaretoken: '{{ csrf_token }}'
+                            },
+                            'traditional': true,
+                            success:function(msg){
+                                   if(msg.ret=='True'){
+                                       alert("指令发送成功，执行中！");
+                                       location.reload(true);
+                                   }
+                                   else{
+                                        alert("操作失败,请核查后重试！");
+                                        location.reload(true);
+                                   }
+                            }
+                    });
              }
         break;
         case "stop":

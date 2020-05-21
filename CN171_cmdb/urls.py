@@ -33,4 +33,8 @@ urlpatterns = [
     url(r'^import_app_info/', cmdbviews.import_app_info, name='import_app_info'),
     url(r'^batch_refresh_cluster_status_info/', cmdbviews.batchRefreshClusterStatusInfo, name='batchRefreshClusterStatusInfo'),
     url(r'^app_task_execute_one/', cmdbviews.appTaskExecuteOne, name='appTaskExecuteOne'),
+
+    #存储管理
+    url(r'^storage_management/', cmdbviews.storageManagement, name='storageManagement'),
+
 ]

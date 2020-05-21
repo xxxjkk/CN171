@@ -9,7 +9,7 @@ from CN171_tools.connecttool import ssh_connect, ssh_exec_cmd, readFile, get_app
 
 
 #app操控命令发送执行
-def appTaskTest(ansible_host_appmgnt_return_filepath,file_name,app_id, app_action, opr_user,applog_id):
+def appTaskTest(ansible_host_appmgnt_return_filepath,ansible_host_appmgnt_applist_path,app_id, app_action, opr_user,applog_id):
     cmdbApp = CmdbApp.objects.get(app_id=app_id)
     applog = CmdbAppLog.objects.get(id=applog_id)
     #执行结果文件返回路径
@@ -21,7 +21,7 @@ def appTaskTest(ansible_host_appmgnt_return_filepath,file_name,app_id, app_actio
     dir_cmd = "mkdir " + file_path_return
     ssh_exec_cmd(sshd, dir_cmd)
     cmd = "sh appopr.sh "+ " |tee -a " + file_path_return  + file_name_return + ".log"
-    # cmd = "./clusterManagement.sh "+file_name+" action=" +app_action+ " |tee -a " + file_path_return  + file_name_return + ".log"
+    #cmd = "./clusterManagement.sh "+app_action+" "+file_name+" |tee -a " + file_path_return  + file_name_return + ".log"
     stdin, stdout, stderr = ssh_exec_cmd(sshd, cmd)
     err_list = stderr.readlines()
     if len(err_list) > 0:
