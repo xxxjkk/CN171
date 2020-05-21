@@ -81,7 +81,7 @@
                 <!-- /.box-header -->
 
                 <div class="box-body">
-                  <table class="table table-striped table-bordered" id="dataform">
+                    <table class="table table-striped table-bordered" id="dataform">
                       <thead>
                         <tr>
                                     <th width="10%" style="text-align:center;">数据库名</th>
@@ -89,7 +89,7 @@
                                     <th width="10%" style="text-align:center;">生成时间</th>
                                     <th width="10%" style="text-align:center;">告警阈值</th>
                                     <th width="20%" style="text-align:center;">预测开始时间</th>
-									<th width="20%" style="text-align:center;">预测结束时间</th>
+                                    <th width="20%" style="text-align:center;">预测结束时间</th>
                                     <th width="10%" style="text-align:center;">生成状态</th>
                                     <th width="10%" style="text-align:center;">预测结果</th>
                                 </tr>
@@ -102,7 +102,7 @@
                                         <td width="14%" style="text-align:center;">{{log_dict.create_time}}</td>
                                         <td width="10%" style="text-align:center;">{{log_dict.alarm_threshold}}</td>
                                         <td width="20%" style="text-align:center;">{{log_dict.start_time}}</td>
-										<td width="20%" style="text-align:center;">{{log_dict.end_time}}</td>
+                                        <td width="20%" style="text-align:center;">{{log_dict.end_time}}</td>
                                         <td width="10%" style="text-align:center;">{{log_dict.status}}</td>
                                         <td width="10%" style="text-align:center;">
                                             <a href="#" style="list-style-type:none" onclick="return resultEcharts({{log_dict.id}})">结果展示</a>
@@ -110,31 +110,32 @@
                                 </tr>
                                 {% endfor %}
                             </tbody>
-                  </table>
-                <div class="row" style="width: auto">
-                    {% include 'aiops/paginator_aiopslog.html' %}
-                    <ul style="margin-top: 0;">
-                            <label for="page_len">
-                              <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
-                                {% ifequal page_len '10' %}
-                                    <option value="10" selected>10</option>
-                                {% else %}
-                                    <option value="10">10</option>
-                                {% endifequal %}
-                                {% ifequal page_len '20' %}
-                                    <option value="20" selected>20</option>
-                                {% else %}
-                                    <option value="20">20</option>
-                                {% endifequal %}
-                                {% ifequal page_len '50' %}
-                                    <option value="50" selected>50</option>
-                                {% else %}
-                                    <option value="50">50</option>
-                                {% endifequal %}
-                            </select>
-                         </label>
-                    </ul>
-                </div>
+                    </table>
+                    <br/>
+                    <div class="row" style="width: auto">
+                        {% include 'aiops/paginator_aiopslog.html' %}
+                        <ul style="margin-top: 0;">
+                                <label for="page_len">
+                                  <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
+                                    {% ifequal page_len '10' %}
+                                        <option value="10" selected>10</option>
+                                    {% else %}
+                                        <option value="10">10</option>
+                                    {% endifequal %}
+                                    {% ifequal page_len '20' %}
+                                        <option value="20" selected>20</option>
+                                    {% else %}
+                                        <option value="20">20</option>
+                                    {% endifequal %}
+                                    {% ifequal page_len '50' %}
+                                        <option value="50" selected>50</option>
+                                    {% else %}
+                                        <option value="50">50</option>
+                                    {% endifequal %}
+                                </select>
+                             </label>
+                        </ul>
+                    </div>
                </div>
             </div>
         </form>

@@ -3,6 +3,7 @@
 
 {% block self_head_css_js %}
     <script src="{% static 'layer/layer.js' %}"></script>
+    <script src="{% static 'js/base.js' %}"></script>
     <script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
     <script src="{% static 'plugins/datatables/dataTables.bootstrap.min.js' %}"></script>
     <script src="{% static 'plugins/datatables/dataTables.bootstrap.css' %}"></script>
@@ -44,18 +45,18 @@
                         <input type="text" class="form-control" name="cycle" placeholder="YYYY-MM" id="month-picker" readonly value="{{ month }}">&nbsp;  &nbsp;  &nbsp
                         <label>稽核结果:  &nbsp;</label>
                         <select id="select2">
-                            {% for checkresult in checkresult_list %}
-                            <option>{{checkresult}}</option>
+                            {% for recoresult in recoresult_list %}
+                            <option>{{recoresult}}</option>
                             {% endfor %}
                         </select>  &nbsp;  &nbsp;
                         <div class="btn-group">
                             <a id="search" style="display: none" href="#" class="btn btn-info" onclick="searchbyargs()"><i class="fa fa-search"></i>搜索</a>
                         </div>  &nbsp;  &nbsp;
                         <div class="btn-group">
-                            <a id="upload" style="display: none" href="#" class="btn btn-warning" onclick="upload()">账务文件稽核</a>
+                            <a id="upload" style="display: none" href="#" class="btn btn-warning" onclick="financereco('确定稽核√选的省份吗？')">账务文件稽核</a>
                         </div>  &nbsp;  &nbsp;
                         <div class="btn-group">
-                            <a id="download" style="display: none" href="#" class="btn btn-success" onclick="download()">稽核结果下载</a>
+                            <a id="download" style="display: none" href="#" class="btn btn-success" onclick="resultdownload('确定下载√选的稽核结果吗？')">稽核结果下载</a>
                         </div>  &nbsp;  &nbsp;
                     </div>
                 </div>
@@ -66,29 +67,35 @@
                       <thead id="thead">
                         <tr>
                             <!--垂直居中：vertical-align: middle;-->
-                            <th width="5%" style="text-align:center;vertical-align: middle;">区域/省份</th>
-                            <th width="5%" style="text-align:center;vertical-align: middle;">账期</th>
-                            <th width="5%" style="text-align:center;vertical-align: middle;">文件是否齐全</th>
-                            <th width="6%" style="text-align:center;vertical-align: middle;">校验结果</th>
-                            <th width="8%" style="text-align:center;vertical-align: middle;">最后稽核操作时间</th>
-                            <th width="20%" style="text-align:center;vertical-align: middle;">稽核结果文件</th>
+                            <th width="6%" style="text-align:center;">
+                                <input id="checkall" type="checkbox" class="i-checks" name="checkall" value="checkall" data-editable='false' onclick="check_all('cmiotFinanceRecoForm')">
+                            </th>
+                            <th width="8%" style="text-align:center;vertical-align: middle;">区域/省份</th>
+                            <th width="6%" style="text-align:center;vertical-align: middle;">账期</th>
+                            <th width="6%" style="text-align:center;vertical-align: middle;">文档是否齐全</th>
+                            <th width="6%" style="text-align:center;vertical-align: middle;">稽核结果</th>
+                            <th width="8%" style="text-align:center;vertical-align: middle;">操作人员</th>
+                            <th width="10%" style="text-align:center;vertical-align: middle;">操作时间</th>
+                            <th width="12%" style="text-align:center;vertical-align: middle;">稽核结果文件</th>
                         </tr>
                       </thead>
                       <tbody id="tbody">
-                        {% for finance in finance_list %}
+                        {% for financereco in page_objects %}
                         <tr class="even gradeX">
-                            <td width="5%" style="text-align:center;vertical-align: middle;">{{finance.opr_area}}</td>
-                            <td width="5%" style="text-align:center;vertical-align: middle;">{{finance.opr_cycle}}</td>
-                            <td width="5%" style="text-align:center;vertical-align: middle;"><a href="#" style="text-decoration:underline">{{finance.opr_payment}}</a></td>
-                            <td width="6%" style="text-align:center;vertical-align: middle;"><a href="#" style="text-decoration:underline">{{finance.opr_check_result}}</a></td>
-                            <td width="8%" style="text-align:center;vertical-align: middle;">{{finance.opr_reco_time}}</td>
-                            <td width="20%" style="text-align:center;vertical-align: middle;">{{finance.opr_reco_time}}</td>
+                            <td width="6%" style="text-align:center;"><input type="checkbox" id="id" class="i-checks" name="id" value="{{financereco.opr_finance_reco_id}}"/></td>
+                            <td width="8%" style="text-align:center;vertical-align: middle;">{{financereco.opr_finance.opr_area}}</td>
+                            <td width="6%" style="text-align:center;vertical-align: middle;">{{financereco.opr_finance.opr_cycle}}</td>
+                            <th width="6%" style="text-align:center;vertical-align: middle;"><a href="#" style="text-decoration:underline">{{financereco.opr_finance.opr_file_iscomplete}}</a></th>
+                            <td width="6%" style="text-align:center;vertical-align: middle;"><a href="#" style="text-decoration:underline">{{financereco.opr_finance_reco_result}}</a></td>
+                            <td width="8%" style="text-align:center;vertical-align: middle;">{{financereco.opr_finance_opruser}}</td>
+                            <td width="10%" style="text-align:center;vertical-align: middle;">{{financereco.opr_finance_reco_time}}</td>
+                            <td width="12%" style="text-align:center;vertical-align: middle;"><a href="#" style="text-decoration:underline" name="file" onclick="resultdownload({{financereco.opr_finance_reco_id}})">{{financereco.opr_finance_reco_file}}</a></td>
                         </tr>
                         {% endfor %}
                       </tbody>
                   </table>
                 <div class="row" style="width: auto">
-                    {% include 'paginator.html' %}
+                    {% include 'operation/paginator_cFinance.html' %}
                     <ul style="margin-top: 0;">
                         <label for="page_len">
                             <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
@@ -151,8 +158,68 @@
 
 <script>
     function change_info(){
-        var args = $("#cmiotFinanceRecoForm").serialize();
-        window.location = "{% url 'cFinanceMgnt' %}?" + args;
+        monthpicker = document.getElementById('month-picker').value;
+        area_list = $("#select1").getSelectValueArr();
+        result_list = $("#select2").getSelectValueArr();
+        page_len = document.getElementById('page_len').value;
+
+        <!--判断查询条件是否均为空-->
+        if (monthpicker=="" && area_list=="" && result_list=="") {
+            window.location = "{% url 'cFinanceReco' %}?page_len=" + page_len;
+        }else{
+            <!--对查询条件变量进行统一封装-->
+            var section_info = {
+                monthpicker,
+                area_list,
+                result_list,
+                page_len,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            }
+            <!--将变量传至后台-->
+            $.ajax({
+                    type: "post",
+                    data: section_info,
+                    traditional:true,
+                    url: "{% url 'cFinanceRecoSearch' %}",
+                    success: function(data){
+                        $('#box-body').html(data.html);
+                    },
+                    error:function(){
+                        alert("查询失败");
+                    }
+            });
+        }
+    }
+</script>
+
+<script>
+    function change_page(page, page_len){
+        monthpicker = document.getElementById('month-picker').value;
+        area_list = $("#select1").getSelectValueArr();
+        result_list = $("#select2").getSelectValueArr();
+
+        <!--对查询条件变量进行统一封装-->
+        var section_info = {
+            monthpicker,
+            area_list,
+            result_list,
+            page,
+            page_len,
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+        }
+        <!--将变量传至后台-->
+        $.ajax({
+                type: "post",
+                data: section_info,
+                traditional:true,
+                url: "{% url 'cFinanceRecoSearch' %}",
+                success: function(data){
+                    $('#box-body').html(data.html);
+                },
+                error:function(){
+                    alert("查询失败");
+                }
+        });
     }
 </script>
 
@@ -161,16 +228,18 @@
         monthpicker = document.getElementById('month-picker').value;
         area_list = $("#select1").getSelectValueArr();
         result_list = $("#select2").getSelectValueArr();
+        page_len = document.getElementById('page_len').value;
 
         <!--判断查询条件是否均为空-->
         if (monthpicker=="" && area_list=="" && result_list=="") {
-            window.location = "{% url 'cFinanceMgnt' %}";
+            window.location = "{% url 'cFinanceReco' %}?page_len=" + page_len;
         }else{
             <!--对查询条件变量进行统一封装-->
             var section_info = {
                 monthpicker,
                 area_list,
                 result_list,
+                page_len,
                 'csrfmiddlewaretoken': '{{ csrf_token }}',
             }
             <!--将变量传至后台-->
@@ -178,9 +247,9 @@
                     type: "post",
                     data: section_info,
                     traditional:true,
-                    url: "{% url 'cFinanceMgntSearch' %}",
+                    url: "{% url 'cFinanceRecoSearch' %}",
                     success: function(data){
-                        $('#tbody').html(data.html);
+                        $('#box-body').html(data.html);
                     },
                     error:function(){
                         alert("查询失败");
@@ -190,19 +259,135 @@
     }
 </script>
 <script>
-function upload(){
-    layer.open({
-    type: 2,
-    title: '上传账务文件',
-    closeBtn: 1,
-    area: ['600px', '300px'],
-    shadeClose: true, //点击遮罩关闭
-    content: ['/operation/cmiotFinanceMgntFileUploadGoto/'],
-    end:function(){
-        location.reload(true);
-    },
-  });
-}
-</script>
+    function resultdownload(a) {
+        if (isNaN(a)) {
+            var page = "recodownload";
+            var isempty = "";
 
+            <!-- 将所有复选框的默认值放入id数组中 -->
+            var id = document.getElementsByName('id');
+            var file = document.getElementsByName('file');
+            var id_list = [];
+            <!-- 将所有选中复选框的默认值写入到id数组中 -->
+            for (var i = 0; i < id.length; i++) {
+                if (id[i].checked){
+                    id_list.push(id[i].value);
+                    if (file[i].innerHTML == "-") {
+                        isempty = "true"
+                    }
+                }
+            }
+            <!-- 判断是否有√选 -->
+            if (id_list.length == 0){
+                alert("√选不能为空！")
+            }else if (isempty == "true"){
+                alert("请不要√选无稽核文件的省份！")
+            }else{
+                if (!confirm(a)) {
+                    window.event.returnValue = false;
+                }else{
+                    var existflag;
+
+                    <!--对查询条件变量进行统一封装-->
+                    var section_info = {
+                        page,
+                        id_list,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    }
+                    <!--将变量传至后台-->
+                    $.ajax({
+                            type: "post",
+                            data: section_info,
+                            traditional:true,
+                            async:false,
+                            url: "{% url 'cFinanceRecoDownload' %}",
+                            success: function(data){
+                                var data=JSON.parse(data)
+                                if (data.existflag){
+                                    existflag=data.existflag
+                                    alert(data.existdes)
+                                }else{
+                                    alert(data.existdes)
+                                }
+                            },
+                            error:function(){
+                                alert("下载失败！");
+                            }
+                    })
+                    if (existflag){
+                        var sitv = setInterval(function(){
+                            var url = "{% url 'cFinanceRecoDownload' %}"
+                            $.getJSON(url, function(data){
+                                <!-- 改变进度条进度 -->
+                                $('#progressbar').width(data.percent + '%');
+                                $('#percent').text(data.percent + '%');
+                                if (data.percent == 100.0){
+                                    clearInterval(sitv);
+                                    window.location = "{% url 'cFinanceRecoDownload' %}?filename="+data.filename;
+                                }
+                            });
+                        }, 1000); <!-- 每1秒查询一次后台进度 -->
+                    }
+                }
+            }
+        }else{
+            window.location = "{% url 'cFinanceRecoDownload' %}?id="+a;
+        }
+    }
+</script>
+<script>
+    function financereco(a) {
+        var isempty = ""
+
+        <!-- 将所有复选框的默认值放入id数组中 -->
+        var id = document.getElementsByName('id');
+        var file = document.getElementsByName('file');
+        var id_list = [];
+        <!-- 将所有选中复选框的默认值写入到id数组中 -->
+        for (var i = 0; i < id.length; i++) {
+            if (id[i].checked){
+                id_list.push(id[i].value);
+                if (file[i].innerHTML != "-") {
+                    isempty = "false"
+                }
+            }
+        }
+        <!-- 判断是否有√选 -->
+        if (id_list.length == 0){
+            alert("√选不能为空！")
+        }else{
+            if (isempty == "false"){
+                a = "部分√选省份已存在稽核文件，是否重新稽核？"
+            }
+            if (!confirm(a)) {
+                window.event.returnValue = false;
+            }else{
+                <!--对查询条件变量进行统一封装-->
+                var section_info = {
+                    id_list,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                }
+                <!--将变量传至后台-->
+                $.ajax({
+                        type: "post",
+                        data: section_info,
+                        traditional:true,
+                        async:false,
+                        url: "{% url 'cFinanceRecoAction' %}",
+                        success: function(data){
+                            var data=JSON.parse(data)
+                            if (data.existflag){
+                                alert(data.existdes)
+                            }else{
+                                alert(data.existdes)
+                            }
+                        },
+                        error:function(){
+                            alert("稽核操作失败！");
+                        }
+                })
+            }
+        }
+    }
+</script>
 {% endblock %}

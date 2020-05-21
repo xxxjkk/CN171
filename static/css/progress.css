@@ -1,0 +1,12 @@
+/*进度条外边框样式*/
+.progresscontainer{
+    margin: 10px;
+    height: 12px;
+    border: solid 1px green;
+}
+/*进度条样式*/
+.progressbar{
+    width: 0%;
+    height: 100%;
+    background-color: green;
+}

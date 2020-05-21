@@ -1,20 +1,72 @@
-                        {% for finance in finance_list %}
-                        <tr class="even gradeX">
-                            <td width="5%" style="text-align:center;vertical-align: middle;">{{finance.opr_area}}</td>
-                            <td width="5%" style="text-align:center;vertical-align: middle;">{{finance.opr_cycle}}</td>
-                            <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('缴费', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_payment}}</a></td>
-                            <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('欠费', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_invoice_detail_owe}}</a></td>
-                            <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('调账', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_adjustment}}</a></td>
-                            <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('销账', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_apply_detail}}</a></td>
-                            <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('余额', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_cm_acct_balance}}</a></td>
-                            <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('赠费', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_bb_bill_charge_bonus}}</a></td>
-                            <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('账单', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_invoice_detail}}</a></td>
-                            <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('账户', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_bc_acct}}</a></td>
-                            <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('呆坏账', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_writeoff}}</a></td>
-                            <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('解挂账', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_hunglog}}</a></td>
-                            <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('转账', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_transfer}}</a></td>
-                            <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('分摊', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_invoice_prorate}}</a></td>
-                            <td width="6%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="checkresult('{{finance.opr_finance_id}}','{{finance.opr_check_result}}')" style="text-decoration:underline">{{finance.opr_check_result}}</a></td>
-                            <td width="8%" style="text-align:center;vertical-align: middle;">{{finance.opr_reco_time}}</td>
-                        </tr>
-                        {% endfor %}
+<div id="box-body" class="box-body">
+    <table class="table table-striped table-bordered" id="dataform">
+        <thead id="thead">
+            <tr>
+                <!--垂直居中：vertical-align: middle;-->
+                <th width="5%" style="text-align:center;vertical-align: middle;">区域/省份</th>
+                <th width="5%" style="text-align:center;vertical-align: middle;">账期</th>
+                <th width="4%" style="text-align:center;vertical-align: middle;">缴费</th>
+                <th width="4%" style="text-align:center;vertical-align: middle;">欠费</th>
+                <th width="4%" style="text-align:center;vertical-align: middle;">调账</th>
+                <th width="4%" style="text-align:center;vertical-align: middle;">销账</th>
+                <th width="4%" style="text-align:center;vertical-align: middle;">余额</th>
+                <th width="4%" style="text-align:center;vertical-align: middle;">赠费</th>
+                <th width="4%" style="text-align:center;vertical-align: middle;">账单</th>
+                <th width="4%" style="text-align:center;vertical-align: middle;">账户</th>
+                <th width="4%" style="text-align:center;vertical-align: middle;">呆坏账</th>
+                <th width="4%" style="text-align:center;vertical-align: middle;">解挂账</th>
+                <th width="4%" style="text-align:center;vertical-align: middle;">转账</th>
+                <th width="4%" style="text-align:center;vertical-align: middle;">分摊</th>
+                <th width="6%" style="text-align:center;vertical-align: middle;">校验结果</th>
+                <th width="8%" style="text-align:center;vertical-align: middle;">文档是否齐全</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+        {% for finance in page_objects %}
+            <tr class="even gradeX">
+                <td width="5%" style="text-align:center;vertical-align: middle;">{{finance.opr_area}}</td>
+                <td width="5%" style="text-align:center;vertical-align: middle;">{{finance.opr_cycle}}</td>
+                <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('缴费', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_payment}}</a></td>
+                <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('欠费', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_invoice_detail_owe}}</a></td>
+                <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('调账', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_adjustment}}</a></td>
+                <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('销账', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_apply_detail}}</a></td>
+                <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('余额', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_cm_acct_balance}}</a></td>
+                <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('赠费', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_bb_bill_charge_bonus}}</a></td>
+                <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('账单', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_invoice_detail_all}}</a></td>
+                <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('账户', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_bc_acct}}</a></td>
+                <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('呆坏账', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_writeoff}}</a></td>
+                <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('解挂账', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_hunglog}}</a></td>
+                <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('转账', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_transfer}}</a></td>
+                <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('分摊', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_invoice_prorate}}</a></td>
+                <td width="6%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="checkresult('{{finance.opr_finance_id}}','{{finance.opr_check_result}}')" style="text-decoration:underline">{{finance.opr_check_result}}</a></td>
+                <td width="8%" style="text-align:center;vertical-align: middle;">{{finance.opr_file_iscomplete}}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <div class="row" style="width: auto">
+        {% include 'operation/paginator_cFinanceSearch.html' %}
+        <ul style="margin-top: 0;">
+            <label for="page_len">
+                <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
+                {% ifequal page_len '10' %}
+                    <option value="10" selected>10</option>
+                {% else %}
+                    <option value="10">10</option>
+                {% endifequal %}
+                {% ifequal page_len '20' %}
+                    <option value="20" selected>20</option>
+                {% else %}
+                    <option value="20">20</option>
+                {% endifequal %}
+                {% ifequal page_len '50' %}
+                    <option value="50" selected>50</option>
+                {% else %}
+                    <option value="50">50</option>
+                {% endifequal %}
+                </select>
+            </label>
+        </ul>
+    </div>
+</div>
