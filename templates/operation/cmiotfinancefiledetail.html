@@ -6,6 +6,7 @@
     <title>Title</title>
     {% include 'link_css.html' %}
     {% include 'head_script.html' %}
+    <link href="{% static 'css/progress.css' %}" rel="stylesheet">
     <script src="{% static 'js/base.js' %}"></script>
 </head>
 <body>
@@ -46,13 +47,89 @@
                       </table>
                    </div>
                 </div><br><br>
+                <div id="process" hidden="hidden">
+                    <p style="margin: 10px;display: initial;">文件后台打包中，已完成：</p>
+                    <p style="display: initial;" id="percent"></p>
+                    <!-- 进度条边框 -->
+                    <div id="progresscontainer" class="progresscontainer">
+                        <!-- 进度条 -->
+                        <div id="progressbar" class="progressbar"></div>
+                    </div></div><br><br>
+                </div>
                 <div style="text-align:center">
-                    <input id="download" type="submit" class="btn btn-warning" style="width: 60pt" value="下载"/>  &nbsp;  &nbsp;
+                    <input id="download" type="button" class="btn btn-warning" style="width: 60pt" value="下载"
+                    onclick="financedownload('确定下载所有√选的文件吗？')"/>  &nbsp;  &nbsp;
                     <input id="cancel" type="button" class="btn btn-inverse" style="width: 60pt" value="关闭"
                            onclick="parent.layer.closeAll()"/>
                 </div>
             </form>
         </section>
 </body>
+<script>
+    function financedownload(a){
+        <!-- 将所有复选框的默认值放入id数组中 -->
+        var id = document.getElementsByName('id');
+        var id_list = [];
+        <!-- 将所有选中复选框的默认值写入到id数组中 -->
+        for (var i = 0; i < id.length; i++) {
+            if (id[i].checked){
+                id_list.push(id[i].value);
+              }
+        }
 
+        <!-- 判断是否有√选 -->
+        if (id_list.length == 0){
+            alert("√选不能为空！")
+        }else{
+            if (!confirm(a)) {
+                window.event.returnValue = false;
+            }else{
+                var page = "financefiledetail"
+                var existflag
+
+                <!--对查询条件变量进行统一封装-->
+                var section_info = {
+                    page,
+                    id_list,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                }
+                <!--将变量传至后台-->
+                $.ajax({
+                        type: "post",
+                        data: section_info,
+                        traditional:true,
+                        async:false,
+                        url: "{% url 'cFinanceMgntDownload' %}",
+                        success: function(data){
+                            var data=JSON.parse(data)
+                            if (data.existflag){
+                                existflag=data.existflag
+                                alert(data.existdes)
+                                $("#process").show();
+                            }else{
+                                alert(data.existdes)
+                            }
+                        },
+                        error:function(){
+                            alert("下载失败！");
+                        }
+                })
+                if (existflag){
+                    var sitv = setInterval(function(){
+                        var url = "{% url 'cFinanceMgntDownload' %}"
+                        $.getJSON(url, function(data){
+                            <!-- 改变进度条进度 -->
+                            $('#progressbar').width(data.percent + '%');
+                            $('#percent').text(data.percent + '%');
+                            if (data.percent == 100.0){
+                                clearInterval(sitv);
+                                window.location = "{% url 'cFinanceMgntDownload' %}?filename="+data.filename;
+                            }
+                        });
+                    }, 1000); <!-- 每1秒查询一次后台进度 -->
+                }
+            }
+        }
+    }
+</script>
 </html>

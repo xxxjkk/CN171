@@ -21,6 +21,12 @@ case $1 in
 			start)
 				echo "$starttime  Start Celery Worker...................."
 				echo "$starttime  Start Celery Worker...................." >> $workerlogfile
+				#判断目录是否存在，若不存在则创建目录
+				if [ ! -d "/var/run/celery/" ];
+				then
+				    mkdir -p "/var/run/celery/"
+        fi
+
 				#启动worker，默认启动与CPU核数相同的线程数，可用参数-c指worker定线程
 				python3 manage.py celery multi start worker -A CN171 -l $loglevel --pidfile=/var/run/celery/%n.pid --logfile=/applog/CN171/celery/%n%I.log
 				case $? in
@@ -57,6 +63,12 @@ case $1 in
 			restart)
 				echo "$starttime  Restart Celery Worker.................."
 				echo "$starttime  Restart Celery Worker.................." >> $workerlogfile
+				#判断目录是否存在，若不存在则创建目录
+				if [ ! -d "/var/run/celery/" ];
+				then
+				    mkdir -p "/var/run/celery/"
+        fi
+
 				#重启worker，默认启动与CPU核数相同的线程数，可用参数-c指worker定线程数
 				python3 manage.py celery multi restart worker -A CN171 -l $loglevel --pidfile=/var/run/celery/%n.pid --logfile=/applog/CN171/celery/%n%I.log
 				case $? in
@@ -87,6 +99,12 @@ case $1 in
 			start)
 				echo "$starttime  Start Celery Beat...................."
 				echo "$starttime  Start Celery Beat...................." >> $beatlogfile
+				#判断目录是否存在，若不存在则创建目录
+				if [ ! -d "/var/run/celery/" ];
+				then
+				    mkdir -p "/var/run/celery/"
+        fi
+
 				#启动beat
 				python3 manage.py celery beat -A CN171 -l $loglevel --pidfile="/var/run/celery/celerybeat.pid" >> $beatlogfile 2>&1 &
 				case $? in
@@ -123,6 +141,11 @@ case $1 in
 			restart)
 				echo "$starttime  Restart Celery Beat.................."
 				echo "$starttime  Restart Celery Beat.................." >> $beatlogfile
+				#判断目录是否存在，若不存在则创建目录
+				if [ ! -d "/var/run/celery/" ];
+				then
+				    mkdir -p "/var/run/celery/"
+        fi
 				#重启beat
 				ps auxww|grep "celery beat"|grep -v grep|awk '{print $2}'|xargs kill -9 && python3 manage.py celery beat -A CN171 -l $loglevel --pidfile="/var/run/celery/celerybeat.pid" >> $beatlogfile 2>&1 &
 				case $? in
@@ -154,7 +177,12 @@ case $1 in
 				echo "$starttime  Start Celery Beat&Worker...................."
 				echo "$starttime  Start Celery Worker...................." >> $workerlogfile
 				echo "$starttime  Start Celery Beat...................." >> $beatlogfile
-				
+
+				#判断目录是否存在，若不存在则创建目录
+				if [ ! -d "/var/run/celery/" ];
+				then
+				    mkdir -p "/var/run/celery/"
+        fi
 				#启动worker，默认启动与CPU核数相同的线程数，可用参数-c指worker定线程
 				python3 manage.py celery multi start worker -A CN171 -l $loglevel --pidfile=/var/run/celery/%n.pid --logfile=/applog/CN171/celery/%n%I.log
 				case $? in
@@ -224,6 +252,12 @@ case $1 in
 			restart)
 				echo "$starttime  Restart Celery Beat&Worker.................."
 				echo "$starttime  Restart Celery Beat&Worker.................." >> $beatlogfile
+				#判断目录是否存在，若不存在则创建目录
+				if [ ! -d "/var/run/celery/" ];
+				then
+				    mkdir -p "/var/run/celery/"
+        fi
+
 				#重启worker，默认启动与CPU核数相同的线程数，可用参数-c指worker定线程数
 				python3 manage.py celery multi restart worker -A CN171 -l $loglevel --pidfile=/var/run/celery/%n.pid --logfile=/applog/CN171/celery/%n%I.log
 				case $? in

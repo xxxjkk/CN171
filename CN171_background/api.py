@@ -16,15 +16,23 @@ def pages(post_objects, request):
     page public function , return page's object tuple
     分页公用函数，返回分页的对象元组
     """
+    if request.method == 'GET':
+        page_len = request.GET.get('page_len', '')
+        try:
+            current_page = int(request.GET.get('page', '1'))
+        except ValueError:
+            current_page = 1
+    else:
+        page_len = request.POST.get('page_len', '')
+        try:
+            current_page = int(request.POST.get('page', '1'))
+        except ValueError:
+            current_page = 1
 
-    page_len = request.GET.get('page_len', '')
     if not page_len:
         page_len = 10
     paginator = Paginator(post_objects, page_len)
-    try:
-        current_page = int(request.GET.get('page', '1'))
-    except ValueError:
-        current_page = 1
+
 
     page_range = page_list_return(len(paginator.page_range), current_page)
     end_page = len(paginator.page_range)

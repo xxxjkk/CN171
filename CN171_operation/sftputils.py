@@ -113,7 +113,7 @@ def sftpGetRemoteHostDir(sftp, localdir, remotedir, **kwargs):
 
 
 # 方法名：目录遍历扫描
-# 用途：扫描远端服务器目录，获取需要下载的文件清单
+# 用途：扫描本地目录，获取需要上传的文件清单
 def getFilesListInLocalHost(localdir):
     #保存所有文件名、文件变更时间的列表
     file_list = []
@@ -146,7 +146,7 @@ def sftpPutRemoteHostDir(sftp, sshd, localdir, remotedir, **kwargs):
         file_list = kwargs['filelist']
         print('file_list :',file_list)
     else:
-        #获取远端服务器上指定目录及其子目录下的所有文件
+        #获取本地服务器上指定目录及其子目录下的所有文件
         file_list = getFilesListInLocalHost(localdir)
 
     if remotedir[-1] == '/':

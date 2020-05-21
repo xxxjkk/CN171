@@ -62,7 +62,7 @@
                 <!-- /.box-header -->
 
                 <div id="box-body" class="box-body">
-                  <table class="table table-striped table-bordered" id="dataform">
+                    <table class="table table-striped table-bordered" id="dataform">
                       <thead id="thead">
                         <tr>
                             <!--垂直居中：vertical-align: middle;-->
@@ -81,11 +81,11 @@
                             <th width="4%" style="text-align:center;vertical-align: middle;">转账</th>
                             <th width="4%" style="text-align:center;vertical-align: middle;">分摊</th>
                             <th width="6%" style="text-align:center;vertical-align: middle;">校验结果</th>
-                            <th width="8%" style="text-align:center;vertical-align: middle;">最后稽核操作时间</th>
+                            <th width="8%" style="text-align:center;vertical-align: middle;">文档是否齐全</th>
                         </tr>
                       </thead>
                       <tbody id="tbody">
-                        {% for finance in finance_list %}
+                        {% for finance in page_objects %}
                         <tr class="even gradeX">
                             <td width="5%" style="text-align:center;vertical-align: middle;">{{finance.opr_area}}</td>
                             <td width="5%" style="text-align:center;vertical-align: middle;">{{finance.opr_cycle}}</td>
@@ -95,43 +95,43 @@
                             <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('销账', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_apply_detail}}</a></td>
                             <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('余额', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_cm_acct_balance}}</a></td>
                             <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('赠费', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_bb_bill_charge_bonus}}</a></td>
-                            <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('账单', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_invoice_detail}}</a></td>
+                            <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('账单', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_invoice_detail_all}}</a></td>
                             <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('账户', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_bc_acct}}</a></td>
                             <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('呆坏账', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_writeoff}}</a></td>
                             <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('解挂账', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_hunglog}}</a></td>
                             <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('转账', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_transfer}}</a></td>
                             <td width="4%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="filedetail('分摊', '{{finance.opr_finance_id}}')" style="text-decoration:underline">{{finance.opr_ar_invoice_prorate}}</a></td>
                             <td width="6%" style="text-align:center;vertical-align: middle;"><a href="#" onclick="checkresult('{{finance.opr_finance_id}}','{{finance.opr_check_result}}')" style="text-decoration:underline">{{finance.opr_check_result}}</a></td>
-                            <td width="8%" style="text-align:center;vertical-align: middle;">{{finance.opr_reco_time}}</td>
+                            <td width="8%" style="text-align:center;vertical-align: middle;">{{finance.opr_file_iscomplete}}</td>
                         </tr>
                         {% endfor %}
                       </tbody>
-                  </table>
-                <div class="row" style="width: auto">
-                    {% include 'paginator.html' %}
-                    <ul style="margin-top: 0;">
-                        <label for="page_len">
-                            <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
-                            {% ifequal page_len '10' %}
-                                <option value="10" selected>10</option>
-                            {% else %}
-                                <option value="10">10</option>
-                            {% endifequal %}
-                            {% ifequal page_len '20' %}
-                                <option value="20" selected>20</option>
-                            {% else %}
-                                <option value="20">20</option>
-                            {% endifequal %}
-                            {% ifequal page_len '50' %}
-                                <option value="50" selected>50</option>
-                            {% else %}
-                                <option value="50">50</option>
-                            {% endifequal %}
-                            </select>
-                        </label>
-                    </ul>
+                    </table>
+                    <div class="row" style="width: auto">
+                        {% include 'operation/paginator_cFinance.html' %}
+                        <ul style="margin-top: 0;">
+                            <label for="page_len">
+                                <select name="page_len" id="page_len" class="form-control m-b input-sm-33"  onchange="change_info()">
+                                {% ifequal page_len '10' %}
+                                    <option value="10" selected>10</option>
+                                {% else %}
+                                    <option value="10">10</option>
+                                {% endifequal %}
+                                {% ifequal page_len '20' %}
+                                    <option value="20" selected>20</option>
+                                {% else %}
+                                    <option value="20">20</option>
+                                {% endifequal %}
+                                {% ifequal page_len '50' %}
+                                    <option value="50" selected>50</option>
+                                {% else %}
+                                    <option value="50">50</option>
+                                {% endifequal %}
+                                </select>
+                            </label>
+                        </ul>
+                    </div>
                 </div>
-               </div>
             </div>
         </form>
     </section>
@@ -171,26 +171,21 @@
 
 <script>
     function change_info(){
-        var args = $("#cmiotFinanceManagementForm").serialize();
-        window.location = "{% url 'cFinanceMgnt' %}?" + args;
-    }
-</script>
-
-<script>
-    function searchbyargs(){
         monthpicker = document.getElementById('month-picker').value;
         area_list = $("#select1").getSelectValueArr();
         result_list = $("#select2").getSelectValueArr();
+        page_len = document.getElementById('page_len').value;
 
         <!--判断查询条件是否均为空-->
         if (monthpicker=="" && area_list=="" && result_list=="") {
-            window.location = "{% url 'cFinanceMgnt' %}";
+            window.location = "{% url 'cFinanceMgnt' %}?page_len=" + page_len;
         }else{
             <!--对查询条件变量进行统一封装-->
             var section_info = {
                 monthpicker,
                 area_list,
                 result_list,
+                page_len,
                 'csrfmiddlewaretoken': '{{ csrf_token }}',
             }
             <!--将变量传至后台-->
@@ -200,7 +195,74 @@
                     traditional:true,
                     url: "{% url 'cFinanceMgntSearch' %}",
                     success: function(data){
-                        $('#tbody').html(data.html);
+                        $('#box-body').html(data.html);
+                    },
+                    error:function(){
+                        alert("查询失败");
+                    }
+            });
+        }
+    }
+</script>
+
+<script>
+    function change_page(page, page_len){
+        monthpicker = document.getElementById('month-picker').value;
+        area_list = $("#select1").getSelectValueArr();
+        result_list = $("#select2").getSelectValueArr();
+
+        <!--对查询条件变量进行统一封装-->
+        var section_info = {
+            monthpicker,
+            area_list,
+            result_list,
+            page,
+            page_len,
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+        }
+        <!--将变量传至后台-->
+        $.ajax({
+                type: "post",
+                data: section_info,
+                traditional:true,
+                url: "{% url 'cFinanceMgntSearch' %}",
+                success: function(data){
+                    $('#box-body').html(data.html);
+                },
+                error:function(){
+                    alert("查询失败");
+                }
+        });
+    }
+</script>
+
+<script>
+    function searchbyargs(){
+        monthpicker = document.getElementById('month-picker').value;
+        area_list = $("#select1").getSelectValueArr();
+        result_list = $("#select2").getSelectValueArr();
+        page_len = document.getElementById('page_len').value;
+
+        <!--判断查询条件是否均为空-->
+        if (monthpicker=="" && area_list=="" && result_list=="") {
+            window.location = "{% url 'cFinanceMgnt' %}?page_len=" + page_len;
+        }else{
+            <!--对查询条件变量进行统一封装-->
+            var section_info = {
+                monthpicker,
+                area_list,
+                result_list,
+                page_len,
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            }
+            <!--将变量传至后台-->
+            $.ajax({
+                    type: "post",
+                    data: section_info,
+                    traditional:true,
+                    url: "{% url 'cFinanceMgntSearch' %}",
+                    success: function(data){
+                        $('#box-body').html(data.html);
                     },
                     error:function(){
                         alert("查询失败");
@@ -232,7 +294,7 @@
         closeBtn: 1,
         area: ['600px', '500px'],
         shadeClose: true, //点击遮罩关闭
-        content: ['/operation/cFinanceMgntDownloadGoto/'],
+        content: ['/operation/cmiotFinanceMgntDownloadGoto/'],
       });
     }
 </script>

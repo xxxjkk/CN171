@@ -54,9 +54,6 @@ def filesClassify(pathtmp, path):
     #整理后的文件清单
     filelist = []
     flist_dict = dict(zip(flist_EN, flist_CN))
-    print(flist_EN)
-    print(flist_CN)
-    print(flist_dict)
     area_dict = dict(zip(areaidlist, arealist))
 
     for file in mylist:
@@ -88,9 +85,7 @@ def filesClassify(pathtmp, path):
                         index_cycle = 3
                     #类型
                     file_type_EN = searchObj.group(index_type).lower()
-                    print(file_type_EN)
                     file_type_CN = flist_dict.get(file_type_EN)
-                    print(file_type_CN)
                     #省份，如100
                     file_beid = searchObj.group(index_be)
                     file_be = area_dict.get(file_beid)
@@ -110,14 +105,14 @@ def filesClassify(pathtmp, path):
                             file_billcycle = file_billmonth[0:4] + '-' + file_billmonth[-2:]
                     else:
                         #月文件类型
-                        if (file_type_EN in ['ar_invoice_detail']) and (file_beid not in ['371']):
+                        if (file_type_EN in ['ar_invoice_detail_all']) and (file_beid not in ['371']):
                             file_billcycle = file_billmonth[0:4] + '-' + file_billmonth[-2:]
                         else:
                             tmp = datetime.datetime.strptime(file_billmonth[0:4] + '-' + file_billmonth[-2:], "%Y-%m")
                             file_billcycle = datetime.datetime.strftime(tmp - relativedelta(months=1), "%Y-%m")
 
                     #路径添加文件类型中文
-                    patha = os.path.join(file_path, flist_CN[index])
+                    patha = os.path.join(file_path, file_type_CN)
                     #路径添加账期
                     pathb = os.path.join(patha, file_billcycle)
                     continue
@@ -168,16 +163,12 @@ def filesClassify(pathtmp, path):
                 filedetail.opr_finance_filedetail_dir = pathb
             else:
                 filedetail = OprFinanceFiledetail()
-                print(filename)
                 filedetail.opr_finance_filedetail_name = filename
-                print(file_type_CN)
                 filedetail.opr_finance_filedetail_type = file_type_CN
-                print(filectime)
                 filedetail.opr_finance_filedetail_createtime = filectime
                 filedetail.opr_finance_filedetail_thistime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
                 filedetail.opr_finance_filedetail_num = 1
                 filedetail.opr_finance_filedetail_check = '尚未校验'
-                print(pathb)
                 filedetail.opr_finance_filedetail_dir = pathb
                 filedetail.save()
 
@@ -232,7 +223,7 @@ def fileNameAnalysis(filename):
     # 赠费
     searchObj6 = re.search(r'cbs_(bb_bill_charge_bonus)_((\d{6})\d{2})_\d*_(\d{3})_\d*_\d{5}.unl', filename, re.M | re.I)
     # 账单
-    searchObj7 = re.search(r'cbs_(ar_invoice_detail)_all_((\d{6})\d{2})_\d*_(\d{3})_\d*_\d{5}.unl', filename, re.M | re.I)
+    searchObj7 = re.search(r'cbs_(ar_invoice_detail_all)_((\d{6})\d{2})_\d*_(\d{3})_\d*_\d{5}.unl', filename, re.M | re.I)
     # 账户
     searchObj8 = re.search(r'cbs_(bc_acct)_((\d{6})\d{2})_\d*_(\d{3})_\d*_\d{5}.unl', filename, re.M | re.I)
     # 呆坏账

@@ -74,6 +74,7 @@ MIDDLEWARE = [
     'CN171_account.service.middlewares.PermissionMiddleWare'
 ]
 
+
 ROOT_URLCONF = 'CN171.urls'
 
 TEMPLATES = [
@@ -193,3 +194,17 @@ CELERY_TIMEZONE = config.get('Celery', 'celery_timezone')
 #设置beat数据库
 CELERYBEAT_SCHEDULER = config.get('Celery', 'celery_beat_scheduler')
 
+
+
+#缓存服务器配置
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': config.get('Redis', 'redis_url'),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+             # "PASSWORD": config.get('Redis', 'redis_password'),
+        },
+    },
+}
+REDIS_TIMEOUT=7*24*60*60
