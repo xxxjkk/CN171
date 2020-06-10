@@ -42,9 +42,9 @@ class privilegedAccountRecord(models.Model):
     # 特权/程序账号备案记录表
     record_id = models.AutoField(u"记录id", primary_key=True)
     system_name = models.CharField(u"系统名称", max_length=64)
-    resource_ip = models.CharField(u"资源ip", max_length=4096)
-    resource_name = models.CharField(u"资源名称", max_length=4096)
-    resource_type = models.CharField(u"资源类型", max_length=64)
+    resource_ip = models.CharField(u"资源ip", max_length=4096, null=True)
+    resource_name = models.CharField(u"资源名称", max_length=4096, null=True)
+    resource_type = models.CharField(u"资源类型", max_length=64, null=True)
     personal_account = models.CharField(u"操作账号（个人）", max_length=64)
     privileged_account = models.CharField(u"操作账号（特权/程序）", max_length=256)
     start_time = models.IntegerField(u"申请开始时间")
@@ -81,6 +81,7 @@ class privilegedAccountWithoutRecord(models.Model):
 class hostAccountList(models.Model):
     # 主机账号列表
     account_id = models.AutoField(u"账号id", primary_key=True)
+    staff_name = models.CharField(u"姓名", max_length=32, null=True)
     host_ip = models.CharField(u"主机ip", max_length=64)
     host_name = models.CharField(u"主机名称", max_length=64)
     host_system = models.CharField(u"所属系统", max_length=64)
@@ -112,6 +113,7 @@ class hostAccountList(models.Model):
 class databaseAccountList(models.Model):
     # 数据库账号列表
     account_id = models.AutoField(u"账号id", primary_key=True)
+    staff_name = models.CharField(u"姓名", max_length=32, null=True)
     database_ip = models.CharField(u"数据库ip", max_length=64)
     database_name = models.CharField(u"数据库名称", max_length=64)
     database_system = models.CharField(u"所属系统", max_length=64)
@@ -142,6 +144,7 @@ class databaseAccountList(models.Model):
 class applicationAccountList(models.Model):
     # 应用账号列表
     account_id = models.AutoField(u"账号id", primary_key=True)
+    staff_name = models.CharField(u"姓名", max_length=32, null=True)
     application_system = models.CharField(u"所属系统", max_length=64)
     account_name = models.CharField(u"账号名", max_length=64)
     account_role = models.CharField(u"账号角色", max_length=1024)
@@ -166,3 +169,38 @@ class applicationAccountList(models.Model):
         verbose_name_plural = verbose_name
         ordering = ['account_id']
         db_table = 'application_account_list'
+
+
+class sensitiveInformation(models.Model):
+    sensitive_id = models.AutoField(u"敏感场景id", primary_key=True)
+    sensitive_item = models.CharField(u"敏感场景", max_length=256)
+    resource_type = models.CharField(u"资源类型", max_length=64)
+    system = models.CharField(u"系统", max_length=64)
+
+    def __unicode__(self):
+        return self.sensitive_id
+
+    class Meta:
+        verbose_name = u"敏感场景表"
+        verbose_name_plural = verbose_name
+        ordering = ['sensitive_id']
+        db_table = 'sensitive_information'
+
+
+class treasuryAuthenticated(models.Model):
+    authentication_id = models.AutoField(u"金库鉴权id", primary_key=True)
+    resource_name = models.CharField(u"实例名", max_length=64, null=True)
+    operating_account = models.CharField(u"操作账号", max_length=64)
+    sensitive_resource = models.CharField(u"敏感资源", max_length=512)
+    start_time = models.IntegerField(u"申请开始时间")
+    end_time = models.IntegerField(u"申请结束时间")
+    system = models.CharField(u"系统", max_length=64)
+
+    def __unicode__(self):
+        return self.authentication_id
+
+    class Meta:
+        verbose_name = u"敏感场景表"
+        verbose_name_plural = verbose_name
+        ordering = ['authentication_id']
+        db_table = 'treasury_authenticated'

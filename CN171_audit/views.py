@@ -23,7 +23,7 @@ except ImportError as e:
 
 from CN171_background.api import pages, get_object
 from CN171_audit.models import staffInfo, hostAccountList, databaseAccountList, systemList, applicationAccountList, \
-    privilegedAccountRecord, privilegedAccountWithoutRecord
+    privilegedAccountRecord, privilegedAccountWithoutRecord, sensitiveInformation, treasuryAuthenticated
 
 # 读取配置文件
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -260,12 +260,16 @@ def accountAudit(request):
         line = log_num.readline()
         log_num_sum = int(line.split(",")[0])
         log_num_without_application = int(line.split(",")[1])
+        log_num_without_authentication = int(line.split(",")[2])
     except:
         log_num_sum = 0
         log_num_without_application = 0
     pass_num1 = hostAccountList.objects.filter(host_system=system_checked, is_isolated="否", is_public="否", is_in_4A="是", is_in_resource="是").count() + \
                 databaseAccountList.objects.filter(database_system=system_checked, is_isolated="否", is_public="否", is_in_4A="是", is_in_resource="是").count() + \
-                applicationAccountList.objects.filter(application_system=system_checked, is_isolated="否", is_public="否", is_in_4A="是", is_in_resource="是").count()
+                applicationAccountList.objects.filter(application_system=system_checked, is_isolated="否", is_public="否", is_in_4A="是", is_in_resource="是").count() + \
+                hostAccountList.objects.filter(host_system=system_checked, is_isolated="否", is_public="否", is_in_4A="否", is_in_resource="否").count() + \
+                databaseAccountList.objects.filter(database_system=system_checked, is_isolated="否", is_public="否", is_in_4A="否", is_in_resource="否").count() + \
+                applicationAccountList.objects.filter(application_system=system_checked, is_isolated="否", is_public="否", is_in_4A="否", is_in_resource="否").count()
     try:
         pass_percent1 = round(pass_num1 / account_num, 2)
     except:
@@ -287,7 +291,7 @@ def accountAudit(request):
     except:
         pass_percent3 = 1
     pass_percent3 = int(pass_percent3 * 100)
-    pass_num4 = log_num_sum - log_num_without_application
+    pass_num4 = log_num_sum - log_num_without_application - log_num_without_authentication
     try:
         pass_percent4 = round(pass_num4 / log_num_sum, 2)
     except:
@@ -334,7 +338,9 @@ def download(request, file_id):
              '4': "特权+程序账号备案记录模板.xlsx",
              '5': "操作日志模板（北京）.csv",
              '6': "操作日志模板（深圳）.csv",
-             '7': "资源侧数据库从账号信息模板.txt"}
+             '7': "资源侧数据库从账号信息模板.txt",
+             '8': "金库场景.xlsx",
+             '9': "金库审批报表.xlsx"}
     file_name = files[file_id]
     file = open(audit_file_download + file_name, "rb")
     response = FileResponse(file)
@@ -351,7 +357,9 @@ def upload(request, file_id):
              '3': ["资源侧主机从账号信息.txt", "txt"],
              '4': ["特权+程序账号备案记录.xlsx", "xlsx", ["特权+程序账号备案记录"]],
              '5': ["操作日志.csv", "csv", ["操作日志（北京4A）", "操作日志（深圳4A）"]],
-             '6': ["资源侧数据库从账号信息.txt", "txt"]}
+             '6': ["资源侧数据库从账号信息.txt", "txt"],
+             '7': ["金库场景.xlsx", "xlsx", ["金库场景"]],
+             '8': ["金库审批报表.xlsx", "xlsx", ["金库审批报表"]]}
     ret = {'msg': "上传成功！"}
     system = request.POST.get('system')
     file_num = request.POST.get('fileNum')
@@ -373,6 +381,7 @@ def upload(request, file_id):
                                        '资源名称': "-1",
                                        '资源类型': "-1",
                                        '操作账号': "-1",
+                                       '程序账号': "-1",
                                        '操作时间': "-1"}
                             for i in range(1, ncolumns + 1):
                                 if table.cell(row=1, column=i).value in ['业务系统']:
@@ -383,21 +392,28 @@ def upload(request, file_id):
                                     columns['资源名称'] = i
                                 elif table.cell(row=1, column=i).value in ['操作类型']:
                                     columns['资源类型'] = i
-                                elif table.cell(row=1, column=i).value in ['操作账号']:
+                                elif table.cell(row=1, column=i).value in ['操作账号', '操作账号(主账号/从账号）']:
                                     columns['操作账号'] = i
+                                elif table.cell(row=1, column=i).value in ['申请程序账号']:
+                                    columns['程序账号'] = i
                                 elif table.cell(row=1, column=i).value in ['操作时间']:
                                     columns['操作时间'] = i
                             for i in range(2, nrows + 1):
+                                print(table.cell(row=i, column=int(columns['系统名称'])).value)
                                 if re.search(system, table.cell(row=i, column=int(columns['系统名称'])).value, re.IGNORECASE):
                                     system_name = system
                                     resource_ip = table.cell(row=i, column=int(columns['资源ip'])).value
                                     resource_name = table.cell(row=i, column=int(columns['资源名称'])).value
                                     resource_type = table.cell(row=i, column=int(columns['资源类型'])).value
                                     operating_account = table.cell(row=i, column=int(columns['操作账号'])).value
-                                    operating_time = table.cell(row=i, column=int(columns['操作时间'])).value
-                                    accounts = operating_account.replace("\n", "").split("/")
-                                    personal_account = accounts[0]
-                                    privilaged_account = accounts[1]
+                                    operating_time = str(table.cell(row=i, column=int(columns['操作时间'])).value)
+                                    if system in ["内容计费", "物漫"]:
+                                        personal_account = operating_account
+                                        privilaged_account = table.cell(row=i, column=int(columns['程序账号'])).value
+                                    else:
+                                        accounts = operating_account.replace("\n", "").split("/")
+                                        personal_account = accounts[0]
+                                        privilaged_account = accounts[1]
                                     try:
                                         times = operating_time.replace("\n", "").split("-")
                                         date = times[0].split(".")
@@ -423,7 +439,7 @@ def upload(request, file_id):
                                                     times[1] = year + "." + month + "." + times[1]
                                                 end_time = int(time.mktime(time.strptime(times[1], '%Y.%m.%d'))) + 86399
                                             else:
-                                                end_time = int(time.mktime(time.strptime(times[1], '%Y.%m.%d %H:%M:%S'))) + 86399
+                                                end_time = int(time.mktime(time.strptime(times[1], '%Y.%m.%d %H:%M:%S')))
                                         privilaged_account_record = privilegedAccountRecord()
                                         privilaged_account_record.system_name = system_name
                                         privilaged_account_record.resource_ip = resource_ip
@@ -438,6 +454,93 @@ def upload(request, file_id):
                                         import traceback
                                         traceback.print_exc()
                                         ret['msg'] = file_obj.name + "的第" + str(i) + "行字段格式不正确！"
+                elif file_id == "7":
+                    file_obj = request.FILES.get('accountFile[0]')
+                    wb = load_workbook(file_obj)
+                    table_name = wb.get_sheet_names()
+                    table = wb.get_sheet_by_name(table_name[0])
+                    nrows = table.max_row
+                    ncolumns = table.max_column
+                    columns = {'敏感场景': "-1",
+                               '资源类型': "-1",
+                               '系统名称': "-1"}
+                    for i in range(1, ncolumns + 1):
+                        if table.cell(row=1, column=i).value in ['敏感表/文件/页面']:
+                            columns['敏感场景'] = i
+                        elif table.cell(row=1, column=i).value in ['资源类型']:
+                            columns['资源类型'] = i
+                        elif table.cell(row=1, column=i).value in ['系统']:
+                            columns['系统名称'] = i
+                    for i in range(2, nrows + 1):
+                        print(table.cell(row=i, column=int(columns['系统名称'])).value)
+                        if re.search(system, table.cell(row=i, column=int(columns['系统名称'])).value, re.IGNORECASE):
+                            system_name = system
+                            resource_type = table.cell(row=i, column=int(columns['资源类型'])).value
+                            sensitive_item = table.cell(row=i, column=int(columns['敏感场景'])).value
+                            sensitive_scene = sensitiveInformation()
+                            sensitive_scene.sensitive_item = sensitive_item
+                            sensitive_scene.resource_type = resource_type
+                            sensitive_scene.system = system_name
+                            sensitive_scene.save()
+                elif system in ["CMIOT", "BBOSS", "内容计费"] and file_id == "8":
+                    file_obj = request.FILES.get('accountFile[0]')
+                    wb = load_workbook(file_obj)
+                    table_names = wb.get_sheet_names()
+                    for table_name in table_names:
+                        table = wb.get_sheet_by_name(table_name)
+                        nrows = table.max_row
+                        ncolumns = table.max_column
+                        columns = {'系统名称': "-1",
+                                   '操作账号': "-1",
+                                   '操作内容': "-1",
+                                   '申请开始时间': "-1",
+                                   '申请结束时间': "-1"}
+                        for i in range(1, ncolumns + 1):
+                            if table.cell(row=1, column=i).value in ['申请人组织机构']:
+                                columns['系统名称'] = i
+                            elif table.cell(row=1, column=i).value in ['申请人从帐号']:
+                                columns['操作账号'] = i
+                            elif table.cell(row=1, column=i).value in ['操作内容']:
+                                columns['操作内容'] = i
+                            elif table.cell(row=1, column=i).value in ['金库申请时间']:
+                                columns['申请开始时间'] = i
+                            elif table.cell(row=1, column=i).value in ['金库申请失效时间']:
+                                columns['申请结束时间'] = i
+                        for i in range(2, nrows + 1):
+
+                            system_name = table.cell(row=i, column=int(columns['系统名称'])).value
+                            pattern1 = re.compile(r'实例名[为]*[a-zA-Z0-9\_]+的')
+                            print(table.cell(row=i, column=int(columns['操作内容'])).value)
+                            resource_name = re.findall(pattern1, table.cell(row=i, column=int(columns['操作内容'])).value)[0]
+                            if re.search('为', resource_name):
+                                resource_name = resource_name[4:(len(resource_name) - 1)]
+                            else:
+                                resource_name = resource_name[3:(len(resource_name) - 1)]
+                            operating_account = table.cell(row=i, column=int(columns['操作账号'])).value
+                            pattern2 = re.compile(r'如下内容表[a-zA-Z0-9\_表]+')
+                            sensitive_table = re.findall(pattern2, table.cell(row=i, column=int(columns['操作内容'])).value)[0]
+                            sensitive_table = sensitive_table[4:]
+                            applied_start_time = table.cell(row=i, column=int(columns['申请开始时间'])).value
+                            applied_end_time = table.cell(row=i, column=int(columns['申请结束时间'])).value
+                            try:
+                                start_time = int(time.mktime(time.strptime(applied_start_time, '%Y-%m-%d %H:%M:%S')))
+                                if applied_end_time:
+                                    end_time = int(time.mktime(time.strptime(applied_end_time, '%Y-%m-%d %H:%M:%S')))
+                                else:
+                                    applied_end_time = applied_start_time[0:11] + "23:59:59"
+                                    end_time = int(time.mktime(time.strptime(applied_end_time, '%Y-%m-%d %H:%M:%S')))
+                                treasury_authenticated = treasuryAuthenticated()
+                                treasury_authenticated.resource_name = resource_name
+                                treasury_authenticated.operating_account = operating_account
+                                treasury_authenticated.sensitive_resource = sensitive_table
+                                treasury_authenticated.start_time = start_time
+                                treasury_authenticated.end_time = end_time
+                                treasury_authenticated.system = system_name
+                                treasury_authenticated.save()
+                            except:
+                                import traceback
+                                traceback.print_exc()
+                                ret['msg'] = file_obj.name + "的第" + str(i) + "行字段格式不正确！"
                 else:
                     file_obj = request.FILES.get('accountFile[0]')
                     wb = load_workbook(file_obj)
@@ -450,13 +553,19 @@ def upload(request, file_id):
                     if i == 0:
                         result_file = open(audit_file_upload + types[file_id][0], 'w', newline='')
                     else:
+                        time.sleep(5)
                         result_file = open(audit_file_upload + types[file_id][0], 'a', newline='')
                     csv_result = csv.writer(result_file)
                     if i == 0:
                         csv_result.writerow(csv_header)
                     for row in csv_file:
-                        csv_result.writerow(row)
+                        try:
+                            print(row)
+                            csv_result.writerow(row)
+                        except:
+                            continue
                     result_file.close()
+                result_file.close()
                 frame = pd.read_csv(audit_file_upload + types[file_id][0], engine='python', encoding='ansi')
                 data = frame.drop_duplicates()
                 data.to_csv(audit_file_upload + types[file_id][0], encoding='ansi', index=False)
@@ -503,8 +612,12 @@ def upload(request, file_id):
                                 account_detail_host.host_ip = host_ip
                                 account_detail_host.host_name = host_name
                                 account_detail_host.account_name = account[0]
-                            if staffInfo.objects.filter(Q(staff_account__icontains=account[0])):
-                                staff_post = staffInfo.objects.get(Q(staff_account__icontains=account[0])).staff_post
+                            if staffInfo.objects.filter(Q(staff_account=account[0]) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account[0] + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account[0]) & Q(staff_system__icontains=system[0])):
+                                staff_post = staffInfo.objects.get(Q(staff_account=account[0]) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account[0] + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account[0]) & Q(staff_system__icontains=system[0])).staff_post
                                 if staff_post == "运维" and system in ["PBOSS", "物漫"]:
                                     if group[0] in ["pbmaintain", "trssadm"]:
                                         account_detail_host.is_to_change = "否"
@@ -524,6 +637,7 @@ def upload(request, file_id):
                                 account_detail_host.how_to_change = ""
                             account_detail_host.account_group = group[0]
                             account_detail_host.is_in_resource = "是"
+                            account_detail_host.host_system = system
                             account_detail_host.save()
                     # hostAccountList.objects.filter(is_keep="否").delete()
                 elif file_id == "6":
@@ -541,7 +655,7 @@ def upload(request, file_id):
                     databaseAccountList.objects.filter(is_to_change="是", database_system=system).update(how_to_change="")
                     for line in file_obj.readlines():
                         items = line.decode("utf-8").strip().split()
-                        if len(items) == 1 and len(items[0].split(".")) == 4:
+                        if len(items) == 1 and len(items[0].split(".")) == 4 and not re.search("_", items[0]):
                             database_ip = items[0]
                         elif len(items) == 1 and items[0] != "\"\c" and items[0] != "\"":
                             database_name = items[0]
@@ -571,10 +685,15 @@ def upload(request, file_id):
                                     account_detail_database.account_name = items[0]
                                 account_detail_database.account_role = items[1]
                                 account_detail_database.is_in_resource = "是"
+                                account_detail_database.database_system = system
                                 account_name = items[0]
                             else:
-                                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                                    staff_post = staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_post
+                                if staffInfo.objects.filter(Q(staff_account=items[0]) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=items[0] + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + items[0]) & Q(staff_system__icontains=system[0])):
+                                    staff_post = staffInfo.objects.get(Q(staff_account=items[0]) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=items[0] + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + items[0]) & Q(staff_system__icontains=system[0])).staff_post
                                     if staff_post == "运维":
                                         if account_detail_database.account_role == "CMSZ_ROLEA+CMSZ_ROLEOL":
                                             account_detail_database.is_to_change = "否"
@@ -613,9 +732,14 @@ def upload(request, file_id):
                                     account_detail_database.account_name = items[0]
                                 account_detail_database.account_role = items[1]
                                 account_detail_database.is_in_resource = "是"
+                                account_detail_database.database_system = system
                                 account_name = items[0]
-                    if staffInfo.objects.filter(Q(staff_account__icontains=items[0])):
-                        staff_post = staffInfo.objects.get(Q(staff_account__icontains=items[0])).staff_post
+                    if staffInfo.objects.filter(Q(staff_account=items[0]) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=items[0] + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + items[0]) & Q(staff_system__icontains=system[0])):
+                        staff_post = staffInfo.objects.get(Q(staff_account=items[0]) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=items[0] + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + items[0]) & Q(staff_system__icontains=system[0])).staff_post
                         if staff_post == "运维":
                             if account_detail_database.account_role == "CMSZ_ROLEA+CMSZ_ROLEOL":
                                 account_detail_database.is_to_change = "否"
@@ -649,9 +773,16 @@ def accountAuditing(request):
     system = request.POST.get("system")
     if system == "CMIOT":
         system = ["CMIOT", "CTBOSS系统", "CTBOSS物联网"]
+    elif system == "内容计费":
+        system = ["内容计费", "物联网-内容计费"]
+    elif system == "物漫":
+        system = ["物漫", "物漫系统"]
     else:
         system = [system]
-    matchList = ['ssh', 'sudo', 'root@', 'I2000@', 'pboss@', 'dds@', 'oracle@']
+    if system[0] == "PBOSS":
+        matchList = ['ssh', 'sudo', 'root@', 'I2000@', 'pboss@', 'dds@', 'oracle@', 'I@', 'P@']
+    else:
+        matchList = ['sudo', 'root', 'sys', 'system', 'dba']
     try:
         wb = load_workbook(audit_file_upload + "4A主账号与从账号对应清单.xlsx")
         table_names = wb.get_sheet_names()
@@ -673,7 +804,7 @@ def accountAuditing(request):
                     columns['4A主账号'] = i
                 elif table.cell(row=1, column=i).value in ['授权主账号真实姓名', '姓名', '主帐号姓名', '负责人']:
                     columns['姓名'] = i
-                elif table.cell(row=1, column=i).value in ['从账号名', '从帐号名', '应用从帐号名称', '从帐号名称']:
+                elif table.cell(row=1, column=i).value in ['从账号名', '从帐号名', '应用从帐号名称', '从帐号名称', '从账号名称']:
                     columns['从账号'] = i
                 elif table.cell(row=1, column=i).value in ['从账号类型', '从帐号类型', '帐号类型']:
                     columns['从账号类型'] = i
@@ -683,7 +814,7 @@ def accountAuditing(request):
                     columns['资源IP'] = i
                 elif table.cell(row=1, column=i).value in ['资源类型']:
                     columns['资源类型'] = i
-                elif table.cell(row=1, column=i).value in ['资源所属业务系统', '业务系统', '应用系统', '所属业务系统']:
+                elif table.cell(row=1, column=i).value in ['资源所属业务系统', '业务系统', '应用系统', '所属业务系统', '业务系统名称']:
                     columns['资源所属业务系统'] = i
                 elif table.cell(row=1, column=i).value in ['从帐号状态', '应用帐号状态']:
                     columns['从账号状态'] = i
@@ -699,15 +830,15 @@ def accountAuditing(request):
                 applicationAccountList.objects.filter(is_to_change="是", application_system=system[0]).update(is_to_change="否")
                 applicationAccountList.objects.filter(is_to_change="是", application_system=system[0]).update(how_to_change="")
             for i in range(2, nrows + 1):
+                account_4AAccount = table.cell(row=i, column=int(columns['4A主账号'])).value
+                staff_name = table.cell(row=i, column=int(columns['姓名'])).value
+                account_name = table.cell(row=i, column=int(columns['从账号'])).value
+                account_type = table.cell(row=i, column=int(columns['从账号类型'])).value
+                resource_name = table.cell(row=i, column=int(columns['资源名称'])).value
+                resource_ip = table.cell(row=i, column=int(columns['资源IP'])).value
+                resource_system = table.cell(row=i, column=int(columns['资源所属业务系统'])).value
                 if table.cell(row=i, column=int(columns['资源所属业务系统'])).value in system and \
                    (int(columns['从账号状态']) == -1 or table.cell(row=i, column=int(columns['从账号状态'])).value == "正常"):
-                    account_4AAccount = table.cell(row=i, column=int(columns['4A主账号'])).value
-                    staff_name = table.cell(row=i, column=int(columns['姓名'])).value
-                    account_name = table.cell(row=i, column=int(columns['从账号'])).value
-                    account_type = table.cell(row=i, column=int(columns['从账号类型'])).value
-                    resource_name = table.cell(row=i, column=int(columns['资源名称'])).value
-                    resource_ip = table.cell(row=i, column=int(columns['资源IP'])).value
-                    resource_system = table.cell(row=i, column=int(columns['资源所属业务系统'])).value
                     if table.cell(row=i, column=int(columns['资源类型'])).value == "unix" or table.cell(row=1, column=int(
                             columns['资源名称'])).value == "主机名称":
                         account_detail_host = hostAccountList.objects.filter(account_name=account_name,
@@ -747,24 +878,31 @@ def accountAuditing(request):
                             account_detail_host.is_to_cancel = "否"
                         elif account_type not in ["用户具名账号", "普通帐号"]:
                             account_detail_host.is_to_cancel = "否"
-                            if account_name + "@" not in matchList:
+                            if account_name + "@" not in matchList and system[0] in ["PBOSS", "内容计费", "物漫"]:
                                 matchList.append(account_name + "@")
                         else:
                             account_detail_host.is_to_cancel = "是"
-                        if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
+                        if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                            account_detail_host.staff_name = staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_name
                             if account_type not in ["用户具名账号", "普通帐号"]:
-                                if account_name + "@" in matchList:
+                                if account_name + "@" in matchList and system[0] in ["PBOSS", "内容计费", "物漫"]:
                                     matchList.remove(account_name + "@")
                                 account_detail_host.is_to_change = "是"
                                 if account_detail_host.how_to_change == "":
                                     account_detail_host.how_to_change = "变更账号属性为用户具名账号/普通帐号"
                                 elif not re.search("账号属性", account_detail_host.how_to_change):
                                     account_detail_host.how_to_change = account_detail_host.how_to_change + "+变更账号属性为用户具名账号/普通帐号"
+                        else:
+                            account_detail_host.staff_name = staff_name
                         account_detail_host.account_type = account_type
                         account_detail_host.host_system = system[0]
                         account_detail_host.is_keep = "是"
                         account_detail_host.is_in_4A = "是"
-                        if account_detail_host.account_4AAccount in [None, ""]:
+                        if account_detail_host.account_4AAccount in [None, ""] and account_detail_host.is_in_4A == "是":
                             account_detail_host.is_isolated = "是"
                         else:
                             account_detail_host.is_isolated = "否"
@@ -808,24 +946,31 @@ def accountAuditing(request):
                             account_detail_database.is_to_cancel = "否"
                         elif account_type not in ["用户具名账号", "普通帐号"]:
                             account_detail_database.is_to_cancel = "否"
-                            if account_name + "@" not in matchList:
+                            if account_name + "@" not in matchList and system[0] in ["PBOSS", "内容计费", "物漫"]:
                                 matchList.append(account_name + "@")
                         else:
                             account_detail_database.is_to_cancel = "是"
-                        if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
+                        if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                            account_detail_database.staff_name = staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_name
                             if account_type not in ["用户具名账号", "普通帐号"]:
-                                if account_name + "@" in matchList:
+                                if account_name + "@" in matchList and system[0] in ["PBOSS", "内容计费", "物漫"]:
                                     matchList.remove(account_name + "@")
                                 account_detail_database.is_to_change = "是"
                                 if account_detail_database.how_to_change == "":
                                     account_detail_database.how_to_change = "变更账号属性为用户具名账号/普通帐号"
                                 elif not re.search("账号属性", account_detail_database.how_to_change):
                                     account_detail_database.how_to_change = account_detail_database.how_to_change + "+变更账号属性为用户具名账号/普通帐号"
+                        else:
+                            account_detail_database.staff_name = staff_name
                         account_detail_database.account_type = account_type
                         account_detail_database.database_system = system[0]
                         account_detail_database.is_keep = "是"
                         account_detail_database.is_in_4A = "是"
-                        if account_detail_database.account_4AAccount in [None, ""]:
+                        if account_detail_database.account_4AAccount in [None, ""] and account_detail_database.is_in_4A == "是":
                             account_detail_database.is_isolated = "是"
                         else:
                             account_detail_database.is_isolated = "否"
@@ -856,35 +1001,51 @@ def accountAuditing(request):
                                 account_detail_application.is_to_cancel = "否"
                             elif account_type not in ["用户具名账号", "普通帐号"]:
                                 account_detail_application.is_to_cancel = "否"
-                                if account_name + "@" not in matchList:
+                                if account_name + "@" not in matchList and system[0] in ["PBOSS", "内容计费", "物漫"]:
                                     matchList.append(account_name + "@")
                             else:
                                 account_detail_application.is_to_cancel = "是"
-                            if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
+                            if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                                account_detail_application.staff_name = staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_name
                                 if account_type not in ["用户具名账号", "普通帐号"]:
-                                    if account_name + "@" in matchList:
+                                    if account_name + "@" in matchList and system[0] in ["PBOSS", "内容计费", "物漫"]:
                                         matchList.remove(account_name + "@")
                                     account_detail_application.is_to_change = "是"
                                     if account_detail_application.how_to_change == "":
                                         account_detail_application.how_to_change = "变更账号属性为用户具名账号/普通帐号"
                                     elif not re.search("账号属性", account_detail_application.how_to_change):
                                         account_detail_application.how_to_change = account_detail_application.how_to_change + "+变更账号属性为用户具名账号/普通帐号"
+                            else:
+                                account_detail_application.staff_name = staff_name
                             account_detail_application.account_type = account_type
                             account_detail_application.application_system = system[0]
                             account_detail_application.is_keep = "是"
                             account_detail_application.is_in_4A = "是"
-                            if account_detail_application.account_4AAccount in [None, ""]:
+                            if account_detail_application.account_4AAccount in [None, ""] and account_detail_application.is_in_4A == "是":
                                 account_detail_application.is_isolated = "是"
                             else:
                                 account_detail_application.is_isolated = "否"
                             account_detail_application.save()
+                else:
+                    if table.cell(row=i, column=int(columns['资源类型'])).value == "unix" or table.cell(row=1, column=int(
+                            columns['资源名称'])).value == "主机名称":
+                        hostAccountList.objects.filter(account_name=account_name, host_system=system[0], host_name=resource_name).delete()
+                    elif table.cell(row=i, column=int(columns['资源类型'])).value == "数据库" or table.cell(row=1, column=int(
+                            columns['资源名称'])).value == "数据库名称":
+                        databaseAccountList.objects.filter(account_name=account_name, database_system=system[0], database_name=resource_name).delete()
+                    else:
+                        applicationAccountList.objects.filter(account_name=account_name, application_system=system[0]).delete()
                 hostAccountList.objects.filter(is_to_change="", host_system=system[0]).update(is_to_change="否")
                 databaseAccountList.objects.filter(is_to_change="", database_system=system[0]).update(is_to_change="否")
                 applicationAccountList.objects.filter(is_to_change="", application_system=system[0]).update(is_to_change="否")
                 # hostAccountList.objects.filter(is_in_resource="否", host_system=system[0]).update(account_name="", account_group="")
                 # databaseAccountList.objects.filter(is_in_resource="否", database_system=system[0]).update(account_name="", account_role="")
                 # applicationAccountList.objects.filter(is_in_resource="否", application_system=system[0]).update(account_name="")
-                # print(matchList)
+                print(matchList)
     except:
         import traceback
         traceback.print_exc()
@@ -937,48 +1098,70 @@ def accountAuditing(request):
                    '操作时间': "-1",
                    '操作人帐号': "-1",
                    '特权/程序账号': "-1",
-                   '资源IP': "-1"}
+                   '资源IP': "-1",
+                   '是否金库操作': "-1",
+                   '资源名称': "-1"}
         for i in range(0, len(csv_header)):
             if csv_header[i] in ['操作内容']:
                 columns['操作内容'] = i
-            elif csv_header[i] in ['操作日期']:
+            elif csv_header[i] in ['操作日期', '操作时间', '日期']:
                 columns['操作时间'] = i
-            elif csv_header[i] in ['操作人从帐号', '主帐号名称']:
+            elif csv_header[i] in ['操作人从帐号', '主帐号名称', '从账号']:
                 columns['操作人帐号'] = i
             elif csv_header[i] in ['从帐号名称']:
                 columns['特权/程序账号'] = i
-            elif csv_header[i] in ['客户端IP']:
+            elif csv_header[i] in ['目的设备名称']:
                 columns['资源IP'] = i
+            elif csv_header[i] in ['是否金库操作']:
+                columns['是否金库操作'] = i
+            elif csv_header[i] in ['数据库服务名']:
+                columns['资源名称'] = i
         result_file = open(audit_file_result + "使用特权+程序账号未备案记录.csv", 'w', newline='')
+        result_file_sensitive = open(audit_file_result + "敏感操作未触发金库.csv", 'w', newline='')
         csv_result = csv.writer(result_file)
+        csv_result_sensitive = csv.writer(result_file_sensitive)
         csv_result.writerow(csv_header)
+        csv_result_sensitive.writerow(csv_header)
         row_num_sum = 0
         row_num_without_application = 0
+        row_num_without_authentication = 0
         for row in csv_file:
             row_num_sum += 1
             if re.search("T", row[int(columns['操作时间'])], re.IGNORECASE):
                 date = row[int(columns['操作时间'])].split("T")[0]
                 time_detail = row[int(columns['操作时间'])].split("T")[1].split(".")[0]
-            else:
+            elif row[int(columns['操作时间'])]:
                 date = row[int(columns['操作时间'])].split(" ")[0]
+                if not date:
+                    continue
+                date = datetime.datetime.strptime(date, r'%Y/%m/%d')
+                date = datetime.datetime.strftime(date, '%Y-%m-%d')
                 if row[int(columns['操作时间'])].split(" ")[1]:
                     time_detail = row[int(columns['操作时间'])].split(" ")[1]
                 else:
                     time_detail = row[int(columns['操作时间'])].split(" ")[2]
+            else:
+                continue
+            if len(time_detail) < 7:
+                time_detail = time_detail + ":00"
+            elif len(time_detail) > 8:
+                time_detail = time_detail[0:7]
             operating_time = int(time.mktime(time.strptime(date + " " + time_detail, '%Y-%m-%d %H:%M:%S')))
             personal_account = row[int(columns['操作人帐号'])]
             if int(columns['特权/程序账号']) == -1:
                 if row[int(columns['操作内容'])] == "" or not re.search("@", row[int(columns['操作内容'])], re.IGNORECASE):
                     continue
             # print(row[int(columns['操作时间'])] + row[int(columns['操作内容'])])
-            if (personal_account + "@") in matchList:
+            if (personal_account + "@") in matchList and int(columns['特权/程序账号']) == -1:
                 continue
             else:
                 for listrow in matchList:
                     if re.search(listrow, row[int(columns['操作内容'])], re.IGNORECASE) or \
-                       row[int(columns['特权/程序账号'])] + "@" == listrow:
+                       row[int(columns['特权/程序账号'])] + "@" == listrow or \
+                       row[int(columns['特权/程序账号'])] == listrow:
                         # 匹配进行ssh操作的记录
-                        if listrow == "ssh":
+                        if listrow == "ssh" or re.search("ssh", row[int(columns['操作内容'])], re.IGNORECASE):
+                            print(personal_account + ":a:" + row[int(columns['操作内容'])])
                             pattern = re.compile(r'[s{2}][h{1}][ ](.*?)$')
                             label = re.findall(pattern, row[int(columns['操作内容'])])
                             if label and re.search("@", label[0]):
@@ -990,16 +1173,16 @@ def accountAuditing(request):
                                     label1 = re.findall(re.compile(r'[@](.*?)[:]'), row[int(columns['操作内容'])])
                                     label2 = re.findall(re.compile(r'[@](.*?)[ ]'), row[int(columns['操作内容'])])
                                     if label1:
-                                        resource = label1[0].split(" ")[0].split(":")[0].strip()
+                                        resource = label1[0].split(" ")[0].split(":")[0].split("[")[0].strip()
                                     elif label2:
-                                        resource = label2[0].split(" ")[0].split(":")[0].strip()
+                                        resource = label2[0].split(" ")[0].split(":")[0].split("[")[0].strip()
                                     elif int(columns['特权/程序账号']) != -1:
                                         resource = row[int(columns['资源IP'])]
                                     else:
                                         continue
                                 # 匹配ssh XXXX@XXXX
                                 elif not label[0].split("@")[1].startswith("$"):
-                                    resource = label[0].split("@")[1].split(" ")[0].split(":")[0].strip()
+                                    resource = label[0].split("@")[1].split(" ")[0].split(":")[0].split("[")[0].strip()
                                 else:
                                     continue
                             else:
@@ -1009,7 +1192,7 @@ def accountAuditing(request):
                                         privileged_account = re.findall(re.compile(r'([A-Za-z0-9]*?)[@]'), row[int(columns['操作内容'])])[0].strip()
                                     else:
                                         privileged_account = row[int(columns['特权/程序账号'])]
-                                    resource = label[0].split(" ")[0].split(":")[0].strip()
+                                    resource = label[0].split(" ")[0].split(":")[0].split("[")[0].strip()
                                 else:
                                     continue
                         else:
@@ -1017,8 +1200,9 @@ def accountAuditing(request):
                             pattern2 = re.compile(r'[@](.*?)[:]')
                             pattern3 = re.compile(r'[@](.*?)[>]')
                             pattern4 = re.compile(r'(.*?)[@]')
-                            if listrow == "sudo":
+                            if listrow == "sudo" or listrow == "root":
                                 privileged_account = "root"
+                                #print(personal_account + ":b:" + row[int(columns['特权/程序账号'])] + ":" + row[int(columns['操作内容'])])
                             else:
                                 privileged_account = listrow.replace("@", "")
                             # 匹配[pboss@PBOSS2-APP3 ~]$
@@ -1036,19 +1220,23 @@ def accountAuditing(request):
                                 item3 = re.findall(pattern4, row[int(columns['操作内容'])])
                                 if len(item1) == 2 and not item1[1].startswith(".") and not item1[1].startswith("$") and (re.search(privileged_account, item1[0], re.IGNORECASE) or listrow == "sudo"):
                                     if re.search(":", item1[1], re.IGNORECASE):
-                                        resource = item1[1].split(":")[0].strip()
+                                        resource = item1[1].split(":")[0].split("[")[0].strip()
                                     else:
-                                        resource = item1[1].strip()
+                                        resource = item1[1].split("[")[0].strip()
                                 elif label2 and not label2[0].startswith(".") and not label2[0].startswith("$") and (re.search(privileged_account, item2[0], re.IGNORECASE) or listrow == "sudo"):
-                                    resource = label2[0].split(" ")[0].strip()
+                                    resource = label2[0].split(" ")[0].split("[")[0].strip()
                                 elif label3 and not label3[0].startswith(".") and not label3[0].startswith("$") and (re.search(privileged_account, item3[0], re.IGNORECASE) or listrow == "sudo"):
-                                    resource = label3[0].split(" ")[0].strip()
+                                    resource = label3[0].split(" ")[0].split("[")[0].strip()
                                 else:
                                     continue
                             else:
                                 resource = row[int(columns['资源IP'])]
-                        if privileged_account + "@" not in matchList:
+                        if (privileged_account + "@" not in matchList and system[0] == "PBOSS") or (privileged_account not in matchList and system[0] != "PBOSS"):
                             continue
+                        if privileged_account == "I" and system[0] == "PBOSS":
+                            privileged_account = "I2000"
+                        elif (privileged_account == "P" or privileged_account == "p") and system[0] == "PBOSS":
+                            privileged_account = "PBOSS"
                         records = privilegedAccountRecord.objects.filter((Q(resource_name__icontains=resource) &
                                                                           Q(personal_account__icontains=personal_account) &
                                                                           Q(privileged_account__icontains=privileged_account)) |
@@ -1092,9 +1280,62 @@ def accountAuditing(request):
                                 csv_result.writerow(row)
                                 break
                                 # print(resource + " " + personal_account + " " + privileged_account + " " + str(operating_time))
+            sensitive_items = sensitiveInformation.objects.filter(system=system[0])
+            for sensitive_item in sensitive_items:
+                pattern1 = re.compile(r'[_a-zA-Z]+' + sensitive_item.sensitive_item, re.I)
+                pattern2 = re.compile(sensitive_item.sensitive_item + r'[_a-zA-Z]+', re.I)
+                if system[0] in ["PBOSS", "物漫"]:
+                    if re.search(sensitive_item.sensitive_item, row[int(columns['操作内容'])], re.IGNORECASE) and row[int(columns['是否金库操作'])] == "否":
+                        csv_result_sensitive.writerow(row)
+                        break
+                    else:
+                        continue
+                else:
+                    print(re.findall(pattern1, row[int(columns['操作内容'])]))
+                    print(re.findall(pattern2, row[int(columns['操作内容'])]))
+                    if re.search(sensitive_item.sensitive_item, row[int(columns['操作内容'])], re.IGNORECASE) and \
+                       not re.findall(pattern1, row[int(columns['操作内容'])]) and \
+                       not re.findall(pattern2, row[int(columns['操作内容'])]):
+                        date = row[int(columns['操作时间'])].split(" ")[0]
+                        if not date or len(date) > 10:
+                            continue
+                        date = datetime.datetime.strptime(date, r'%Y/%m/%d')
+                        date = datetime.datetime.strftime(date, '%Y-%m-%d')
+                        if row[int(columns['操作时间'])].split(" ")[1]:
+                            time_detail = row[int(columns['操作时间'])].split(" ")[1]
+                        else:
+                            time_detail = row[int(columns['操作时间'])].split(" ")[2]
+                        if len(time_detail) < 7:
+                            time_detail = time_detail + ":00"
+                        operating_time = int(time.mktime(time.strptime(date + " " + time_detail, '%Y-%m-%d %H:%M:%S')))
+                        operating_account = row[int(columns['操作人帐号'])]
+                        resource_name = row[int(columns['资源名称'])]
+                        records = treasuryAuthenticated.objects.filter((Q(operating_account=operating_account) &
+                                                                        Q(resource_name=resource_name) &
+                                                                        Q(sensitive_resource__icontains=sensitive_item.sensitive_item)))
+                        if records:
+                            for record in records:
+                                if operating_time not in range(record.start_time, record.end_time) and record != records[len(records) - 1]:
+                                    # print("a:" + row[int(columns['操作内容'])])
+                                    continue
+                                elif operating_time in range(record.start_time, record.end_time):
+                                    # print("b:" + row[int(columns['操作内容'])])
+                                    break
+                                elif operating_time not in range(record.start_time, record.end_time) and record == records[len(records) - 1]:
+                                    print("c:" + row[int(columns['操作内容'])] + str(operating_time) + operating_account + ":" + sensitive_item.sensitive_item)
+                                    row_num_without_authentication += 1
+                                    csv_result_sensitive.writerow(row)
+                                    break
+                                break
+                        else:
+                            print("d:" + row[int(columns['操作内容'])] + str(operating_time) + operating_account + ":" + sensitive_item.sensitive_item)
+                            row_num_without_authentication += 1
+                            csv_result_sensitive.writerow(row)
+                            break
         result_file.close()
+        result_file_sensitive.close()
         log_num = open(audit_file_result + "log_num.txt", "w")
-        log_num.write(str(row_num_sum) + "," + str(row_num_without_application))
+        log_num.write(str(row_num_sum) + "," + str(row_num_without_application) + "," + str(row_num_without_authentication))
         log_num.close()
     except:
         import traceback
@@ -1106,9 +1347,9 @@ def accountAuditing(request):
         account_audit_detail = account_audit_result.get_sheet_by_name(account_audit_type)
         row = 2
         if account_audit_type == "孤立账号":
-            host_isolated_accounts = hostAccountList.objects.filter(host_system=system[0], is_isolated="是", is_in_4A="是", is_in_resource="是")
-            database_isolated_accounts = databaseAccountList.objects.filter(database_system=system[0], is_isolated="是", is_in_4A="是", is_in_resource="是")
-            application_isolated_accounts = applicationAccountList.objects.filter(application_system=system[0], is_isolated="是", is_in_4A="是", is_in_resource="是")
+            host_isolated_accounts = hostAccountList.objects.filter(host_system=system[0], is_isolated="是")
+            database_isolated_accounts = databaseAccountList.objects.filter(database_system=system[0], is_isolated="是")
+            application_isolated_accounts = applicationAccountList.objects.filter(application_system=system[0], is_isolated="是")
             for host_isolated_account in host_isolated_accounts:
                 account_audit_detail.cell(row=row, column=1, value="主机")
                 account_audit_detail.cell(row=row, column=2, value=host_isolated_account.host_ip)
@@ -1118,10 +1359,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=host_isolated_account.account_group)
                 account_audit_detail.cell(row=row, column=7, value=host_isolated_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value="否")
+                account_audit_detail.cell(row=row, column=9, value=host_isolated_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 row += 1
             for database_isolated_account in database_isolated_accounts:
                 account_audit_detail.cell(row=row, column=1, value="数据库")
@@ -1132,10 +1377,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=database_isolated_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value=database_isolated_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value="否")
+                account_audit_detail.cell(row=row, column=9, value=database_isolated_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 row += 1
             for application_isolated_account in application_isolated_accounts:
                 account_audit_detail.cell(row=row, column=1, value="应用")
@@ -1144,15 +1393,19 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=application_isolated_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value=application_isolated_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value="否")
+                account_audit_detail.cell(row=row, column=9, value=application_isolated_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 row += 1
         elif account_audit_type == "公共账号":
-            host_public_accounts = hostAccountList.objects.filter(host_system=system[0], is_public="是", is_in_4A="是", is_in_resource="是")
-            database_public_accounts = databaseAccountList.objects.filter(database_system=system[0], is_public="是", is_in_4A="是", is_in_resource="是")
-            application_public_accounts = applicationAccountList.objects.filter(application_system=system[0], is_public="是", is_in_4A="是", is_in_resource="是")
+            host_public_accounts = hostAccountList.objects.filter(host_system=system[0], is_public="是")
+            database_public_accounts = databaseAccountList.objects.filter(database_system=system[0], is_public="是")
+            application_public_accounts = applicationAccountList.objects.filter(application_system=system[0], is_public="是")
             for host_public_account in host_public_accounts:
                 account_audit_detail.cell(row=row, column=1, value="主机")
                 account_audit_detail.cell(row=row, column=2, value=host_public_account.host_ip)
@@ -1163,10 +1416,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=7, value=host_public_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=host_public_account.account_4AAccount)
                 account_audit_detail.cell(row=row, column=9, value="是")
+                account_audit_detail.cell(row=row, column=10, value=host_public_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=11, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=11, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 row += 1
             for database_public_account in database_public_accounts:
                 account_audit_detail.cell(row=row, column=1, value="数据库")
@@ -1178,10 +1435,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=7, value=database_public_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=database_public_account.account_4AAccount)
                 account_audit_detail.cell(row=row, column=9, value="是")
+                account_audit_detail.cell(row=row, column=10, value=database_public_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=11, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=11, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 row += 1
             for application_public_account in application_public_accounts:
                 account_audit_detail.cell(row=row, column=1, value="应用")
@@ -1191,10 +1452,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=7, value=application_public_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=application_public_account.account_4AAccount)
                 account_audit_detail.cell(row=row, column=9, value="是")
+                account_audit_detail.cell(row=row, column=10, value=application_public_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=11, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=11, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 row += 1
         elif account_audit_type == "4A侧存在资源侧不存在账号":
             host_inconsistent1_accounts = hostAccountList.objects.filter(host_system=system[0], is_in_4A="是", is_in_resource="否")
@@ -1209,10 +1474,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=host_inconsistent1_account.account_group)
                 account_audit_detail.cell(row=row, column=7, value=host_inconsistent1_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=host_inconsistent1_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=host_inconsistent1_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value="是")
                 account_audit_detail.cell(row=row, column=12, value="否")
                 row += 1
@@ -1225,10 +1494,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=database_inconsistent1_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value=database_inconsistent1_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=database_inconsistent1_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=database_inconsistent1_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value="是")
                 account_audit_detail.cell(row=row, column=12, value="否")
                 row += 1
@@ -1239,10 +1512,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=application_inconsistent1_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value=application_inconsistent1_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=application_inconsistent1_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=application_inconsistent1_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value="是")
                 account_audit_detail.cell(row=row, column=12, value="否")
                 row += 1
@@ -1259,10 +1536,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=host_inconsistent2_account.account_group)
                 account_audit_detail.cell(row=row, column=7, value="否")
                 account_audit_detail.cell(row=row, column=8, value="是")
+                account_audit_detail.cell(row=row, column=9, value=host_inconsistent2_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 row += 1
             for database_inconsistent2_account in database_inconsistent2_accounts:
                 account_audit_detail.cell(row=row, column=1, value="数据库")
@@ -1273,10 +1554,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=database_inconsistent2_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value="否")
                 account_audit_detail.cell(row=row, column=8, value="是")
+                account_audit_detail.cell(row=row, column=9, value=database_inconsistent2_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 row += 1
             for application_inconsistent2_account in application_inconsistent2_accounts:
                 account_audit_detail.cell(row=row, column=1, value="应用")
@@ -1285,10 +1570,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=application_inconsistent2_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value="否")
                 account_audit_detail.cell(row=row, column=8, value="是")
+                account_audit_detail.cell(row=row, column=9, value=application_inconsistent2_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 row += 1
         elif account_audit_type == "需变更主机账号主组":
             host_change_group_accounts = hostAccountList.objects.filter(Q(host_system=system[0]) & Q(how_to_change__icontains="变更主组"))
@@ -1301,10 +1590,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=host_change_group_account.account_group)
                 account_audit_detail.cell(row=row, column=7, value=host_change_group_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=host_change_group_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=host_change_group_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value=host_change_group_account.how_to_change)
                 row += 1
         elif account_audit_type == "需变更数据库账号角色":
@@ -1318,10 +1611,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=database_change_role_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value=database_change_role_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=database_change_role_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=database_change_role_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value=database_change_role_account.how_to_change)
                 row += 1
         elif account_audit_type == "需变更账号属性":
@@ -1337,10 +1634,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=host_change_type_account.account_group)
                 account_audit_detail.cell(row=row, column=7, value=host_change_type_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=host_change_type_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=host_change_type_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value=host_change_type_account.how_to_change)
                 row += 1
             for database_change_type_account in database_change_type_accounts:
@@ -1352,10 +1653,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=database_change_type_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value=database_change_type_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=database_change_type_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=database_change_type_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value=database_change_type_account.how_to_change)
                 row += 1
             for application_change_type_account in application_change_type_accounts:
@@ -1365,10 +1670,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=application_change_type_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value=application_change_type_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=application_change_type_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=application_change_type_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value=application_change_type_account.how_to_change)
                 row += 1
         elif account_audit_type == "已销户漏删账号":
@@ -1384,10 +1693,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=host_miss_delete_account.account_group)
                 account_audit_detail.cell(row=row, column=7, value=host_miss_delete_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=host_miss_delete_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=host_miss_delete_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value="否")
                 row += 1
             for database_miss_delete_account in database_miss_delete_accounts:
@@ -1399,10 +1712,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=database_miss_delete_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value=database_miss_delete_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=database_miss_delete_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=database_miss_delete_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value="否")
                 row += 1
             for application_miss_delete_account in application_miss_delete_accounts:
@@ -1412,10 +1729,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=application_miss_delete_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value=application_miss_delete_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=application_miss_delete_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=application_miss_delete_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value="否")
                 row += 1
         elif account_audit_type == "需提单销户":
@@ -1431,10 +1752,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=host_to_cancel_account.account_group)
                 account_audit_detail.cell(row=row, column=7, value=host_to_cancel_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=host_to_cancel_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=host_to_cancel_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value="是")
                 row += 1
             for database_to_cancel_account in database_to_cancel_accounts:
@@ -1446,10 +1771,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=database_to_cancel_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value=database_to_cancel_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=database_to_cancel_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=database_to_cancel_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value="是")
                 row += 1
             for application_to_cancel_account in application_to_cancel_accounts:
@@ -1459,10 +1788,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=application_to_cancel_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value=application_to_cancel_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=application_to_cancel_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=application_to_cancel_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value="是")
                 row += 1
         elif account_audit_type == "新增账号无开户记录":
@@ -1478,10 +1811,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=host_new_without_application_account.account_group)
                 account_audit_detail.cell(row=row, column=7, value=host_new_without_application_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=host_new_without_application_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=host_new_without_application_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value="否")
                 row += 1
             for database_new_without_application_account in database_new_without_application_accounts:
@@ -1493,10 +1830,14 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=database_new_without_application_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value=database_new_without_application_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=database_new_without_application_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=database_new_without_application_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value="否")
                 row += 1
             for application_new_without_application_account in application_new_without_application_accounts:
@@ -1506,16 +1847,33 @@ def accountAuditing(request):
                 account_audit_detail.cell(row=row, column=6, value=application_new_without_application_account.account_role)
                 account_audit_detail.cell(row=row, column=7, value=application_new_without_application_account.account_type)
                 account_audit_detail.cell(row=row, column=8, value=application_new_without_application_account.account_4AAccount)
+                account_audit_detail.cell(row=row, column=9, value=application_new_without_application_account.staff_name)
                 account_name = account_name.value
-                if staffInfo.objects.filter(Q(staff_account__icontains=account_name)):
-                    account_audit_detail.cell(row=row, column=9, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_name)
-                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account__icontains=account_name)).staff_group)
+                if staffInfo.objects.filter(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])):
+                    account_audit_detail.cell(row=row, column=10, value=staffInfo.objects.get(Q(staff_account=account_name) & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains=account_name + ",") & Q(staff_system__icontains=system[0]) |
+                                            Q(staff_account__icontains="," + account_name) & Q(staff_system__icontains=system[0])).staff_group)
                 account_audit_detail.cell(row=row, column=11, value="否")
                 row += 1
     account_audit_result.save(audit_file_result + "账号审计明细.xlsx")
-    csv_file = open(audit_file_result + "使用特权+程序账号未备案记录.csv")
-    writer = pd.ExcelWriter(audit_file_result + "使用特权+程序账号未备案.xlsx")
-    pd.read_csv(csv_file).to_excel(writer, sheet_name="使用特权+程序账号未备案", index=False)
+    try:
+        csv_file = open(audit_file_result + "使用特权+程序账号未备案记录.csv", encoding='ansi')
+        writer = pd.ExcelWriter(audit_file_result + "使用特权+程序账号未备案.xlsx")
+        pd.read_csv(csv_file).to_excel(writer, sheet_name="使用特权+程序账号未备案", index=False, encoding='ansi')
+    except:
+        import traceback
+        traceback.print_exc()
+    writer.save()
+    writer.close()
+    try:
+        csv_file_sensitive = open(audit_file_result + "敏感操作未触发金库.csv", encoding='ansi')
+        writer = pd.ExcelWriter(audit_file_result + "敏感操作未触发金库.xlsx")
+        pd.read_csv(csv_file_sensitive).to_excel(writer, sheet_name="敏感操作未触发金库", index=False, encoding='ansi')
+    except:
+        import traceback
+        traceback.print_exc()
     writer.save()
     writer.close()
     v = json.dumps(ret)
@@ -1525,16 +1883,25 @@ def accountAuditing(request):
 def exportAccountAuditResult(request):
     wb = load_workbook(audit_file_result + "账号审计明细.xlsx")
     wb.create_sheet(title="使用特权+程序账号未备案", index=0)
+    wb.create_sheet(title="敏感操作未触发金库", index=1)
     temp = load_workbook(audit_file_result + "使用特权+程序账号未备案.xlsx")
+    temp_sensitive = load_workbook(audit_file_result + "敏感操作未触发金库.xlsx")
     sheet_old = temp.get_sheet_by_name("使用特权+程序账号未备案")
+    sheet_old_sensitive = temp_sensitive.get_sheet_by_name("敏感操作未触发金库")
     sheet_new = wb.get_sheet_by_name("使用特权+程序账号未备案")
+    sheet_new_sensitive = wb.get_sheet_by_name("敏感操作未触发金库")
     max_row = sheet_old.max_row
+    max_row_sensitive = sheet_old_sensitive.max_row
     max_column = sheet_old.max_column
+    max_column_sensitive = sheet_old_sensitive.max_column
     for i in range(1, max_row + 1):
         for j in range(1, max_column + 1):
             value = sheet_old.cell(row=i, column=j).value
             sheet_new.cell(row=i, column=j, value=value)
-    temp.close()
+    for i in range(1, max_row_sensitive + 1):
+        for j in range(1, max_column_sensitive + 1):
+            value = sheet_old_sensitive.cell(row=i, column=j).value
+            sheet_new_sensitive.cell(row=i, column=j, value=value)
     output = BytesIO()
     wb.save(output)
     output.seek(0)
