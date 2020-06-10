@@ -78,7 +78,7 @@ class CmdbApp(models.Model):
 class CmdbAppLog(models.Model):
     # '''后台管理日志表'''
     id = models.AutoField(u"日志id", primary_key=True)
-    app_id = models.IntegerField(u"后台id" )
+    app_id = models.IntegerField(u"后台id", null=True, blank=True)
     app_operation_user = models.CharField(u"操作人员", max_length=56,null=True, blank=True)
     app_operation = models.CharField(u"操作类型", max_length=32,null=True, blank=True)
     app_opr_result = models.CharField(u"操作结果", max_length=32,null=True, blank=True)
@@ -118,7 +118,7 @@ class CmdbAppCluster(models.Model):
 
 
 class CmdbAppNetmode(models.Model):
-    # ''' cmdb_app 表'''
+    # ''' cmdb_app_netmode 表'''
 
     net_id = models.AutoField(u"组网id", primary_key=True)
     net_mode = models.CharField(u"组网类型", max_length=56, unique=True)
@@ -166,3 +166,42 @@ class HostPwdOprLog(models.Model):
 
 class AppCluster(object):
     pass
+
+
+# 存储管理
+class CmdbStorage(models.Model):
+    # ''' cmdb_storage 表'''
+    storage_id = models.AutoField(u"存储id", primary_key=True)
+    cmdbStorageTotal = models.ForeignKey("CmdbStorageTotal", on_delete=models.CASCADE ,verbose_name=u"总存储")
+    storage_name = models.CharField(u"存储项目名", max_length=128)
+    storage_used = models.CharField(u"使用存储量",choices=APP_STATUS ,max_length=36, null=True, blank=True)
+    storage_insert_time = models.DateTimeField(u"录入时间", auto_now_add=True)
+    storage_type = models.CharField(u"存储类型", max_length=32, null=True, blank=True)
+
+    def __str__(self):
+        return self.storage_name
+
+    class Meta:
+        verbose_name = '存储'
+        verbose_name_plural = '存储'
+        ordering=['-storage_insert_time']
+        db_table = "cmdb_storage"
+
+ #总存储表
+class cmdbStorageTotal(models.Model):
+    # ''' cmdb_storage_total 表'''
+
+    id = models.AutoField(u"总存储id", primary_key=True)
+    storage_total = models.CharField(u"总存储", max_length=128)
+    storage_left = models.CharField(u"剩余存储", max_length=56)
+    storage_used = models.CharField(u"使用存储", max_length=56)
+    storage_total_name = models.CharField(u"总存储名", max_length=128)
+
+    def __str__(self):
+        return self.storage_total
+
+    class Meta:
+        verbose_name = '总存储表'
+        verbose_name_plural = '总存储表'
+        ordering=['id']
+        db_table = "cmdb_storage_total"

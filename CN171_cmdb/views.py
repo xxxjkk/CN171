@@ -12,6 +12,7 @@ from CN171_cmdb.exceloper import excel_export_host, excel_import_host, excel_imp
 from CN171_cmdb.models import CmdbHost, CmdbApp, HostPwdOprLog, CmdbAppCluster, APP_STATUS, CmdbAppLog
 from CN171_cmdb.forms import DetailLogForm, HostPwdEditForm, NormalUserForm, CmdbHostForm, CmdbAppForm
 from CN171_background.api import pages, get_object
+from CN171_cmdb.tasks import batchRefreshClusterStatusTask, checkHostStatusResult, checkClusterStatusResult
 from CN171_tools.common_api import export_download_txt, to_ints, write_txt,write_txt1, isNullStr, toInt
 from CN171_tools.connecttool import *
 from CN171_tools.sftputils import *
@@ -178,18 +179,24 @@ def batchRefreshClusterStatusInfo(request):
     cluster_id_all = request.POST.get('cluster_id_all')
     iscluster = request.POST.get('iscluster')
     clusterIds=cluster_id_all.split(",")
+    opr_user = request.session['user_name']
+    cmdbAppLog = CmdbAppLog()
+    cmdbAppLog.app_operation_user = opr_user
+    cmdbAppLog.app_operation_time = datetime.datetime.now()
+    cmdbAppLog.app_log_dir = "刷新集群状态"
+    cmdbAppLog.app_log_dir = "刷新集群状态"
+    cmdbAppLog.app_operation = "status"
+    cmdbAppLog.app_opr_result = "集群刷新进行中"
+    cmdbAppLog.save()
+    logId = cmdbAppLog.id
     appClusterId=""
     content1=""
     for clusterId in clusterIds:
         appCluster = CmdbAppCluster.objects.get(id=clusterId)
+        ClusterName = appCluster.name
         appListInCluster = appCluster.cmdbApp_cmdbAppCluster.all()
         for app in appListInCluster:
-           if iscluster==1:
-               appClusterId=clusterId
-           else:
-               appClusterId=app.app_id
-           content1=content1+app.cmdb_host.bg.bg_domain+" "+app.cmdb_host.bg.bg_module+" "+app.app_name+" "\
-                      +app.cmdb_host.cmdb_host_busip+" "+iscluster+" "+appClusterId+"\n"
+           content1=content1+app.cmdb_host.bg.bg_domain+" "+app.cmdb_host.bg.bg_module+" "+app.app_name+" "+app.cmdb_host.cmdb_host_busip+" "+iscluster+"\n"
     nowDay = datetime.datetime.now().strftime("%Y%m%d")
     user_name = request.session.get('user_name')
     # 文件绝对路径
@@ -200,7 +207,8 @@ def batchRefreshClusterStatusInfo(request):
     flag = put(sftp, file_name, ansible_cmdb_appmgnt_appClusterlist_path)
     sftpDisconnect(t)
     if flag:
-        tasks.batchRefreshClusterStatusTask.delay(ansible_cmdb_appmgnt_clusterReturn_filepath, user_name)
+        tasks.batchRefreshClusterStatusTask.delay(ansible_cmdb_appmgnt_clusterReturn_filepath, user_name,logId)
+        #batchRefreshClusterStatusTask(ansible_cmdb_appmgnt_clusterReturn_filepath, user_name, logId)
         returnmsg = "True"
     else:
         returnmsg = "False"
@@ -219,7 +227,7 @@ def export_app_info(request):
     cluster_id_all = to_ints(request.GET.get('cluster_id_all'))
     if cluster_id_all:
         list_cluster_obj=CmdbAppCluster.objects.filter(id__in=cluster_id_all)
-    return excel_export_app(list_cluster_obj)
+        return excel_export_app(list_cluster_obj)
 
 #导入应用信息
 def import_app_info(request):
@@ -246,7 +254,7 @@ def appTaskExecuteOne(request):
     app_id = request.POST.get('app_id')
     app_action = request.POST.get('app_action')
     opr_user = request.session['user_name']
-    cmdbApp = CmdbApp.objects.get(app_id=app_id)
+    cmdbApp = models.CmdbApp.objects.get(app_id=app_id)
     applog = CmdbAppLog()
     applog.app_id = app_id
     applog.app_operation_user = opr_user
@@ -272,19 +280,22 @@ def appTaskExecuteOne(request):
     nowDay = datetime.datetime.now().strftime("%Y%m%d")
     nowTime = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     app_opr_content = cmdbApp.cmdb_host.bg.bg_domain + " " + cmdbApp.cmdb_host.bg.bg_module + " " + cmdbApp.app_name + " " \
-    + cmdbApp.cmdb_host.cmdb_host_busip + " " + "0" + " " + cmdbApp.app_id + "\n"
+    + cmdbApp.cmdb_host.cmdb_host_busip + " " + "0"+ "\n"
     # 文件名
     file_name = write_txt1(app_opr_content, 'D:/temp/cmdb/appmgnt/oneopr/' + nowDay + "/",
                           opr_user + '_app_oneopr_'+app_action+'_app_'+nowTime)
+    arrayLines = file_name.split("/")
+    host_list_name = arrayLines[len(arrayLines) - 1]
     t, sftp = sftpconnect('CMIOT')
     ansible_host_appmgnt_applist_path, ansible_host_appmgnt_return_filepath = get_appmgnt_init_parameter('Ansible')
     flag = put(sftp, file_name, ansible_host_appmgnt_applist_path)
     sftpDisconnect(t)
     applog_id = applog.id
+    ansible_host_appmgnt_applist_path = ansible_host_appmgnt_applist_path+host_list_name
     if flag:
-        tasks.appTaskOne.delay(ansible_host_appmgnt_return_filepath,file_name, app_id, app_action,opr_user,applog_id)
+        #tasks.appTaskOne.delay(ansible_host_appmgnt_return_filepath,file_name, app_id, app_action,opr_user,applog_id)
 
-        #appTaskTest(ansible_host_appmgnt_return_filepath, file_name, app_id, app_action, opr_user, applog_id)
+        appTaskTest(ansible_host_appmgnt_return_filepath, ansible_host_appmgnt_applist_path, app_id, app_action, opr_user, applog_id)
         #appOprResultCheck()
         returnmsg = "True"
     else:
@@ -474,5 +485,18 @@ def import_host_info(request):
 
 
 
-
+ #存储管理
+def storageManagement(request):
+    storage_list = []
+    keyword = request.GET.get("keyword", "")
+    if keyword:
+        storage_list = models.CmdbStorage.objects.filter(
+            Q(storage_name__icontains=keyword) |
+            Q(storage_used__icontains=keyword) |
+            Q(storage_type__icontains=keyword)
+        )
+    else:
+        storage_list = models.CmdbStorage.objects.all()
+    p, page_objects, page_range, current_page, show_first, show_end, end_page, page_len = pages(storage_list, request)
+    return render(request, "cmdb/host_management.html", locals())
 
