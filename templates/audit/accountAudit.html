@@ -173,18 +173,39 @@
                     <u><a href="{% url 'download' file_id=6 %}" download="操作日志模板（深圳）.csv">操作日志模板下载（深圳）</a></u>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <u><a href="{% url 'download' file_id=7 %}" download="资源侧数据库从账号信息模板.txt">资源侧数据库从账号信息模板下载</a></u>
-                </div>
-                <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <div class="btn-group">
-                    <a id="accountAudit" style="display: none" href="#" class="btn btn-primary" onclick="accountAudit()">开始审计</a>
-                </div>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <div class="btn-group">
-                    <a id="exportResult" style="display: none" class="btn btn-primary">导出明细</a>
+                    <br><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="btn-group">
+                        <input type="button" value="选择文件" onclick="upFile7.click()" style="line-height: 25px; float: left">
+                        <input type="text" size="25" name="file7" id="ufile7" readonly="readonly" style="line-height: 25px;" placeholder="  请选择文件···">
+                        <input type="file" id="upFile7" name="upFile7" style="display: none" onchange="file7.value=this.value">
+                    </div>
+                    <div class="btn-group">
+                        <a id="upload7" class="btn btn-danger" style="display: none" onclick="upload('7')">上传</a>
+                    </div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="btn-group">
+                        <input type="button" value="选择文件" onclick="upFile8.click()" style="line-height: 25px; float: left">
+                        <input type="text" size="25" name="file8" id="ufile8" readonly="readonly" style="line-height: 25px;" placeholder="  请选择文件···">
+                        <input type="file" id="upFile8" name="upFile8" style="display: none" onchange="file8.value=this.value">
+                    </div>
+                    <div class="btn-group">
+                        <a id="upload8" class="btn btn-danger" style="display: none" onclick="upload('8')">上传</a>
+                    </div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="btn-group">
+                        <a id="accountAudit" style="display: none" href="#" class="btn btn-primary" onclick="accountAudit()">开始审计</a>
+                    </div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="btn-group">
+                        <a id="exportResult" style="display: none" class="btn btn-primary">导出明细</a>
+                    </div>
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <u><a href="{% url 'download' file_id=8 %}" download="金库场景模板.xlsx">金库场景模板下载</a></u>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <u><a href="{% url 'download' file_id=9 %}" download="金库审批报表.xlsx">金库审批报表</a></u>
                 </div>
                 <!-- /.box-header -->
-                <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             </div>
         </form>
         <div class="box product-container1">
@@ -260,6 +281,7 @@
                         <!--<div style="width:100%; height:2px; border-top:1px solid #999; clear:both;"></div>-->
                         <p class="text-muted small">&nbsp;&nbsp;&nbsp;&nbsp;1.使用特权/程序账号（绕行）未</p>
                         <p class="text-muted small">&nbsp;&nbsp;&nbsp;&nbsp;备案有{{log_num_without_application}}个。</p>
+                        <p class="text-muted small">&nbsp;&nbsp;&nbsp;&nbsp;2.敏感操作未触发金库{{log_num_without_authentication}}个。</p>
                     </div>
                 </div>
                 <div class="col-md-6" id="main4" style="width: 190px; height: 190px; float: right"></div>
@@ -585,7 +607,7 @@
                 }
             },
             data: [{{account_num}}-{{isolated_account_num}}, {{account_num}}-{{public_account_num}}, {{account_num}}-{{inconsistent_account_num}},
-                   {{account_num}}-{{change_host_group_num}}, {{account_num}}-{{change_database_role_num}}, {{account_num}}-{{change_authority_num}}]
+                   {{account_num}}-{{change_host_group_num}}, {{account_num}}-{{change_database_role_num}}, {{account_num}}-{{change_account_type_num}}]
         },
         {
             name: '不合格',
@@ -604,7 +626,7 @@
                 }
             },
             data: [{{isolated_account_num}}, {{public_account_num}}, {{inconsistent_account_num}},
-                   {{change_host_group_num}}, {{change_database_role_num}}, {{change_authority_num}}]
+                   {{change_host_group_num}}, {{change_database_role_num}}, {{change_account_type_num}}]
         }];
         option5 = {
             tooltip: {
@@ -683,16 +705,16 @@
             xAxisIndex: 1,
             itemStyle: {
                 normal: {color: function(params) {
-                    var colorList = ['rgba(40, 96, 144, 1)', 'rgba(40, 96, 144, 1)',
-                                     'rgba(40, 96, 144, 1)', 'rgba(68, 157, 68, 1)'];
+                    var colorList = ['rgba(40, 96, 144, 1)', 'rgba(40, 96, 144, 1)', 'rgba(40, 96, 144, 1)',
+                                     'rgba(68, 157, 68, 1)', 'rgba(68, 157, 68, 1)'];
                     return colorList[params.dataIndex];
                 }},
                 emphasis: {
                     opacity: 1
                 }
             },
-            data: [{{account_num}}-{{miss_delete_account_num}}, {{account_num}}-{{account_to_cancel_num}},
-                   {{account_num}}-{{new_without_application_num}}, {{log_num_sum}}-{{log_num_without_application}}]
+            data: [{{account_num}}-{{miss_delete_account_num}}, {{account_num}}-{{account_to_cancel_num}}, {{account_num}}-{{new_without_application_num}},
+                   {{log_num_sum}}-{{log_num_without_application}}, {{log_num_sum}}-{{log_num_without_authentication}}]
         },
         {
             name: '不合格',
@@ -702,16 +724,16 @@
             xAxisIndex: 1,
             itemStyle: {
                 normal: {color: function(params) {
-                    var colorList = ['rgba(40, 96, 144, 0.3)', 'rgba(40, 96, 144, 0.3)',
-                                     'rgba(40, 96, 144, 0.3)', 'rgba(68, 157, 68, 0.3)'];
+                    var colorList = ['rgba(40, 96, 144, 0.3)', 'rgba(40, 96, 144, 0.3)', 'rgba(40, 96, 144, 0.3)',
+                                     'rgba(68, 157, 68, 0.3)', 'rgba(68, 157, 68, 0.3)'];
                     return colorList[params.dataIndex]
                 }},
                 emphasis: {
                     opacity: 1
                 }
             },
-            data: [{{miss_delete_account_num}}, {{account_to_cancel_num}},
-                   {{new_without_application_num}}, {{log_num_without_application}}]
+            data: [{{miss_delete_account_num}}, {{account_to_cancel_num}}, {{new_without_application_num}},
+                   {{log_num_without_application}}, {{log_num_without_authentication}}]
         }];
         option6 = {
             tooltip: {
@@ -726,7 +748,7 @@
             },
             xAxis: [{
                 type: 'category',
-                data: ['漏删账号', '提单销户', '补提开户单', '特权/程序账号备案'],
+                data: ['漏删账号', '提单销户', '补提开户单', '特权/程序账号备案', '敏感操作备案'],
                 axisLabel:{
                     interval: 0,
                     rotate: 30,
@@ -741,7 +763,7 @@
             {
                 type: 'category',
                 position: "bottom",
-                data: ['漏删账号', '提单销户', '补提开户单', '特权/程序账号备案'],
+                data: ['漏删账号', '提单销户', '补提开户单', '特权/程序账号备案', '敏感操作备案'],
                 axisLabel:{
                     interval: 0,
                     rotate: 30,
