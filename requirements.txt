@@ -23,7 +23,7 @@ jdcal==1.4.1
 kombu==3.0.37
 more-itertools==7.2.0
 mysqlclient==1.4.4
-numpy==1.17.2
+numpy==1.22.0
 openpyxl==3.0.0
 pandas==0.22.0
 paramiko==2.6.0
